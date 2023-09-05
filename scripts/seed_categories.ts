@@ -2,7 +2,7 @@ const { PrismaClient } = require('@prisma/client');
 
 const db = new PrismaClient();
 
-async function main() {
+async function seedCategories() {
   try {
     await db.category.createMany({
       data: [
@@ -18,4 +18,4 @@ async function main() {
   }
 }
 
-main();
+seedCategories();

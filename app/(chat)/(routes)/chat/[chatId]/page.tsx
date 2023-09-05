@@ -20,7 +20,7 @@ const ChatIdPage = async ({
   if (!userId) {
     return redirectToSignIn();
   }
-
+  const isPro = await checkSubscription();
   const companion = await prismadb.companion.findUnique({
     where: {
       id: params.chatId
@@ -48,7 +48,7 @@ const ChatIdPage = async ({
   }
 
   return (
-    <ChatClient companion={companion} />
+    <ChatClient isPro={isPro} companion={companion} />
   );
 }
  

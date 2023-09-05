@@ -12,7 +12,7 @@ import { useToast } from "@/components/ui/use-toast";
 
 export interface ChatMessageProps {
   role: "system" | "user",
-  content?: string;
+  content?: React.ReactNode;
   isLoading?: boolean;
   src?: string;
 }
@@ -31,7 +31,7 @@ export const ChatMessage = ({
       return;
     }
 
-    navigator.clipboard.writeText(content);
+    navigator.clipboard.writeText(content.toString());
     toast({
       description: "Message copied to clipboard.",
       duration: 3000,
