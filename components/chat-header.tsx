@@ -66,7 +66,21 @@ export const ChatHeader = ({
           </p>
         </div>
       </div>
-
+      {(
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="secondary" size="icon">
+              <MoreVertical />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem onClick={onDelete}>
+              <Trash className="w-4 h-4 mr-2" />
+              Delete chat history
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      )}
     </div>
   );
 };

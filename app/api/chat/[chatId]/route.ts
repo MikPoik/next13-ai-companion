@@ -45,7 +45,7 @@ export async function POST(
     if (!companion) {
       return new NextResponse("Companion not found", { status: 404 });
     }
-    console.log(companion.apiUrl);
+    //console.log(companion.apiUrl);
     const name = companion.id;
 
     const companionKey = {
