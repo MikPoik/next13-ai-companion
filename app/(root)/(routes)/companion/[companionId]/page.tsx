@@ -35,10 +35,10 @@ const CompanionIdPage = async ({
   });
 
   const categories = await prismadb.category.findMany();
-
-  return ( 
-    <CompanionForm initialData={companion} categories={categories} />
-  );
+  return redirect("/");
+  //return ( 
+  //  <CompanionForm initialData={companion} categories={categories} />
+  //);
 }
- 
+
 export default CompanionIdPage;

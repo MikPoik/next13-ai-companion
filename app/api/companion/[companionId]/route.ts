@@ -8,6 +8,8 @@ export async function PATCH(
   req: Request,
   { params }: { params: { companionId: string } }
 ) {
+  return new NextResponse("Currently disabled", { status: 500 });
+  /*
   try {
     const body = await req.json();
     const user = await currentUser();
@@ -54,6 +56,7 @@ export async function PATCH(
     console.log("[COMPANION_PATCH]", error);
     return new NextResponse("Internal Error", { status: 500 });
   }
+  */
 };
 
 export async function DELETE(
@@ -69,7 +72,7 @@ export async function DELETE(
 
     const companion = await prismadb.message.deleteMany({
       where: {
-        userId:userId,
+        userId: userId,
         companionId: params.companionId
       }
     });

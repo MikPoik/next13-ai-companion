@@ -5,7 +5,10 @@ import prismadb from "@/lib/prismadb";
 import { checkSubscription } from "@/lib/subscription";
 
 export async function POST(req: Request) {
+  return new NextResponse("Currently disabled", { status: 500 });
+  /*
   try {
+
     const body = await req.json();
     const user = await currentUser();
     const { src, name, description, instructions, seed, categoryId, apiUrl } = body;
@@ -43,4 +46,5 @@ export async function POST(req: Request) {
     console.log("[COMPANION_POST]", error);
     return new NextResponse("Internal Error", { status: 500 });
   }
+  */
 };

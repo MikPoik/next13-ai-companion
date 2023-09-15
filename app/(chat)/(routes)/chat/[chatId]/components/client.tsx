@@ -34,7 +34,7 @@ export const ChatClient = ({
     role: message.role,
     content: responseToChatBlocks(message.content)
   })));
-  
+
   const {
     input,
     isLoading,
@@ -72,24 +72,24 @@ export const ChatClient = ({
 
       <ChatHeader companion={companion} />
       {!isPro && (
-          <Button onClick={proModal.onOpen} size="sm" variant="premium">
-            Upgrade to increase message rate limit
-            <Sparkles className="h-4 w-4 fill-white text-white ml-2" />
-          </Button>
-        )}
-      <ChatMessages 
+        <Button onClick={proModal.onOpen} size="sm" variant="premium">
+          Upgrade to increase message limit
+          <Sparkles className="h-4 w-4 fill-white text-white ml-2" />
+        </Button>
+      )}
+      <ChatMessages
         companion={companion}
         isLoading={isLoading}
         messages={messages}
       />
-        
-      <ChatForm 
-        isLoading={isLoading} 
-        input={input} 
-        handleInputChange={handleInputChange} 
-        onSubmit={onSubmit} 
+
+      <ChatForm
+        isLoading={isLoading}
+        input={input}
+        handleInputChange={handleInputChange}
+        onSubmit={onSubmit}
       />
-      
+
     </div>
-   );
+  );
 };

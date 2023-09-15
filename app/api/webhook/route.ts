@@ -62,6 +62,21 @@ export async function POST(req: Request) {
       },
     })
   }
-
+  /*
+   //todo refill message count?
+   const resp = await fetch("", {
+     method: "POST",
+     headers: {
+       "Content-Type": "application/json",
+       "Authorization": ``
+     },
+     body: JSON.stringify({
+       question: "/balance",
+       chat_id: session?.metadata?.userId
+     })
+   });
+   
+   console.log(await resp.text())
+   */
   return new NextResponse(null, { status: 200 })
 };

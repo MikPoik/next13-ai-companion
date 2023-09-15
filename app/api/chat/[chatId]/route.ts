@@ -2,8 +2,6 @@ import dotenv from "dotenv";
 import { auth, currentUser } from "@clerk/nextjs";
 import { NextResponse } from "next/server";
 
-import { MemoryManager } from "@/lib/memory";
-import { rateLimit } from "@/lib/rate-limit";
 import prismadb from "@/lib/prismadb";
 
 dotenv.config({ path: `.env` });
@@ -20,13 +18,7 @@ export async function POST(
       return new NextResponse("Unauthorized", { status: 401 });
     }
 
-    const identifier = request.url + "-" + user.id;
-    const { success } = await rateLimit(identifier);
 
-    if (!success) {
-      return NextResponse.json("Rate limit exceeded, upgrade to Pro plan for faster messaging.");
-    }
-    
     const companion = await prismadb.companion.update({
       where: {
         id: params.chatId
@@ -48,21 +40,6 @@ export async function POST(
     //console.log(companion.apiUrl);
     const name = companion.id;
 
-    const companionKey = {
-      companionName: name!,
-      userId: user.id,
-      modelName: "llama2-13b",
-    };
-   const memoryManager = await MemoryManager.getInstance();
-
-    const records = await memoryManager.readLatestHistory(companionKey);
-    if (records.length === 0) {
-      console.log("no history")
-      await memoryManager.seedChatHistory(companion.seed, "\n\n", companionKey);
-    }
-    await memoryManager.writeToHistory("User: " + prompt + "\n", companionKey);
-
-
     const resp = await fetch(companion.apiUrl, {
       method: "POST",
       headers: {
@@ -76,16 +53,10 @@ export async function POST(
     });
     const response = await resp.text()
     const responseBlocks = JSON.parse(response)
-   
-    const responseText = responseBlocks[0].text
 
-    console.log(response)
-   // await memoryManager.writeToHistory("" + responseText, companionKey);
-
+    //console.log(response)
 
     if (responseBlocks.length > 0) {
-      //memoryManager.writeToHistory("" + responseText.trim(), companionKey);
-
       await prismadb.companion.update({
         where: {
           id: params.chatId
@@ -105,6 +76,7 @@ export async function POST(
     return NextResponse.json(responseBlocks)
 
   } catch (error) {
+    console.log(error)
     return new NextResponse("Internal Error", { status: 500 });
   }
 };
