@@ -18,7 +18,7 @@ import { Separator } from "@/components/ui/separator";
 import { Select, SelectContent, SelectItem, SelectValue, SelectTrigger } from "@/components/ui/select";
 
 
-const PREAMBLE = `placeholder`;
+const PREAMBLE = `You are ...`;
 
 
 const SEED_CHAT = `Introduction message for bot.`;
@@ -42,9 +42,9 @@ const formSchema = z.object({
   categoryId: z.string().min(1, {
     message: "Category is required",
   }),
-  apiUrl: z.string().min(1, {
-    message: "Api url is required",
-  }),
+  packageName: z.string().min(0, {
+    message: "package is required",
+  })  
 });
 
 interface CompanionFormProps {
@@ -64,11 +64,11 @@ export const CompanionForm = ({
     defaultValues: initialData || {
       name: "",
       description: "",
-      instructions: "placeholder",
+      instructions: "",
       seed: "",
       src: "",
       categoryId: undefined,
-      apiUrl: "",
+      packageName: ""
     },
   });
 
@@ -194,13 +194,29 @@ export const CompanionForm = ({
             control={form.control}
             render={({ field }) => (
               <FormItem>
+                <FormLabel>Personality</FormLabel>
                 <FormControl>
-                  <Input disabled={isLoading} type="hidden" placeholder={PREAMBLE} {...field} defaultValue={"placeholder"}/>
+                  <Textarea disabled={isLoading} rows={5} className="bg-background resize-none" placeholder={PREAMBLE} {...field} />
                 </FormControl>
+                <FormDescription>
+                  Describe in detail your companion&apos;s personality and relevant details.
+                </FormDescription>
                 <FormMessage />
               </FormItem>
             )}
           />
+          <FormField
+            name="packageName"
+            control={form.control}
+            render={({ field }) => (
+              <FormItem>
+                <FormControl>
+                <input type="hidden" name="packageName" value="your-steamship-bot-package" />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />          
           <FormField
             name="seed"
             control={form.control}
@@ -214,22 +230,7 @@ export const CompanionForm = ({
               </FormItem>
             )}
           />
-          <FormField
-            name="apiUrl"
-            control={form.control}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Api URL</FormLabel>
-                <FormControl>
-                <Input disabled={isLoading} placeholder="" {...field} />
-                </FormControl>
-                <FormDescription>
-                  Api url for model
-                </FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />          
+       
           <div className="w-full flex justify-center">
             <Button size="lg" disabled={isLoading}>
               {initialData ? "Edit your companion" : "Create your companion"}

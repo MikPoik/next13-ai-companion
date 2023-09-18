@@ -32,14 +32,14 @@ export const Sidebar = ({
       label: "Home",
       pro: false,
     },
-    /*
+  
     {
       icon: Plus,
       href: '/companion/new',
       label: "Create",
       pro: true,
     },
-    */
+    
     {
       icon: Settings,
       href: '/settings',

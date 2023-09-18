@@ -4,6 +4,7 @@ import { NextResponse } from "next/server"
 
 import prismadb from "@/lib/prismadb"
 import { stripe } from "@/lib/stripe"
+import { UserButton } from "@clerk/nextjs"
 
 export async function POST(req: Request) {
   const body = await req.text()
@@ -32,7 +33,7 @@ export async function POST(req: Request) {
       return new NextResponse("User id is required", { status: 400 });
     }
 
-    await prismadb.userSubscription.create({
+    var user_sub = await prismadb.userSubscription.create({
       data: {
         userId: session?.metadata?.userId,
         stripeSubscriptionId: subscription.id,
@@ -43,6 +44,26 @@ export async function POST(req: Request) {
         ),
       },
     })
+    await prismadb.userBalance.upsert({
+      where: {
+        userId: user_sub.userId
+      },
+      update: 
+        {
+          tokenCount: 0,
+          messageCount: 0,
+          messageLimit:1000,
+          tokenLimit:10000          
+
+        },
+        create: {
+          userId: session?.metadata?.userId,
+          tokenCount:0,
+          messageCount: 0,
+          messageLimit:1000,
+          tokenLimit:10000
+        },        
+    });    
   }
 
   if (event.type === "invoice.payment_succeeded") {
@@ -50,7 +71,7 @@ export async function POST(req: Request) {
       session.subscription as string
     )
 
-    await prismadb.userSubscription.update({
+    var sub = await prismadb.userSubscription.update({
       where: {
         stripeSubscriptionId: subscription.id,
       },
@@ -61,22 +82,28 @@ export async function POST(req: Request) {
         ),
       },
     })
+
+    await prismadb.userBalance.upsert({
+      where: {
+        userId: sub.userId
+      },
+      update: 
+        {
+          tokenCount: 0,
+          messageCount: 0,
+          messageLimit:1000,
+          tokenLimit:10000          
+
+        },
+        create: {
+          userId: sub.userId,
+          tokenCount:0,
+          messageCount: 0,
+          messageLimit:1000,
+          tokenLimit:10000
+        },        
+    });        
   }
-  /*
-   //todo refill message count?
-   const resp = await fetch("", {
-     method: "POST",
-     headers: {
-       "Content-Type": "application/json",
-       "Authorization": ``
-     },
-     body: JSON.stringify({
-       question: "/balance",
-       chat_id: session?.metadata?.userId
-     })
-   });
-   
-   console.log(await resp.text())
-   */
+
   return new NextResponse(null, { status: 200 })
 };

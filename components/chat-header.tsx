@@ -66,7 +66,7 @@ export const ChatHeader = ({
           </p>
         </div>
       </div>
-      {(
+      {user?.id === companion.userId && (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="secondary" size="icon">
@@ -74,9 +74,13 @@ export const ChatHeader = ({
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
+            <DropdownMenuItem onClick={() => router.push(`/companion/${companion.id}`)}>
+              <Edit className="w-4 h-4 mr-2" />
+              Edit
+            </DropdownMenuItem>
             <DropdownMenuItem onClick={onDelete}>
               <Trash className="w-4 h-4 mr-2" />
-              Delete chat history
+              Delete
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

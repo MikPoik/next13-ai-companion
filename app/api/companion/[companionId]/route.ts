@@ -8,12 +8,12 @@ export async function PATCH(
   req: Request,
   { params }: { params: { companionId: string } }
 ) {
-  return new NextResponse("Currently disabled", { status: 500 });
-  /*
+  //return new NextResponse("Currently disabled", { status: 500 });
+  
   try {
     const body = await req.json();
     const user = await currentUser();
-    const { src, name, description, instructions, seed, categoryId,apiUrl } = body;
+    const { src, name, description, instructions, seed, categoryId } = body;
 
     if (!params.companionId) {
       return new NextResponse("Companion ID required", { status: 400 });
@@ -46,8 +46,7 @@ export async function PATCH(
         name,
         description,
         instructions,
-        seed,
-        apiUrl
+        seed
       }
     });
 
@@ -56,7 +55,7 @@ export async function PATCH(
     console.log("[COMPANION_PATCH]", error);
     return new NextResponse("Internal Error", { status: 500 });
   }
-  */
+  
 };
 
 export async function DELETE(
@@ -70,10 +69,10 @@ export async function DELETE(
       return new NextResponse("Unauthorized", { status: 401 });
     }
 
-    const companion = await prismadb.message.deleteMany({
+    const companion = await prismadb.companion.delete({
       where: {
-        userId: userId,
-        companionId: params.companionId
+        userId,
+        id: params.companionId
       }
     });
 

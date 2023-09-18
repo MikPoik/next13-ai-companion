@@ -5,7 +5,7 @@ ARG NODE_VERSION=16.15.0
 FROM node:${NODE_VERSION}-slim as base
 
 LABEL fly_launch_runtime="Next.js/Prisma"
-RUN apt-get update && apt-get install -y ca-certificates
+
 # Next.js/Prisma app lives here
 WORKDIR /app
 
