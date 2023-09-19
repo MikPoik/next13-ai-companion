@@ -47,6 +47,22 @@ export const ChatHeader = ({
       })
     }
   }
+  const onDeleteChatHistory = async () => {
+    try {
+      await axios.delete(`/api/companion/${companion.id}/chat-history`);
+      toast({
+        description: "Chat history deleted successfully."
+      });
+      router.refresh();
+      router.push("/");
+      // You can perform any additional actions here after chat history deletion.
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        description: "Something went wrong while deleting chat history."
+      });
+    }
+  }  
   
   return (
     <div className="flex w-full justify-between items-center border-b border-primary/10 pb-4">
@@ -82,6 +98,10 @@ export const ChatHeader = ({
               <Trash className="w-4 h-4 mr-2" />
               Delete
             </DropdownMenuItem>
+            <DropdownMenuItem onClick={onDeleteChatHistory}>
+              <Trash className="w-4 h-4 mr-2" />
+              Delete Chat history
+            </DropdownMenuItem>            
           </DropdownMenuContent>
         </DropdownMenu>
       )}

@@ -3,6 +3,8 @@ import { auth, currentUser } from "@clerk/nextjs";
 import { NextResponse } from "next/server";
 import { Steamship } from '@steamship/client';
 import prismadb from "@/lib/prismadb";
+import { UndoIcon } from "lucide-react";
+import axios, { AxiosError } from 'axios';
 
 dotenv.config({ path: `.env` });
 
@@ -24,16 +26,47 @@ interface SteamshipBlock {
   url: string | null;
 }
 
-async function getSteamshipResponse(prompt: string,context_id:string, package_name:string,instance_handle:string,workspace_handle:string): Promise<string> {
-  
-  const instance = await Steamship.use(package_name, instance_handle,undefined,undefined,undefined,workspace_handle);
-  const response = await (instance.invoke('prompt', {
-    prompt,
-    context_id
-  }) as Promise<SteamshipApiResponse>);
-  const steamshipBlock = response.data;
-  const steamshipBlockJSONString = JSON.stringify(steamshipBlock);
-  return steamshipBlockJSONString;
+async function getSteamshipResponse(prompt: string,context_id:string, package_name:string,instance_handle:string,workspace_handle:string,instructions:string,name:string): Promise<string> {
+  const maxRetryCount = 3; // Maximum number of retry attempts
+
+  for (let retryCount = 0; retryCount < maxRetryCount; retryCount++) {
+    try {
+      const instance = await Steamship.use(package_name, instance_handle, undefined, undefined, true, workspace_handle);
+      const response = await (instance.invoke('prompt', {
+        prompt,
+        context_id,
+        instructions,
+        name
+      }) as Promise<SteamshipApiResponse>);
+      const steamshipBlock = response.data;
+      const steamshipBlockJSONString = JSON.stringify(steamshipBlock);
+      return steamshipBlockJSONString;
+    } catch (error) {
+      //if (axios.isAxiosError(error)) {
+        //if (error.response?.status === 400) {
+          // Handle a 400 error (bad request)
+          console.error('Received a error');
+          if (retryCount < maxRetryCount - 1) {
+            // Retry the request after a delay (optional)
+            console.log('Retrying...');
+            await new Promise((resolve) => setTimeout(resolve, 3000)); // Wait for 3 second before retrying
+          } else {
+            throw new Error('Max retry attempts reached');
+          }
+        //} else {
+          // Handle other Axios errors
+          //console.error('Axios error:', error.response?.data || error.message);
+          //throw new Error('Request failed with Axios error');
+        //}
+      //} else {
+        // Handle other types of errors if needed
+        //console.error('Unhandled error:', error);
+        //throw error; // Rethrow the error
+      //}
+    }
+  }
+
+  throw new Error('Max retry attempts reached');
 }
 
 
@@ -80,14 +113,12 @@ export async function POST(
       return new NextResponse("Companion not found", { status: 404 });
     }
 
-    const workspace_name = companion.id;
-
-    const steamshipResponse = await getSteamshipResponse(prompt,user.id,companion.packageName,companion.instanceHandle,companion.workspaceName);
+    const steamshipResponse = await getSteamshipResponse(prompt,user.id,companion.packageName,companion.instanceHandle,companion.workspaceName,companion.instructions,companion.name);
     const responseBlocks = JSON.parse(steamshipResponse)
-    //console.log(responseBlocks);
-    //console.log(response)
+    
+    //console.log(steamshipResponse)
 
-    if (steamshipResponse.length > 0) {
+    if (responseBlocks[0].text.length > 0) {
       await prismadb.companion.update({
         where: {
           id: params.chatId
@@ -108,7 +139,7 @@ export async function POST(
         },
         update: 
           {
-            tokenCount: {increment:responseBlocks.text.length},
+            tokenCount: {increment:responseBlocks[0].text.length},
             messageCount: {increment:1}
   
           },

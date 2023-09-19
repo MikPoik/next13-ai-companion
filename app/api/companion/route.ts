@@ -11,13 +11,13 @@ export async function POST(req: Request) {
 
     const body = await req.json();
     const user = await currentUser();
-    const { src, name, description, instructions, seed, categoryId, packageName } = body;
+    const { src, name, description, instructions, seed, categoryId, packageName,isPublic } = body;
 
     if (!user || !user.id || !user.firstName) {
       return new NextResponse("Unauthorized", { status: 401 });
     }
 
-    if (!src || !name || !description || !instructions || !seed || !categoryId) {
+    if (!src || !name || !description || !instructions || !seed || !categoryId || !isPublic) {
       return new NextResponse("Missing required fields", { status: 400 });
     };
 
@@ -26,6 +26,9 @@ export async function POST(req: Request) {
     if (!isPro) {
       return new NextResponse("Pro subscription required", { status: 403 });
     }
+
+    const workspace_name = user.id.replace("user_","")+"-"+name.replace(" ","-");
+    const instance_handle = user.id.replace("user_","")+"-"+name.replace(" ","-");
 
     const companion = await prismadb.companion.create({
       data: {
@@ -38,6 +41,9 @@ export async function POST(req: Request) {
         instructions,
         seed,
         packageName,
+        isPublic,
+        workspaceName:workspace_name,
+        instanceHandle:instance_handle
       }
     });
 

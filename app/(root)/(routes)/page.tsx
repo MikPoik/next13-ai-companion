@@ -19,6 +19,7 @@ const RootPage = async ({
       name: {
         search: searchParams.name,
       },
+      isPublic: true
     },
     orderBy: {
       createdAt: "desc"

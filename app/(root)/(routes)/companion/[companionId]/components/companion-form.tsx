@@ -44,7 +44,8 @@ const formSchema = z.object({
   }),
   packageName: z.string().min(0, {
     message: "package is required",
-  })  
+  }),  
+  isPublic: z.boolean()
 });
 
 interface CompanionFormProps {
@@ -68,7 +69,8 @@ export const CompanionForm = ({
       seed: "",
       src: "",
       categoryId: undefined,
-      packageName: ""
+      packageName: "",
+
     },
   });
 
@@ -156,7 +158,7 @@ export const CompanionForm = ({
                 </FormItem>
               )}
              
-            />
+            />            
             <FormField
               control={form.control}
               name="categoryId"
@@ -230,8 +232,32 @@ export const CompanionForm = ({
               </FormItem>
             )}
           />
-       
-          <div className="w-full flex justify-center">
+          <FormField
+            name="isPublic"
+            control={form.control}
+            render={({ field }) => {
+              // Remove the value property from the field object
+              const { value, ...rest } = field;
+
+              return (
+                <FormItem>
+                  <FormLabel>Public</FormLabel>
+                  <FormControl>
+                    <label>
+                      <input
+                        type="checkbox"
+                        {...rest} // Spread the rest of the field object into the input element's props
+                        checked={value} // Use the value property to set the checked property
+                      />
+                      Public
+                    </label>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              );
+            }}
+          />
+                    <div className="w-full flex justify-center">
             <Button size="lg" disabled={isLoading}>
               {initialData ? "Edit your companion" : "Create your companion"}
               <Wand2 className="w-4 h-4 ml-2" />
