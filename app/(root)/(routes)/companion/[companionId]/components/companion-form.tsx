@@ -42,10 +42,8 @@ const formSchema = z.object({
   categoryId: z.string().min(1, {
     message: "Category is required",
   }),
-  packageName: z.string().min(0, {
-    message: "package is required",
-  }),  
-  isPublic: z.boolean()
+  packageName: z.string().optional(),
+  isPublic: z.boolean().optional()
 });
 
 interface CompanionFormProps {
@@ -69,7 +67,8 @@ export const CompanionForm = ({
       seed: "",
       src: "",
       categoryId: undefined,
-      packageName: "",
+      packageName: "lilith-test-bot",
+      isPublic: true
 
     },
   });
@@ -207,18 +206,7 @@ export const CompanionForm = ({
               </FormItem>
             )}
           />
-          <FormField
-            name="packageName"
-            control={form.control}
-            render={({ field }) => (
-              <FormItem>
-                <FormControl>
-                <input type="hidden" name="packageName" value="your-steamship-bot-package" />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />          
+      
           <FormField
             name="seed"
             control={form.control}
@@ -241,7 +229,7 @@ export const CompanionForm = ({
 
               return (
                 <FormItem>
-                  <FormLabel>Public</FormLabel>
+                  
                   <FormControl>
                     <label>
                       <input
@@ -249,9 +237,12 @@ export const CompanionForm = ({
                         {...rest} // Spread the rest of the field object into the input element's props
                         checked={value} // Use the value property to set the checked property
                       />
-                      Public
+                       Public
                     </label>
                   </FormControl>
+                  <FormDescription>
+                  (Other users see and talk to the bot)
+                </FormDescription>                  
                   <FormMessage />
                 </FormItem>
               );

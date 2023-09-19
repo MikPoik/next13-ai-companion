@@ -49,7 +49,7 @@ async function getSteamshipResponse(prompt: string,context_id:string, package_na
           if (retryCount < maxRetryCount - 1) {
             // Retry the request after a delay (optional)
             console.log('Retrying...');
-            await new Promise((resolve) => setTimeout(resolve, 3000)); // Wait for 3 second before retrying
+            await new Promise((resolve) => setTimeout(resolve, 5000)); // Wait for 3 second before retrying
           } else {
             throw new Error('Max retry attempts reached');
           }
