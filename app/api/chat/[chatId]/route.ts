@@ -1,7 +1,7 @@
 import dotenv from "dotenv";
 import { auth, currentUser } from "@clerk/nextjs";
 import { NextResponse } from "next/server";
-import { Steamship } from '@steamship/client';
+import { MimeTypes, Steamship } from '@steamship/client';
 import prismadb from "@/lib/prismadb";
 import { UndoIcon } from "lucide-react";
 import axios, { AxiosError } from 'axios';
@@ -25,9 +25,28 @@ interface SteamshipBlock {
   mimeType: string | null;
   url: string | null;
 }
+function roughTokenCount(text: string): number {
+  // Use regular expression to split text based on whitespace and punctuation
+  const tokens = text.match(/\b\w+\b|[.,!?;]/g);
+  return tokens ? tokens.length : 0;
+}
 
-async function getSteamshipResponse(prompt: string,context_id:string, package_name:string,instance_handle:string,workspace_handle:string,instructions:string,name:string): Promise<string> {
-  const maxRetryCount = 3; // Maximum number of retry attempts
+async function getSteamshipResponse(
+  prompt: string,
+  context_id:string,
+  package_name:string,
+  instance_handle:string,
+  workspace_handle:string,
+  personality:string,
+  name:string,
+  description:string,
+  behaviour:string,
+  selfie_pre:string,
+  selfie_post:string,
+  seed:string
+
+  ): Promise<string> {
+  const maxRetryCount = 2; // Maximum number of retry attempts
 
   for (let retryCount = 0; retryCount < maxRetryCount; retryCount++) {
     try {
@@ -35,34 +54,27 @@ async function getSteamshipResponse(prompt: string,context_id:string, package_na
       const response = await (instance.invoke('prompt', {
         prompt,
         context_id,
-        instructions,
-        name
+        personality,
+        name,
+        description,
+        behaviour,
+        selfie_pre,
+        selfie_post,
+        seed
       }) as Promise<SteamshipApiResponse>);
+      //console.log(response.data);
       const steamshipBlock = response.data;
       const steamshipBlockJSONString = JSON.stringify(steamshipBlock);
       return steamshipBlockJSONString;
     } catch (error) {
-      //if (axios.isAxiosError(error)) {
-        //if (error.response?.status === 400) {
-          // Handle a 400 error (bad request)
           console.error('Received a error');
           if (retryCount < maxRetryCount - 1) {
             // Retry the request after a delay (optional)
             console.log('Retrying...');
-            await new Promise((resolve) => setTimeout(resolve, 5000)); // Wait for 3 second before retrying
+            await new Promise((resolve) => setTimeout(resolve, 3000)); // Wait for 3 second before retrying
           } else {
             throw new Error('Max retry attempts reached');
           }
-        //} else {
-          // Handle other Axios errors
-          //console.error('Axios error:', error.response?.data || error.message);
-          //throw new Error('Request failed with Axios error');
-        //}
-      //} else {
-        // Handle other types of errors if needed
-        //console.error('Unhandled error:', error);
-        //throw error; // Rethrow the error
-      //}
     }
   }
 
@@ -113,12 +125,37 @@ export async function POST(
       return new NextResponse("Companion not found", { status: 404 });
     }
 
-    const steamshipResponse = await getSteamshipResponse(prompt,user.id,companion.packageName,companion.instanceHandle,companion.workspaceName,companion.instructions,companion.name);
+    const steamshipResponse = await getSteamshipResponse(
+      prompt,
+      user.id,
+      companion.packageName,
+      companion.instanceHandle,
+      companion.workspaceName,
+      companion.personality,
+      companion.name,
+      companion.description,
+      companion.behaviour,
+      companion.selfiePre,
+      companion.selfiePost,
+      companion.seed);
     const responseBlocks = JSON.parse(steamshipResponse)
     
     //console.log(steamshipResponse)
-
-    if (responseBlocks[0].text.length > 0) {
+    var imageTokens = 0;
+    var responseLength = 0;
+    var responseText = "";
+    for (const block of responseBlocks) {
+      //console.log(block);
+      if ((block.text && block.text.length > 1)) {
+        responseLength += block.text.length;
+        responseText += block.text
+      } else if (block.mimeType.startsWith("image")) {
+        imageTokens += 1000;
+      }
+    }
+    //console.log(responseLength);
+    //console.log(responseText);
+    if (responseLength > 0) {
       await prismadb.companion.update({
         where: {
           id: params.chatId
@@ -133,13 +170,16 @@ export async function POST(
           },
         }
       });
+
+      const token_count = roughTokenCount(responseText)
+      //console.log(token_count);
       await prismadb.userBalance.upsert({
         where: {
           userId: user.id
         },
         update: 
           {
-            tokenCount: {increment:responseBlocks[0].text.length},
+            tokenCount: {increment:token_count+imageTokens},
             messageCount: {increment:1}
   
           },

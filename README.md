@@ -58,6 +58,8 @@ STRIPE_API_KEY=
 STRIPE_WEBHOOK_SECRET=
 
 NEXT_PUBLIC_APP_URL="http://localhost:3000"
+
+STEAMSHIP_API_KEY
 ```
 
 ### Setup Prisma
@@ -74,10 +76,6 @@ Seed categories:
 node scripts/seed.ts
 ```
 
-Create character:
-```shell
-node scripts/create_companion.ts
-```
 
 ### Start the app
 

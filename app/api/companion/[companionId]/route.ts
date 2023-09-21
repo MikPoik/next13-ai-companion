@@ -1,6 +1,6 @@
 import { auth, currentUser } from "@clerk/nextjs";
 import { NextResponse } from "next/server";
-
+import { Steamship } from '@steamship/client';
 import prismadb from "@/lib/prismadb";
 import { checkSubscription } from "@/lib/subscription";
 
@@ -13,7 +13,7 @@ export async function PATCH(
   try {
     const body = await req.json();
     const user = await currentUser();
-    const { src, name, description, instructions, seed, categoryId,isPublic } = body;
+    const { src, description, personality, seed, categoryId,isPublic,behaviour,selfiePost,selfiePre } = body;
 
     if (!params.companionId) {
       return new NextResponse("Companion ID required", { status: 400 });
@@ -23,7 +23,7 @@ export async function PATCH(
       return new NextResponse("Unauthorized", { status: 401 });
     }
 
-    if (!src || !name || !description || !instructions || !seed || !categoryId) {
+    if (!src || !description || !personality || !seed || !categoryId) {
       return new NextResponse("Missing required fields", { status: 400 });
     };
 
@@ -43,11 +43,13 @@ export async function PATCH(
         userId: user.id,
         userName: user.firstName,
         src,
-        name,
         description,
-        instructions,
+        personality,
         seed,
-        isPublic
+        isPublic,
+        behaviour,
+        selfiePost,
+        selfiePre
       }
     });
 
@@ -64,18 +66,21 @@ export async function DELETE(
   { params }: { params: { companionId: string } }
 ) {
   try {
-    const { userId } = auth();
+    const user = await currentUser();
 
-    if (!userId) {
+    if (!user) {
       return new NextResponse("Unauthorized", { status: 401 });
     }
 
     const companion = await prismadb.companion.delete({
       where: {
-        userId,
+        userId:user.id,
         id: params.companionId
       }
     });
+
+    const instance = await Steamship.use(companion.packageName, companion.instanceHandle, undefined, undefined, true, companion.workspaceName);
+    instance.delete();
 
     return NextResponse.json(companion);
   } catch (error) {

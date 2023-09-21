@@ -18,10 +18,13 @@ import { Separator } from "@/components/ui/separator";
 import { Select, SelectContent, SelectItem, SelectValue, SelectTrigger } from "@/components/ui/select";
 
 
-const PREAMBLE = `You are ...`;
+const PREAMBLE = `Your personality can be described as ...`;
+const PREAMBLE_BEHAVIOUR = `You behave like ...`;
+const PREAMBLE_SELFIE_PRE = `describe your character in detail ...`;
+const PREAMBLE_SELFIE_POST = `describe image details and effects ...`;
 
 
-const SEED_CHAT = `Introduction message for bot.`;
+const SEED_CHAT = `Introduction message for bot ...`;
 
 const formSchema = z.object({
   name: z.string().min(1, {
@@ -30,10 +33,10 @@ const formSchema = z.object({
   description: z.string().min(1, {
     message: "Description is required.",
   }),
-  instructions: z.string().min(0, {
-    message: "Instructions require at least 200 characters."
+  personality: z.string().min(1, {
+    message: "Personality require at least 200 characters."
   }),
-  seed: z.string().min(0, {
+  seed: z.string().min(1, {
     message: "Seed requires at least 200 characters."
   }),
   src: z.string().min(1, {
@@ -43,7 +46,12 @@ const formSchema = z.object({
     message: "Category is required",
   }),
   packageName: z.string().optional(),
-  isPublic: z.boolean().optional()
+  isPublic: z.boolean().optional(),
+  behaviour: z.string().min(0, {
+    message: "Behaviour is required",
+  }),
+  selfiePre: z.string().optional(),
+  selfiePost: z.string().optional()  
 });
 
 interface CompanionFormProps {
@@ -63,12 +71,16 @@ export const CompanionForm = ({
     defaultValues: initialData || {
       name: "",
       description: "",
-      instructions: "",
+      personality: "",
       seed: "",
       src: "",
       categoryId: undefined,
-      packageName: "lilith-test-bot",
-      isPublic: true
+      packageName: "lilith-test-bot", //name of the steamship package to use
+      isPublic: true,
+      behaviour:"",
+      selfiePre:"",
+      selfiePost:""
+
 
     },
   });
@@ -132,7 +144,7 @@ export const CompanionForm = ({
                 <FormItem className="col-span-2 md:col-span-1">
                   <FormLabel>Name</FormLabel>
                   <FormControl>
-                    <Input disabled={isLoading} placeholder="Elon Musk" {...field} />
+                    <Input disabled={isLoading} placeholder="Name" {...field} />
                   </FormControl>
                   <FormDescription>
                     This is how your AI Companion will be named.
@@ -148,10 +160,10 @@ export const CompanionForm = ({
                 <FormItem>
                   <FormLabel>Description</FormLabel>
                   <FormControl>
-                    <Input disabled={isLoading} placeholder="CEO & Founder of Tesla, SpaceX" {...field} />
+                    <Input disabled={isLoading} placeholder="You are.." {...field} />
                   </FormControl>
                   <FormDescription>
-                    Short description for your AI Companion
+                    Short description for your AI Companion type
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -164,7 +176,7 @@ export const CompanionForm = ({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Category</FormLabel>
-                  <Select disabled={isLoading} onValueChange={field.onChange} value={field.value} defaultValue={field.value}>
+                  <Select disabled={isLoading} onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl>
                       <SelectTrigger className="bg-background">
                         <SelectValue defaultValue={field.value} placeholder="Select a category" />
@@ -191,7 +203,7 @@ export const CompanionForm = ({
             <Separator className="bg-primary/10" />
           </div>
           <FormField
-            name="instructions"
+            name="personality"
             control={form.control}
             render={({ field }) => (
               <FormItem>
@@ -206,7 +218,22 @@ export const CompanionForm = ({
               </FormItem>
             )}
           />
-      
+          <FormField
+            name="behaviour"
+            control={form.control}
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Behaviour</FormLabel>
+                <FormControl>
+                  <Textarea disabled={isLoading} rows={5} className="bg-background resize-none" placeholder={PREAMBLE_BEHAVIOUR} {...field} />
+                </FormControl>
+                <FormDescription>
+                  Describe in detail your companion&apos;s behaviour.
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />      
           <FormField
             name="seed"
             control={form.control}
@@ -214,12 +241,52 @@ export const CompanionForm = ({
               <FormItem>
                 <FormLabel>First chat message</FormLabel>
                 <FormControl>
-                  <Input disabled={isLoading} defaultValue={""} placeholder={SEED_CHAT} {...field} />
+                  <Input disabled={isLoading} placeholder={SEED_CHAT} {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
-          />
+          />          
+          <div className="space-y-2 w-full">
+            <div>
+              <h3 className="text-lg font-medium">Image generation settings</h3>
+            </div>
+            <Separator className="bg-primary/10" />
+          </div>
+
+          <FormField
+            name="selfiePre"
+            control={form.control}
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Pre-selfie prompt</FormLabel>
+                <FormControl>
+                  <Input disabled={isLoading} className="bg-background resize-none" placeholder={PREAMBLE_SELFIE_PRE} {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />    
+          <FormField
+            name="selfiePost"
+            control={form.control}
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Post-selfie prompt</FormLabel>
+                <FormControl>
+                  <Input disabled={isLoading} className="bg-background resize-none" placeholder={PREAMBLE_SELFIE_POST} {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />                        
+          <div className="space-y-1 w-full">
+            <div>
+              <h3 className="text-lg font-medium">Other settings</h3>
+            </div>
+            <Separator className="bg-primary/10" />
+          </div>
+
           <FormField
             name="isPublic"
             control={form.control}
@@ -231,17 +298,17 @@ export const CompanionForm = ({
                 <FormItem>
                   
                   <FormControl>
-                    <label>
+                    <label>Public &nbsp;
                       <input
                         type="checkbox"
                         {...rest} // Spread the rest of the field object into the input element's props
                         checked={value} // Use the value property to set the checked property
-                      />
-                       Public
+                        style={{ width: '14px', height: '14px' }}
+                      />  
                     </label>
                   </FormControl>
                   <FormDescription>
-                  (Other users see and talk to the bot)
+                  (Other users can talk to the bot)
                 </FormDescription>                  
                   <FormMessage />
                 </FormItem>

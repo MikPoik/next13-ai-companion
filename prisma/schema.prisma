@@ -21,10 +21,12 @@ model Companion {
   userName       String
   src            String
   name           String    @db.Text
-  description    String
-  instructions   String    @db.Text
+  description    String    @db.Text
+  personality    String    @db.Text
+  behaviour      String    @db.Text
+  selfiePre      String    @db.Text
+  selfiePost     String    @db.Text
   seed           String    @db.Text
-  apiUrl         String?   @db.Text
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
   categoryId     String

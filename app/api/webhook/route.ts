@@ -91,7 +91,7 @@ export async function POST(req: Request) {
         {
           tokenCount: 0,
           messageCount: 0,
-          messageLimit:1000,
+          messageLimit:7500,
           tokenLimit:10000          
 
         },
@@ -99,7 +99,7 @@ export async function POST(req: Request) {
           userId: sub.userId,
           tokenCount:0,
           messageCount: 0,
-          messageLimit:1000,
+          messageLimit:7500,
           tokenLimit:10000
         },        
     });        

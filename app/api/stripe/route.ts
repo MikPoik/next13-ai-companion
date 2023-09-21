@@ -44,7 +44,7 @@ export async function GET() {
             currency: "USD",
             product_data: {
               name: "Companion Pro",
-              description: "AI Companions"
+              description: "Create Custom AI Companions"
             },
             unit_amount: 999,
             recurring: {

@@ -22,6 +22,15 @@ export const ChatMessages = ({
   isLoading,
   companion,
 }: ChatMessagesProps) => {
+
+  const [messageKeys, setMessageKeys] = useState<string[]>([]);
+
+  useEffect(() => {
+    // Generate unique keys for messages
+    const messageKeys = messages.map(() => uuidv4());
+    setMessageKeys(messageKeys);
+  }, [messages]);
+
   const scrollRef = useRef<ElementRef<"div">>(null);
 
   const [fakeLoading, setFakeLoading] = useState(messages.length === 0 ? true : false);
@@ -47,10 +56,11 @@ export const ChatMessages = ({
         src={companion.src}
         role="system"
         content={`Hello, I am ${companion.name}, ${companion.seed}`}
+        key="system" // Assign a fixed key for system message
       />
-      {messages.map((message) => (
+      {messages.map((message, index) => (
         <ChatMessage
-          key={uuidv4()}
+          key={messageKeys[index]} // Assign the pre-generated key
           src={companion.src}
           content={message.content}
           role={message.role}
@@ -61,6 +71,7 @@ export const ChatMessages = ({
           src={companion.src}
           role="system"
           isLoading
+          key="loading" // Assign a fixed key for loading message
         />
       )}
       <div ref={scrollRef} />

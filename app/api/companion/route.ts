@@ -1,6 +1,6 @@
 import { auth, currentUser } from "@clerk/nextjs";
 import { NextResponse } from "next/server";
-
+import { Steamship } from '@steamship/client';
 import prismadb from "@/lib/prismadb";
 import { checkSubscription } from "@/lib/subscription";
 
@@ -11,13 +11,13 @@ export async function POST(req: Request) {
 
     const body = await req.json();
     const user = await currentUser();
-    const { src, name, description, instructions, seed, categoryId, packageName,isPublic } = body;
+    const { src, name, description, personality, seed, categoryId, packageName,isPublic,selfiePost,selfiePre,behaviour } = body;
 
     if (!user || !user.id || !user.firstName) {
       return new NextResponse("Unauthorized", { status: 401 });
     }
 
-    if (!src || !name || !description || !instructions || !seed || !categoryId ) {
+    if (!src || !name || !description || !personality || !seed || !categoryId || !behaviour ) {
       return new NextResponse("Missing required fields", { status: 400 });
     };
 
@@ -38,14 +38,18 @@ export async function POST(req: Request) {
         src,
         name,
         description,
-        instructions,
+        personality,
         seed,
         packageName,
         isPublic,
         workspaceName:workspace_name,
         instanceHandle:instance_handle,
+        behaviour,
+        selfiePost,
+        selfiePre
       }
     });
+    await Steamship.use(packageName, instance_handle, undefined, undefined, true, workspace_name);
 
     return NextResponse.json(companion);
   } catch (error) {
