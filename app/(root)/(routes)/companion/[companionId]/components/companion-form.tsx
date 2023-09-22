@@ -51,7 +51,10 @@ const formSchema = z.object({
     message: "Behaviour is required",
   }),
   selfiePre: z.string().optional(),
-  selfiePost: z.string().optional()  
+  selfiePost: z.string().optional(),
+  model: z.string().min(1,{
+    message: "model is required",
+  })  
 });
 
 interface CompanionFormProps {
@@ -75,11 +78,12 @@ export const CompanionForm = ({
       seed: "",
       src: "",
       categoryId: undefined,
-      packageName: "lilith-test-bot", //name of the steamship package to use
+      packageName: "backend-test-bot",  //steamship package name
       isPublic: true,
       behaviour:"",
       selfiePre:"",
-      selfiePost:""
+      selfiePost:"",
+      model: ""
 
 
     },
@@ -103,7 +107,7 @@ export const CompanionForm = ({
       router.refresh();
       router.push("/");
     } catch (error) {
-      console.log(error)
+      //console.log(error);
       toast({
         variant: "destructive",
         description: "Something went wrong.",
@@ -195,6 +199,31 @@ export const CompanionForm = ({
                 </FormItem>
               )}
             />
+            <FormField
+              control={form.control}
+              name="model"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Model</FormLabel>
+                  <Select disabled={isLoading} onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger className="bg-background">
+                        <SelectValue defaultValue={field.value} placeholder="Select a llm model" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+
+                        <SelectItem key="Llama2" value="Llama2">Llama2 (NSFW content)</SelectItem>
+                        <SelectItem key="GPT3.5" value="GPT3.5">GPT-3.5</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormDescription>
+                    Select the model for your AI, for NSFW content use LLama2
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />            
           </div>
           <div className="space-y-2 w-full">
             <div>

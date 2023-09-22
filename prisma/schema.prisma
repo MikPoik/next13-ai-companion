@@ -33,6 +33,7 @@ model Companion {
   instanceHandle String   @db.Text @default(uuid())
   packageName    String   @db.Text 
   workspaceName  String   @db.Text @default(uuid())
+  model          String   @default("NousResearch/Nous-Hermes-Llama2-13b")
   isPublic       Boolean  @default(true)
   category       Category  @relation(fields: [categoryId], references: [id])
   messages       Message[]

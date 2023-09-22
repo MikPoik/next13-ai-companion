@@ -57,6 +57,7 @@ export const ChatHeader = ({
       router.push("/");
       // You can perform any additional actions here after chat history deletion.
     } catch (error) {
+      //console.log(error);
       toast({
         variant: "destructive",
         description: "Something went wrong while deleting chat history."

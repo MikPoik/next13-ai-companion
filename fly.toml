@@ -1,9 +1,9 @@
-# fly.toml app configuration file generated for companionui-test on 2023-09-20T09:24:59+03:00
+# fly.toml app configuration file generated for companion-ai-dev on 2023-09-22T14:10:09+03:00
 #
 # See https://fly.io/docs/reference/configuration/ for information about how to use this file.
 #
 
-app = "companion-ui-test"
+app = "companion-ai-dev"
 primary_region = "arn"
 
 [build]

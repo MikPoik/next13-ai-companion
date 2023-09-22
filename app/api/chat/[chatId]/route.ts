@@ -43,14 +43,15 @@ async function getSteamshipResponse(
   behaviour:string,
   selfie_pre:string,
   selfie_post:string,
-  seed:string
+  seed:string,
+  model:string
 
   ): Promise<string> {
-  const maxRetryCount = 2; // Maximum number of retry attempts
+  const maxRetryCount = 3; // Maximum number of retry attempts
 
   for (let retryCount = 0; retryCount < maxRetryCount; retryCount++) {
     try {
-      const instance = await Steamship.use(package_name, instance_handle, undefined, undefined, true, workspace_handle);
+      const instance = await Steamship.use(package_name, instance_handle, {llm_model:model}, undefined, true, workspace_handle);
       const response = await (instance.invoke('prompt', {
         prompt,
         context_id,
@@ -60,7 +61,8 @@ async function getSteamshipResponse(
         behaviour,
         selfie_pre,
         selfie_post,
-        seed
+        seed,
+        model
       }) as Promise<SteamshipApiResponse>);
       //console.log(response.data);
       const steamshipBlock = response.data;
@@ -71,7 +73,7 @@ async function getSteamshipResponse(
           if (retryCount < maxRetryCount - 1) {
             // Retry the request after a delay (optional)
             console.log('Retrying...');
-            await new Promise((resolve) => setTimeout(resolve, 3000)); // Wait for 3 second before retrying
+            await new Promise((resolve) => setTimeout(resolve, 5000)); // Wait for 3 second before retrying
           } else {
             throw new Error('Max retry attempts reached');
           }
@@ -137,7 +139,8 @@ export async function POST(
       companion.behaviour,
       companion.selfiePre,
       companion.selfiePost,
-      companion.seed);
+      companion.seed,
+      companion.model);
     const responseBlocks = JSON.parse(steamshipResponse)
     
     //console.log(steamshipResponse)

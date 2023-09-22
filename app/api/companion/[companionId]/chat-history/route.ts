@@ -43,9 +43,7 @@ export async function DELETE(
     }
     const instance = await Steamship.use(companion.packageName, companion.instanceHandle, undefined, undefined, true, companion.workspaceName);
     const context_id = user.id;
-    const prompt = "/reset"
-    const response = await (instance.invoke('prompt', {
-      prompt,
+    const response = await (instance.invoke('clear_history', {
       context_id
     }));
     //console.log(response);
