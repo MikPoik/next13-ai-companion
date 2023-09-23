@@ -47,6 +47,7 @@ const formSchema = z.object({
   }),
   packageName: z.string().optional(),
   isPublic: z.boolean().optional(),
+  createImages: z.boolean().optional(),
   behaviour: z.string().min(0, {
     message: "Behaviour is required",
   }),
@@ -83,7 +84,8 @@ export const CompanionForm = ({
       behaviour:"",
       selfiePre:"",
       selfiePost:"",
-      model: ""
+      model: "",
+      createImages:true
 
 
     },
@@ -164,10 +166,10 @@ export const CompanionForm = ({
                 <FormItem>
                   <FormLabel>Description</FormLabel>
                   <FormControl>
-                    <Input disabled={isLoading} placeholder="You are.." {...field} />
+                    <Input disabled={isLoading} placeholder="girlfriend, etc.." {...field} />
                   </FormControl>
                   <FormDescription>
-                    Short description for your AI Companion type
+                    Short description of your AI Companion&apos;s type
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -282,7 +284,34 @@ export const CompanionForm = ({
             </div>
             <Separator className="bg-primary/10" />
           </div>
+          <FormField
+            name="createImages"
+            control={form.control}
+            render={({ field }) => {
+              // Remove the value property from the field object
+              const { value, ...rest } = field;
 
+              return (
+                <FormItem>
+                  
+                  <FormControl>
+                    <label>Enable Image generation &nbsp;
+                      <input
+                        type="checkbox"
+                        {...rest} // Spread the rest of the field object into the input element's props
+                        checked={value} // Use the value property to set the checked property
+                        style={{ width: '14px', height: '14px' }}
+                      />  
+                    </label>
+                  </FormControl>
+                  <FormDescription>
+                  (Generated images cost extra tokens)
+                </FormDescription>                  
+                  <FormMessage />
+                </FormItem>
+              );
+            }}
+          />
           <FormField
             name="selfiePre"
             control={form.control}

@@ -34,6 +34,7 @@ model Companion {
   packageName    String   @db.Text 
   workspaceName  String   @db.Text @default(uuid())
   model          String   @default("NousResearch/Nous-Hermes-Llama2-13b")
+  createImages   Boolean  @default(true)
   isPublic       Boolean  @default(true)
   category       Category  @relation(fields: [categoryId], references: [id])
   messages       Message[]

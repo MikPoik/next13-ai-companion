@@ -8,7 +8,7 @@ export async function POST(req: Request) {
   try {
     const body = await req.json();
     const user = await currentUser();
-    const { src, name, description, personality, seed, categoryId, packageName,isPublic,selfiePost,selfiePre,behaviour,model } = body;
+    const { src, name, description, personality, seed, categoryId, packageName,isPublic,selfiePost,selfiePre,behaviour,model,createImages } = body;
 
     if (!user || !user.id || !user.firstName) {
       return new NextResponse("Unauthorized", { status: 401 });
@@ -52,10 +52,11 @@ export async function POST(req: Request) {
         behaviour,
         selfiePost,
         selfiePre,
-        model:llm_model
+        model:llm_model,
+        createImages
       }
     });
-    await Steamship.use(packageName, instance_handle, {llm_model:llm_model}, undefined, true, workspace_name);
+    await Steamship.use(packageName, instance_handle, {llm_model:llm_model,create_images:createImages}, undefined, true, workspace_name);
 
     return NextResponse.json(companion);
   } catch (error) {
