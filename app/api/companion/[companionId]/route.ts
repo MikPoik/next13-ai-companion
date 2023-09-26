@@ -29,9 +29,9 @@ export async function PATCH(
 
     const isPro = await checkSubscription();
 
-    if (!isPro) {
-      return new NextResponse("Pro subscription required", { status: 403 });
-    }
+    //if (!isPro) {
+    //  return new NextResponse("Pro subscription required", { status: 403 });
+    //}
 
     const companion = await prismadb.companion.update({
       where: {

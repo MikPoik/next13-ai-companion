@@ -4,6 +4,14 @@
 ARG NODE_VERSION=16.15.0
 FROM node:${NODE_VERSION}-slim as base
 
+ENV NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME=yourcloudname
+ENV NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET=yourcloudpreset
+ENV NEXT_PUBLIC_CLERK_SIGN_IN_URL=/sign-in
+ENV NEXT_PUBLIC_CLERK_SIGN_UP_URL=/sign-up
+ENV NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL=/dashboard
+ENV NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL=/dashboard
+ENV NEXT_PUBLIC_APP_URL=https://
+
 LABEL fly_launch_runtime="Next.js/Prisma"
 RUN apt-get update && apt-get install -y ca-certificates
 # Next.js/Prisma app lives here

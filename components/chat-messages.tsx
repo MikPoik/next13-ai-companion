@@ -29,7 +29,7 @@ export const ChatMessages = ({
     // Generate unique keys for messages
     const messageKeys = messages.map(() => uuidv4());
     setMessageKeys(messageKeys);
-  }, [messages]);
+  }, [messages,isLoading]);
 
   const scrollRef = useRef<ElementRef<"div">>(null);
 
@@ -60,7 +60,7 @@ export const ChatMessages = ({
       />
       {messages.map((message, index) => (
         <ChatMessage
-          key={messageKeys[index]} // Assign the pre-generated key
+          key={index} // Assign the pre-generated key
           src={companion.src}
           content={message.content}
           role={message.role}

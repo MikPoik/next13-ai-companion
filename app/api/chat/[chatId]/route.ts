@@ -104,7 +104,7 @@ export async function POST(
     });
     //console.log(balance);
     if (balance) {
-      if (balance.tokenCount > balance.tokenLimit || balance.messageCount > balance.messageLimit ){
+      if (balance.tokenCount > balance.tokenLimit){
         return NextResponse.json("Message limit exceeded, upgrade to Pro plan for increased limit.");
       }
     }
@@ -191,7 +191,7 @@ export async function POST(
             tokenCount:1,
             messageCount: 1,
             messageLimit:20,
-            tokenLimit:1000
+            tokenLimit:10000
           },        
       });
   

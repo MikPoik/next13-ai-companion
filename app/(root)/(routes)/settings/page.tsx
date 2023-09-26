@@ -7,7 +7,7 @@ const SettingsPage = async () => {
   const isPro = await checkSubscription();
   const user = await currentUser();
   var tokens = 0;
-  var token_limit = 0;
+  var token_limit = 10000;
   if (user) {
     const balance =  await prismadb.userBalance.findUnique({
       where: {

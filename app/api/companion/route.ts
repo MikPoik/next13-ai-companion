@@ -20,9 +20,9 @@ export async function POST(req: Request) {
 
     const isPro = await checkSubscription();
 
-    if (!isPro) {
-      return new NextResponse("Pro subscription required", { status: 403 });
-    }
+    //if (!isPro) {
+    //  return new NextResponse("Pro subscription required", { status: 403 });
+    //}
 
     const workspace_name = user.id.replace("user_","").toLowerCase()+"-"+name.replace(" ","-").toLowerCase();
     const instance_handle = user.id.replace("user_","").toLowerCase()+"-"+name.replace(" ","-").toLowerCase();
