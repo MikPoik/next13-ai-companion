@@ -53,6 +53,7 @@ const RootPage = async ({
       <Categories data={categories} />
       <Companions data={data} />
     </div>
+    
   )
 }
 

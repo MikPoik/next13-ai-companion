@@ -17,9 +17,7 @@ export async function DELETE(
     }
     //console.log("delete chat history")
     
-
     // Handle deletion of chat history here.
-    // Replace the following line with your actual logic for deleting chat history.
     const deletedChatHistory = await prismadb.message.deleteMany({
       where: {
         userId: user.id,
@@ -34,7 +32,6 @@ export async function DELETE(
 
     const companion = await prismadb.companion.findUnique({
       where: {
-        userId: user.id,
         id: params.companionId
       },       
     });    

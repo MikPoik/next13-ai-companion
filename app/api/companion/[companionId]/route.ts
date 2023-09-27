@@ -8,7 +8,7 @@ export async function PATCH(
   req: Request,
   { params }: { params: { companionId: string } }
 ) {
-  //return new NextResponse("Currently disabled", { status: 500 });
+
   
   try {
     const body = await req.json();
@@ -27,7 +27,7 @@ export async function PATCH(
       return new NextResponse("Missing required fields", { status: 400 });
     };
 
-    const isPro = await checkSubscription();
+    //const isPro = await checkSubscription();
 
     //if (!isPro) {
     //  return new NextResponse("Pro subscription required", { status: 403 });

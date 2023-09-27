@@ -29,7 +29,7 @@ export default function RootLayout({
             <ProModal />
             {children}
             <Toaster />
-          </ThemeProvider>
+          </ThemeProvider>    
         </body>
       </html>
     </ClerkProvider>
