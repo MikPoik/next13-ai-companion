@@ -19,9 +19,8 @@ const RootLayout = async ({
       </main>
       <footer className="text-muted-foreground text-xs text-center w-full">
             {/* Your footer content goes here */}
-            <p>&copy; {new Date().getFullYear()} trulov.me |{' '}
-              <a href="/terms-of-service" className="text-grey-500 hover:none">Terms of Service</a> |{' '}
-              <a href="https://discord.gg/DFYe5TrpXg" className="text-grey-500 hover:none" target="_blank" rel="noopener noreferrer" style={{ display: 'inline-flex', verticalAlign: 'middle',alignItems: 'center' }}>Discord Support</a>
+            <p>&copy; {new Date().getFullYear()} truluv.me |{' '}
+              <a href="/terms-of-service" className="text-grey-500 hover:none">Terms of Service</a>              
             </p>
         </footer>        
     </div>

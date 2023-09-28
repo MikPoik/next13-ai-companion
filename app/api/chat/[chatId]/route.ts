@@ -93,7 +93,7 @@ export async function POST(
     const { prompt } = await request.json();
     const user = await currentUser();
 
-    if (!user || !user.firstName || !user.id) {
+    if (!user || !user.id) {
       return new NextResponse("Unauthorized", { status: 401 });
     }
 
@@ -153,7 +153,7 @@ export async function POST(
         responseLength += block.text.length;
         responseText += block.text
       } else if (block.mimeType.startsWith("image")) {
-        imageTokens += 1000;
+        imageTokens += 500;
       }
     }
     //console.log(responseLength);

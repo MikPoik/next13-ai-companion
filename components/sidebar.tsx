@@ -1,6 +1,6 @@
 "use client";
 
-import { Home, Plus, Settings } from "lucide-react";
+import { Home, Plus, Settings,HelpCircle } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 
 import { cn } from "@/lib/utils";
@@ -22,7 +22,12 @@ export const Sidebar = ({
       return proModal.onOpen();
     }
 
-    return router.push(url);
+    if (url.startsWith("http")) {
+      // If it's an external link, open in a new tab/window
+      window.open(url, "_blank");
+    } else {
+      router.push(url);
+    }
   }
 
   const routes = [
@@ -46,6 +51,12 @@ export const Sidebar = ({
       label: "Settings",
       pro: false,
     },
+    {
+      icon: HelpCircle,
+      href: 'https://discord.gg/DFYe5TrpXg',
+      label: "Support",
+      pro: false,
+    },    
   ];
 
   return (
