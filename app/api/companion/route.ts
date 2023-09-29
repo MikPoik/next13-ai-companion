@@ -10,14 +10,17 @@ export async function POST(req: Request) {
     const user = await currentUser();
     const { src, name, description, personality, seed, categoryId, packageName,isPublic,selfiePost,selfiePre,behaviour,model,createImages } = body;
 
-    if (!user || !user.id || !user.firstName) {
+    if (!user || !user.id ) {
       return new NextResponse("Unauthorized", { status: 401 });
     }
 
     if ( !src ||!name || !description || !personality || !seed || !categoryId || !behaviour || !model ) {
       return new NextResponse("Missing required fields", { status: 400 });
     };
-
+    var firstName = "user";
+    if (user.firstName) {
+      firstName = user.firstName
+    }
     //const isPro = await checkSubscription();
 
     //if (!isPro) {
@@ -39,7 +42,7 @@ export async function POST(req: Request) {
       data: {
         categoryId,
         userId: user.id,
-        userName: user.firstName,
+        userName: firstName,
         src,
         name,
         description,
