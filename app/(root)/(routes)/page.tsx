@@ -15,8 +15,12 @@ const RootPage = async ({
   searchParams
 }: RootPageProps) => {
   const user = await currentUser();
+  var user_id="";
   if (!user) {
-    return redirectToSignIn();
+    user_id="public";
+    //return redirectToSignIn();
+    } else {
+    user_id=user.id;
     }    
   const data = await prismadb.companion.findMany({
     where: {
@@ -29,7 +33,7 @@ const RootPage = async ({
           isPublic: true // Check if the companion is public
         },
         {
-          userId: user.id // Check if userId matches
+          userId: user_id // Check if userId matches
         }
       ]
     },

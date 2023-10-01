@@ -58,7 +58,7 @@ export const ProModal = () => {
             * Create your custom 
             <span className="text-sky-500 mx-1 font-medium">AI</span>
             companions<br/>
-            * 10 000 tokens/month.
+            * 100 000 tokens/month.
           </DialogDescription>
         </DialogHeader>
         <Separator />
