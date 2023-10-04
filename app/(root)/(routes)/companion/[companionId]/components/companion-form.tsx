@@ -270,7 +270,7 @@ export const CompanionForm = ({
             control={form.control}
             render={({ field }) => (
               <FormItem>
-                <FormLabel>First chat message</FormLabel>
+                <FormLabel>Seed chat message</FormLabel>
                 <FormControl>
                   <Input disabled={isLoading} placeholder={SEED_CHAT} {...field} />
                 </FormControl>

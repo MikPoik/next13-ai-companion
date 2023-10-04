@@ -55,7 +55,7 @@ export const ChatMessages = ({
         isLoading={fakeLoading}
         src={companion.src}
         role="system"
-        content={`I am ${companion.name}, ${companion.seed}`}
+        content={`${companion.seed}`}
         key="system" // Assign a fixed key for system message
       />
       {messages.map((message, index) => (

@@ -1,6 +1,6 @@
 "use client";
 
-import { Home, Plus, Settings,HelpCircle } from "lucide-react";
+import { Home, Plus, Settings, HelpCircle, Component } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 
 import { cn } from "@/lib/utils";
@@ -37,14 +37,14 @@ export const Sidebar = ({
       label: "Home",
       pro: false,
     },
-  
+
     {
       icon: Plus,
       href: '/companion/new',
       label: "Create",
       pro: false,
     },
-    
+
     {
       icon: Settings,
       href: '/settings',
@@ -52,11 +52,11 @@ export const Sidebar = ({
       pro: false,
     },
     {
-      icon: HelpCircle,
+      icon: Component,
       href: 'https://discord.gg/DFYe5TrpXg',
-      label: "Support",
+      label: "Community",
       pro: false,
-    },    
+    },
   ];
 
   return (
