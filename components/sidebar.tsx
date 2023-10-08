@@ -53,7 +53,7 @@ export const Sidebar = ({
     },
     {
       icon: Component,
-      href: 'https://discord.gg/DFYe5TrpXg',
+      href: 'https://discord.com/invite/DFYe5TrpXg',
       label: "Community",
       pro: false,
     },

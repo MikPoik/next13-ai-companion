@@ -2,7 +2,7 @@ import prismadb from "@/lib/prismadb"
 import { Categories } from "@/components/categories"
 import { Companions } from "@/components/companions"
 import { SearchInput } from "@/components/search-input"
-import { auth, currentUser,redirectToSignIn } from "@clerk/nextjs";
+import { auth, currentUser, redirectToSignIn } from "@clerk/nextjs";
 
 interface RootPageProps {
   searchParams: {
@@ -15,27 +15,42 @@ const RootPage = async ({
   searchParams
 }: RootPageProps) => {
   const user = await currentUser();
-  var user_id="";
+  var user_id = "";
   if (!user) {
-    user_id="public";
+    user_id = "public";
     //return redirectToSignIn();
-    } else {
-    user_id=user.id;
-    }    
+  } else {
+    user_id = user.id;
+  }
   const data = await prismadb.companion.findMany({
     where: {
       categoryId: searchParams.categoryId,
-      name: {
-        search: searchParams.name,
-      },
-      OR: [
+      AND: [
         {
-          isPublic: true // Check if the companion is public
+          OR: [
+            {
+              name: {
+                contains: searchParams.name,
+              },
+            },
+            {
+              description: {
+                contains: searchParams.name,
+              },
+            },
+          ],
         },
         {
-          userId: user_id // Check if userId matches
-        }
-      ]
+          OR: [
+            {
+              isPublic: true,
+            },
+            {
+              userId: user_id,
+            },
+          ],
+        },
+      ],
     },
     orderBy: {
       createdAt: "desc"
@@ -48,6 +63,7 @@ const RootPage = async ({
       }
     },
   });
+  console.log(data);
 
   const categories = await prismadb.category.findMany();
 
@@ -57,7 +73,7 @@ const RootPage = async ({
       <Categories data={categories} />
       <Companions data={data} />
     </div>
-    
+
   )
 }
 

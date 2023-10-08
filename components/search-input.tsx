@@ -24,8 +24,8 @@ export const SearchInput = () => {
   };
 
   useEffect(() => {
-    const query = { 
-      name: debouncedValue, 
+    const query = {
+      name: debouncedValue,
       categoryId: categoryId,
     };
 
