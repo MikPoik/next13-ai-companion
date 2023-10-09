@@ -1,7 +1,7 @@
 import Image from "next/image"
 import Link from "next/link"
 import { Companion } from "@prisma/client"
-import { MessagesSquare } from "lucide-react";
+import { MessagesSquare, ImagePlus,ImageOff,Camera,CameraOff } from "lucide-react";
 
 import { Card, CardFooter, CardHeader } from "@/components/ui/card"
 
@@ -65,6 +65,9 @@ export const Companions = ({
                 <span>Private</span>
               )}
               |
+              {item.createImages ? (
+                <span ><ImagePlus size={16} /></span>
+              ) : (<span ><ImageOff size={16} /></span>)}|
               <div className="flex items-center">
                 <MessagesSquare className="w-3 h-3 mr-1" />
                 {item._count.messages}

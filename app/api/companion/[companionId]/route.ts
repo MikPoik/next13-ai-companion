@@ -9,11 +9,11 @@ export async function PATCH(
   { params }: { params: { companionId: string } }
 ) {
 
-  
+
   try {
     const body = await req.json();
     const user = await currentUser();
-    const { src, description, personality, seed, categoryId,isPublic,behaviour,selfiePost,selfiePre,createImages } = body;
+    const { name, src, description, personality, seed, categoryId, isPublic, behaviour, selfiePost, selfiePre, createImages } = body;
 
     if (!params.companionId) {
       return new NextResponse("Companion ID required", { status: 400 });
@@ -27,7 +27,7 @@ export async function PATCH(
       firstName = user.firstName
     }
 
-    if (!src || !description || !personality || !seed || !categoryId) {
+    if (!name || !src || !description || !personality || !seed || !categoryId) {
       return new NextResponse("Missing required fields", { status: 400 });
     };
 
@@ -43,6 +43,7 @@ export async function PATCH(
         userId: user.id,
       },
       data: {
+        name,
         categoryId,
         userId: user.id,
         userName: firstName,
@@ -63,7 +64,7 @@ export async function PATCH(
     console.log("[COMPANION_PATCH]", error);
     return new NextResponse("Internal Error", { status: 500 });
   }
-  
+
 };
 
 export async function DELETE(
@@ -79,7 +80,7 @@ export async function DELETE(
 
     const companion = await prismadb.companion.delete({
       where: {
-        userId:user.id,
+        userId: user.id,
         id: params.companionId
       }
     });

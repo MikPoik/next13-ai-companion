@@ -53,9 +53,9 @@ const formSchema = z.object({
   }),
   selfiePre: z.string().optional(),
   selfiePost: z.string().optional(),
-  model: z.string().min(1,{
+  model: z.string().min(1, {
     message: "model is required",
-  })  
+  })
 });
 
 interface CompanionFormProps {
@@ -81,11 +81,11 @@ export const CompanionForm = ({
       categoryId: undefined,
       packageName: "backend-test-bot",  //steamship package name
       isPublic: true,
-      behaviour:"",
-      selfiePre:"",
-      selfiePost:"",
+      behaviour: "",
+      selfiePre: "",
+      selfiePost: "",
       model: "",
-      createImages:true
+      createImages: true
 
 
     },
@@ -118,7 +118,7 @@ export const CompanionForm = ({
     }
   };
 
-  return ( 
+  return (
     <div className="h-full p-4 space-y-2 max-w-3xl mx-auto">
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 pb-10">
@@ -174,8 +174,8 @@ export const CompanionForm = ({
                   <FormMessage />
                 </FormItem>
               )}
-             
-            />            
+
+            />
             <FormField
               control={form.control}
               name="categoryId"
@@ -215,17 +215,17 @@ export const CompanionForm = ({
                     </FormControl>
                     <SelectContent>
 
-                        <SelectItem key="Llama2" value="Llama2">Llama2 (NSFW content)</SelectItem>
-                        <SelectItem key="GPT3.5" value="GPT3.5">GPT-3.5</SelectItem>
+                      <SelectItem key="Llama2" value="Llama2">Llama2 (NSFW content)</SelectItem>
+                      <SelectItem key="GPT3.5" value="GPT3.5">GPT-3.5</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormDescription>
-                    Select the model for your AI, for NSFW content use LLama2
+                    Select the model for your AI, for NSFW content use LLama2. (Model cannot be changed afterwards)
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
-            />            
+            />
           </div>
           <div className="space-y-2 w-full">
             <div>
@@ -264,7 +264,7 @@ export const CompanionForm = ({
                 <FormMessage />
               </FormItem>
             )}
-          />      
+          />
           <FormField
             name="seed"
             control={form.control}
@@ -277,7 +277,7 @@ export const CompanionForm = ({
                 <FormMessage />
               </FormItem>
             )}
-          />          
+          />
           <div className="space-y-2 w-full">
             <div>
               <h3 className="text-lg font-medium">Image generation settings</h3>
@@ -293,7 +293,7 @@ export const CompanionForm = ({
 
               return (
                 <FormItem>
-                  
+
                   <FormControl>
                     <label>Enable Image generation &nbsp;
                       <input
@@ -301,12 +301,12 @@ export const CompanionForm = ({
                         {...rest} // Spread the rest of the field object into the input element's props
                         checked={value} // Use the value property to set the checked property
                         style={{ width: '14px', height: '14px' }}
-                      />  
+                      />
                     </label>
                   </FormControl>
                   <FormDescription>
-                  (Generated images cost extra tokens)
-                </FormDescription>                  
+                    (Generated images cost extra tokens)
+                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               );
@@ -324,7 +324,7 @@ export const CompanionForm = ({
                 <FormMessage />
               </FormItem>
             )}
-          />    
+          />
           <FormField
             name="selfiePost"
             control={form.control}
@@ -337,7 +337,7 @@ export const CompanionForm = ({
                 <FormMessage />
               </FormItem>
             )}
-          />                        
+          />
           <div className="space-y-1 w-full">
             <div>
               <h3 className="text-lg font-medium">Other settings</h3>
@@ -354,7 +354,7 @@ export const CompanionForm = ({
 
               return (
                 <FormItem>
-                  
+
                   <FormControl>
                     <label>Public &nbsp;
                       <input
@@ -362,18 +362,18 @@ export const CompanionForm = ({
                         {...rest} // Spread the rest of the field object into the input element's props
                         checked={value} // Use the value property to set the checked property
                         style={{ width: '14px', height: '14px' }}
-                      />  
+                      />
                     </label>
                   </FormControl>
                   <FormDescription>
-                  (Other users can talk to the bot)
-                </FormDescription>                  
+                    (Other users can talk to the bot)
+                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               );
             }}
           />
-                    <div className="w-full flex justify-center">
+          <div className="w-full flex justify-center">
             <Button size="lg" disabled={isLoading}>
               {initialData ? "Edit your companion" : "Create your companion"}
               <Wand2 className="w-4 h-4 ml-2" />
@@ -382,5 +382,5 @@ export const CompanionForm = ({
         </form>
       </Form>
     </div>
-   );
+  );
 };
