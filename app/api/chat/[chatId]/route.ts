@@ -6,6 +6,8 @@ import prismadb from "@/lib/prismadb";
 import { UndoIcon } from "lucide-react";
 import axios, { AxiosError } from 'axios';
 
+export const maxDuration = 120; //2 minute timeout
+
 dotenv.config({ path: `.env` });
 
 interface SteamshipApiResponse {
@@ -33,25 +35,27 @@ function roughTokenCount(text: string): number {
 
 async function getSteamshipResponse(
   prompt: string,
-  context_id:string,
-  package_name:string,
-  instance_handle:string,
-  workspace_handle:string,
-  personality:string,
-  name:string,
-  description:string,
-  behaviour:string,
-  selfie_pre:string,
-  selfie_post:string,
-  seed:string,
-  model:string
+  context_id: string,
+  package_name: string,
+  instance_handle: string,
+  workspace_handle: string,
+  personality: string,
+  name: string,
+  description: string,
+  behaviour: string,
+  selfie_pre: string,
+  selfie_post: string,
+  seed: string,
+  model: string,
+  image_model: string,
+  create_images: boolean
 
-  ): Promise<string> {
+): Promise<string> {
   const maxRetryCount = 3; // Maximum number of retry attempts
 
   for (let retryCount = 0; retryCount < maxRetryCount; retryCount++) {
     try {
-      const instance = await Steamship.use(package_name, instance_handle, {llm_model:model}, undefined, true, workspace_handle);
+      const instance = await Steamship.use(package_name, instance_handle, { llm_model: model, create_images: String(create_images) }, undefined, true, workspace_handle);
       const response = await (instance.invoke('prompt', {
         prompt,
         context_id,
@@ -62,21 +66,23 @@ async function getSteamshipResponse(
         selfie_pre,
         selfie_post,
         seed,
-        model
+        model,
+        image_model
       }) as Promise<SteamshipApiResponse>);
       //console.log(response.data);
       const steamshipBlock = response.data;
       const steamshipBlockJSONString = JSON.stringify(steamshipBlock);
       return steamshipBlockJSONString;
     } catch (error) {
-          console.error('Received a error');
-          if (retryCount < maxRetryCount - 1) {
-            // Retry the request after a delay (optional)
-            console.log('Retrying...');
-            await new Promise((resolve) => setTimeout(resolve, 5000)); // Wait for 3 second before retrying
-          } else {
-            throw new Error('Max retry attempts reached');
-          }
+      console.error('Received a error');
+      //console.log(error)
+      if (retryCount < maxRetryCount - 1) {
+        // Retry the request after a delay (optional)
+        console.log('Retrying...');
+        await new Promise((resolve) => setTimeout(resolve, 5000)); // Wait for 3 second before retrying
+      } else {
+        throw new Error('Max retry attempts reached');
+      }
     }
   }
 
@@ -88,7 +94,7 @@ export async function POST(
   request: Request,
   { params }: { params: { chatId: string } }
 ) {
-  
+
   try {
     const { prompt } = await request.json();
     const user = await currentUser();
@@ -100,11 +106,11 @@ export async function POST(
     const balance = await prismadb.userBalance.findUnique({
       where: {
         userId: user.id
-      },       
+      },
     });
     //console.log(balance);
     if (balance) {
-      if (balance.tokenCount > balance.tokenLimit){
+      if (balance.tokenCount > balance.tokenLimit) {
         return NextResponse.json("Message limit exceeded, upgrade to Pro plan for increased limit.");
       }
     }
@@ -140,9 +146,11 @@ export async function POST(
       companion.selfiePre,
       companion.selfiePost,
       companion.seed,
-      companion.model);
+      companion.model,
+      companion.imageModel,
+      companion.createImages);
     const responseBlocks = JSON.parse(steamshipResponse)
-    
+
     //console.log(steamshipResponse)
     var imageTokens = 0;
     var responseLength = 0;
@@ -180,21 +188,21 @@ export async function POST(
         where: {
           userId: user.id
         },
-        update: 
-          {
-            tokenCount: {increment:token_count+imageTokens},
-            messageCount: {increment:1}
-  
-          },
-          create: {
-            userId: user.id,
-            tokenCount:1,
-            messageCount: 1,
-            messageLimit:20,
-            tokenLimit:10000
-          },        
+        update:
+        {
+          tokenCount: { increment: token_count + imageTokens },
+          messageCount: { increment: 1 }
+
+        },
+        create: {
+          userId: user.id,
+          tokenCount: 1,
+          messageCount: 1,
+          messageLimit: 20,
+          tokenLimit: 10000
+        },
       });
-  
+
 
     }
     //console.log(responseBlocks)

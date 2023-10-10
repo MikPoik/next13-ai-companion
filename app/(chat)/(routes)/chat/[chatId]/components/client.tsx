@@ -71,12 +71,13 @@ export const ChatClient = ({
     <div className="flex flex-col h-full p-4 space-y-2">
 
       <ChatHeader companion={companion} />
-      {!isPro && (
-        <Button onClick={proModal.onOpen} size="sm" variant="premium">
-          Upgrade to increase message limit
-          <Sparkles className="h-4 w-4 fill-white text-white ml-2" />
-        </Button>
-      )}
+       {//!isPro && (
+        //<Button onClick={proModal.onOpen} size="sm" variant="premium">
+          //Upgrade to increase message limit
+         // <Sparkles className="h-4 w-4 fill-white text-white ml-2" />
+       // </Button>
+      //)
+       }
       <ChatMessages
         companion={companion}
         isLoading={isLoading}

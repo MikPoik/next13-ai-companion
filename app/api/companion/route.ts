@@ -4,6 +4,8 @@ import { Steamship } from '@steamship/client';
 import prismadb from "@/lib/prismadb";
 import { checkSubscription } from "@/lib/subscription";
 
+export const maxDuration = 120;
+
 function uuidv4() {
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
     var r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
@@ -15,7 +17,7 @@ export async function POST(req: Request) {
   try {
     const body = await req.json();
     const user = await currentUser();
-    const { src, name, description, personality, seed, categoryId, packageName, isPublic, selfiePost, selfiePre, behaviour, model, createImages } = body;
+    const { src, name, description, personality, seed, categoryId, packageName, isPublic, selfiePost, selfiePre, behaviour, model, createImages, imageModel } = body;
 
     if (!user || !user.id) {
       return new NextResponse("Unauthorized", { status: 401 });
@@ -33,9 +35,9 @@ export async function POST(req: Request) {
     //if (!isPro) {
     //  return new NextResponse("Pro subscription required", { status: 403 });
     //}
-
-    const workspace_name = user.id.replace("user_", "").toLowerCase() + "-" + uuidv4().replace(/-/g, "").toLowerCase();
-    const instance_handle = user.id.replace("user_", "").toLowerCase() + "-" + uuidv4().replace(/-/g, "").toLowerCase();
+    const bot_uuid = uuidv4().replace(/-/g, "").toLowerCase();
+    const workspace_name = user.id.replace("user_", "").toLowerCase() + "-" + bot_uuid;
+    const instance_handle = user.id.replace("user_", "").toLowerCase() + "-" + bot_uuid;
 
     var llm_model = "NousResearch/Nous-Hermes-Llama2-13b";
 
@@ -66,10 +68,11 @@ export async function POST(req: Request) {
         selfiePost,
         selfiePre,
         model: llm_model,
-        createImages
+        createImages,
+        imageModel
       }
     });
-    await Steamship.use(packageName, instance_handle, { llm_model: llm_model, create_images: createImages }, undefined, true, workspace_name);
+    await Steamship.use(packageName, instance_handle, { llm_model: llm_model, create_images: String(createImages) }, undefined, true, workspace_name);
 
     return NextResponse.json(companion);
   } catch (error) {

@@ -55,6 +55,9 @@ const formSchema = z.object({
   selfiePost: z.string().optional(),
   model: z.string().min(1, {
     message: "model is required",
+  }),
+  imageModel: z.string().min(1, {
+    message: "imageModel is required",
   })
 });
 
@@ -85,7 +88,8 @@ export const CompanionForm = ({
       selfiePre: "",
       selfiePost: "",
       model: "",
-      createImages: true
+      createImages: true,
+      imageModel: "realistic"
 
 
     },
@@ -220,7 +224,7 @@ export const CompanionForm = ({
                     </SelectContent>
                   </Select>
                   <FormDescription>
-                    Select the model for your AI, for NSFW content use LLama2. (Model cannot be changed afterwards)
+                    Select the model for your AI, for NSFW content use LLama2. (Model version cannot be changed after creation)
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -305,12 +309,37 @@ export const CompanionForm = ({
                     </label>
                   </FormControl>
                   <FormDescription>
-                    (Generated images cost extra tokens)
+                    Generated images cost extra tokens. This option cannot be edited after creation.
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
               );
             }}
+          />
+          <FormField
+            control={form.control}
+            name="imageModel"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Image style</FormLabel>
+                <Select disabled={isLoading} onValueChange={field.onChange} defaultValue={field.value}>
+                  <FormControl>
+                    <SelectTrigger className="bg-background">
+                      <SelectValue defaultValue={field.value} placeholder="Select a image style" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+
+                    <SelectItem key="realistic" value="realistic">Realistic</SelectItem>
+                    <SelectItem key="anime" value="anime">Anime</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormDescription>
+                  Select the style for generated images.
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
           />
           <FormField
             name="selfiePre"

@@ -4,6 +4,8 @@ import { Steamship } from '@steamship/client';
 import prismadb from "@/lib/prismadb";
 import { checkSubscription } from "@/lib/subscription";
 
+export const maxDuration = 120;
+
 export async function PATCH(
   req: Request,
   { params }: { params: { companionId: string } }
@@ -13,7 +15,7 @@ export async function PATCH(
   try {
     const body = await req.json();
     const user = await currentUser();
-    const { name, src, description, personality, seed, categoryId, isPublic, behaviour, selfiePost, selfiePre, createImages } = body;
+    const { name, src, description, personality, seed, categoryId, isPublic, behaviour, selfiePost, selfiePre, imageModel } = body;
 
     if (!params.companionId) {
       return new NextResponse("Companion ID required", { status: 400 });
@@ -55,7 +57,7 @@ export async function PATCH(
         behaviour,
         selfiePost,
         selfiePre,
-        createImages
+        imageModel
       }
     });
 
