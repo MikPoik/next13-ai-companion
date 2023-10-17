@@ -15,6 +15,14 @@ model Category {
   companions Companion[]
 }
 
+model Voice {
+  id         String      @id @default(uuid())
+  name       String
+  voice_id   String      
+  sample_url String
+  companions Companion[]
+}
+
 model Companion {
   id             String    @id @default(uuid())
   userId         String
@@ -37,7 +45,9 @@ model Companion {
   imageModel     String   @default("realistic")
   createImages   Boolean  @default(true)
   isPublic       Boolean  @default(true)
+  voiceId        String   @default("none")
   category       Category  @relation(fields: [categoryId], references: [id])
+  voice          Voice  @relation(fields: [voiceId], references: [id])
   messages       Message[]
 
   @@index([categoryId])

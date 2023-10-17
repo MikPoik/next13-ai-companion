@@ -1,12 +1,12 @@
 "use client";
-
+import React, { useState } from "react"; // Import React and useState
 import * as z from "zod";
 import axios from "axios";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { Wand2 } from "lucide-react";
-import { Category, Companion } from "@prisma/client";
+import { Category, Companion, Voice } from "@prisma/client";
 
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
@@ -58,21 +58,41 @@ const formSchema = z.object({
   }),
   imageModel: z.string().min(1, {
     message: "imageModel is required",
-  })
+  }),
+  voiceId: z.string().optional()
 });
 
 interface CompanionFormProps {
   categories: Category[];
+  voices: Voice[];
   initialData: Companion | null;
 };
 
 export const CompanionForm = ({
   categories,
+  voices,
   initialData
 }: CompanionFormProps) => {
   const { toast } = useToast();
   const router = useRouter();
+  const [selectedVoiceId, setSelectedVoiceId] = useState(initialData?.voiceId || 'none');
+  const [sampleUrl, setSampleUrl] = useState(""); // State variable to store the sample URL
 
+  const handleVoiceChange = (value: string) => {
+    setSelectedVoiceId(value);
+    // Find the selected voice by ID
+    const selectedVoice = voices.find((voice) => voice.voice_id === value);
+    if (selectedVoice) {
+      setSampleUrl(selectedVoice.sample_url); // Update the sample URL
+    }
+  };
+
+  const playAudio = () => {
+    if (sampleUrl) {
+      const audio = new Audio(sampleUrl);
+      audio.play();
+    }
+  };;
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: initialData || {
@@ -89,7 +109,8 @@ export const CompanionForm = ({
       selfiePost: "",
       model: "",
       createImages: true,
-      imageModel: "realistic"
+      imageModel: "realistic",
+      voiceId: 'none'
 
 
     },
@@ -121,7 +142,19 @@ export const CompanionForm = ({
       });
     }
   };
-
+  // Define CSS styles for the button
+  const buttonStyle = {
+    padding: "4px 12px",
+    backgroundColor: "#fff",
+    color: "#000",
+    border: "1px solid #fff",
+    borderRadius: "6px",
+    cursor: "pointer",
+  };
+  const selectContentStyle = {
+    maxHeight: "200px", // Adjust the maximum height as needed
+    overflowY: "auto",
+  };
   return (
     <div className="h-full p-4 space-y-2 max-w-3xl mx-auto">
       <Form {...form}>
@@ -373,7 +406,51 @@ export const CompanionForm = ({
             </div>
             <Separator className="bg-primary/10" />
           </div>
-
+          <FormField
+            control={form.control}
+            name="voiceId"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Voice</FormLabel>
+                <div className="flex items-center">
+                  <Select
+                    disabled={isLoading}
+                    onValueChange={(value) => {
+                      field.onChange(value);
+                      handleVoiceChange(value);
+                    }}
+                    defaultValue={field.value}
+                  >
+                    <FormControl>
+                      <SelectTrigger className="bg-background">
+                        <SelectValue defaultValue={field.value} placeholder="Select a voice to use" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent style={selectContentStyle} >
+                      {voices.map((voice) => (
+                        <SelectItem key={voice.id} value={voice.id}>
+                          {voice.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <button // Use a plain HTML button with type="button"
+                    type="button"
+                    className="btn-sm" // Add the appropriate button class
+                    style={buttonStyle}
+                    onClick={() => playAudio()} // Call playAudio directly without arguments // Call playAudio directly
+                    disabled={isLoading || selectedVoiceId === "none" || !sampleUrl}
+                  >
+                    Play
+                  </button>
+                </div>
+                <FormDescription>
+                  Select a voice for your AI (&quot;none&quot; means voice is disabled)
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
           <FormField
             name="isPublic"
             control={form.control}

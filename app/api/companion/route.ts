@@ -17,7 +17,7 @@ export async function POST(req: Request) {
   try {
     const body = await req.json();
     const user = await currentUser();
-    const { src, name, description, personality, seed, categoryId, packageName, isPublic, selfiePost, selfiePre, behaviour, model, createImages, imageModel } = body;
+    const { src, name, description, personality, seed, categoryId, packageName, isPublic, selfiePost, selfiePre, behaviour, model, createImages, imageModel, voiceId } = body;
 
     if (!user || !user.id) {
       return new NextResponse("Unauthorized", { status: 401 });
@@ -50,6 +50,8 @@ export async function POST(req: Request) {
     const behaviour_string = behaviour.replace(/{{|{|}|}}/g, "");
     const description_string = description.replace(/{{|{|}|}}/g, "");
 
+    await Steamship.use(packageName, instance_handle, { llm_model: llm_model, create_images: String(createImages) }, undefined, true, workspace_name);
+
     const companion = await prismadb.companion.create({
       data: {
         categoryId,
@@ -69,10 +71,11 @@ export async function POST(req: Request) {
         selfiePre,
         model: llm_model,
         createImages,
-        imageModel
+        imageModel,
+        voiceId
       }
     });
-    await Steamship.use(packageName, instance_handle, { llm_model: llm_model, create_images: String(createImages) }, undefined, true, workspace_name);
+
 
     return NextResponse.json(companion);
   } catch (error) {

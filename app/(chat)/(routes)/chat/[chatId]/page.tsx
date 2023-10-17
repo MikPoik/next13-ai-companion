@@ -16,7 +16,7 @@ const ChatIdPage = async ({
   params
 }: ChatIdPageProps) => {
   const { userId } = auth();
-
+  
   if (!userId) {
     return redirectToSignIn();
   }

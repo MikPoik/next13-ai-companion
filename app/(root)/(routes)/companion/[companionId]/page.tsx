@@ -21,7 +21,7 @@ const CompanionIdPage = async ({
     return redirectToSignIn();
   }
 
-  const validSubscription = await checkSubscription();
+  //const validSubscription = await checkSubscription();
 
   //if (!validSubscription) {
   //  return redirect("/");
@@ -35,9 +35,10 @@ const CompanionIdPage = async ({
   });
 
   const categories = await prismadb.category.findMany();
+  const voices = await prismadb.voice.findMany();
   //return redirect("/");
-  return ( 
-    <CompanionForm initialData={companion} categories={categories} />
+  return (
+    <CompanionForm initialData={companion} categories={categories} voices={voices} />
   );
 }
 

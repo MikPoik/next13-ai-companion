@@ -1,7 +1,7 @@
 import Image from "next/image"
 import Link from "next/link"
 import { Companion } from "@prisma/client"
-import { MessagesSquare, ImagePlus,ImageOff,Camera,CameraOff } from "lucide-react";
+import { MessagesSquare, ImagePlus, ImageOff, Camera, CameraOff, EyeOff, Eye, ShieldOff, Shield, VolumeX, Volume2 } from "lucide-react";
 
 import { Card, CardFooter, CardHeader } from "@/components/ui/card"
 
@@ -55,28 +55,34 @@ export const Companions = ({
               </p>
             </CardHeader>
             <CardFooter className="flex items-center justify-between text-xs text-muted-foreground">
-              {item.model === 'NousResearch/Nous-Hermes-Llama2-13b' && (
-                <p >NSFW</p>
-              )}
+              {item.model === 'NousResearch/Nous-Hermes-Llama2-13b' ? (
+                <span title="NSFW content enabled" ><ShieldOff size={16} /></span>
+              ) : (
+                <span title="NSFW content disabled" ><Shield size={16} /></span>
+              )
+              }
               |
               {item.isPublic ? (
-                <span>Public</span>
+                <span title="Bot is public"><Eye size={16} /></span>
               ) : (
-                <span>Private</span>
+                <span title="Bot is private"><EyeOff size={16} /></span>
               )}
               |
               {item.createImages ? (
-                <span ><ImagePlus size={16} /></span>
-              ) : (<span ><ImageOff size={16} /></span>)}|
-              <div className="flex items-center">
-                <MessagesSquare className="w-3 h-3 mr-1" />
-                {item._count.messages}
-              </div>
+                <span title="Image generation enabled"><ImagePlus size={16} /></span>
+              ) : (<span title="Image generation disabled" ><ImageOff size={16} /></span>)}
               |
+              {item.voiceId === 'none' ? (
+                <span title="Voice disabled"><VolumeX size={16} /></span>
+              ) : (<span title="Voice enabled" ><Volume2 size={16} /></span>)}|
+              <div className="flex items-center">
+                <span title="Total messages" ><MessagesSquare className="w-3 h-3 mr-1" /></span>{item._count.messages}
+              </div>
             </CardFooter>
           </Link>
         </Card>
-      ))}
-    </div>
+      ))
+      }
+    </div >
   )
 }

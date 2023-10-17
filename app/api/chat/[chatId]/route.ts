@@ -48,7 +48,8 @@ async function getSteamshipResponse(
   seed: string,
   model: string,
   image_model: string,
-  create_images: boolean
+  create_images: boolean,
+  voice_id: string
 
 ): Promise<string> {
   const maxRetryCount = 3; // Maximum number of retry attempts
@@ -67,7 +68,8 @@ async function getSteamshipResponse(
         selfie_post,
         seed,
         model,
-        image_model
+        image_model,
+        voice_id
       }) as Promise<SteamshipApiResponse>);
       //console.log(response.data);
       const steamshipBlock = response.data;
@@ -148,13 +150,17 @@ export async function POST(
       companion.seed,
       companion.model,
       companion.imageModel,
-      companion.createImages);
-    const responseBlocks = JSON.parse(steamshipResponse)
+      companion.createImages,
+      companion.voiceId);
+    
+    const responseBlocks = JSON.parse(steamshipResponse);
 
     //console.log(steamshipResponse)
     var imageTokens = 0;
+    var voiceTokens = 0;
     var responseLength = 0;
     var responseText = "";
+    var hasAudio = 0;
     for (const block of responseBlocks) {
       //console.log(block);
       if ((block.text && block.text.length > 1)) {
@@ -162,6 +168,8 @@ export async function POST(
         responseText += block.text
       } else if (block.mimeType.startsWith("image")) {
         imageTokens += 500;
+      } else if (block.mimeType.startsWith("audio")) {
+        hasAudio = 1;
       }
     }
     //console.log(responseLength);
@@ -182,15 +190,21 @@ export async function POST(
         }
       });
 
-      const token_count = roughTokenCount(responseText)
-      //console.log(token_count);
+      const token_count = roughTokenCount(responseText); //should we calculate with tiktoken?
+      
+      //console.log(token_count);      
+      if (hasAudio == 1) {
+        voiceTokens = token_count;
+        voiceTokens = voiceTokens / 4;
+      }
+      
       await prismadb.userBalance.upsert({
         where: {
           userId: user.id
         },
         update:
         {
-          tokenCount: { increment: token_count + imageTokens },
+          tokenCount: { increment: token_count + imageTokens + voiceTokens },
           messageCount: { increment: 1 }
 
         },
