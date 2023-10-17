@@ -151,7 +151,7 @@ export const CompanionForm = ({
     borderRadius: "6px",
     cursor: "pointer",
   };
-  const selectContentStyle = {
+  const selectContentStyle: React.CSSProperties = {
     maxHeight: "200px", // Adjust the maximum height as needed
     overflowY: "auto",
   };
