@@ -197,7 +197,168 @@ async function seedVoices() {
           voice_id: '8ca72d29-f9ec-4df8-8ad0-de7a1c5790b0',
           sample_url: 'https://storage.googleapis.com/coqui-samples/XTTS_Personalities_Meet_the_Gang_Ilkin%20Urbano_3f627f80-b679-41a1-bd04-eacc924f12b0_.wav'
         },
-
+        {
+          "id": "ab86648c-68d3-4b03-a6dc-f4a78cf527d5",
+          "name": "Kazuhiko Atallah-American-Male",
+          "voice_id": "ab86648c-68d3-4b03-a6dc-f4a78cf527d5",
+          "sample_url": "https://storage.googleapis.com/coqui-samples/XTTS_Personalities_Meet_the_Gang_Kazuhiko%20Atallah_3f627f80-b679-41a1-bd04-eacc924f12b0_.wav"
+        },
+        {
+          "id": "92202dab-e5dd-425e-a2c7-fcc924b98948",
+          "name": "Kumar Dahl-British-Male",
+          "voice_id": "92202dab-e5dd-425e-a2c7-fcc924b98948",
+          "sample_url": "https://storage.googleapis.com/coqui-samples/XTTS_Personalities_Meet_the_Gang_Kumar%20Dahl_3f627f80-b679-41a1-bd04-eacc924f12b0_.wav"
+        },
+        {
+          "id": "9d5631a6-1a43-426d-a639-4bf54ae58d27",
+          "name": "Lidiya Szekeres-British-Female",
+          "voice_id": "9d5631a6-1a43-426d-a639-4bf54ae58d27",
+          "sample_url": "https://storage.googleapis.com/coqui-samples/XTTS_Personalities_Meet_the_Gang_Lidiya%20Szekeres_3f627f80-b679-41a1-bd04-eacc924f12b0_.wav"
+        },
+        {
+          "id": "a8327a5b-f672-487c-9ebc-565d7d8ac2ce",
+          "name": "Lilya Stainthorpe-British-Female",
+          "voice_id": "a8327a5b-f672-487c-9ebc-565d7d8ac2ce",
+          "sample_url": "https://storage.googleapis.com/coqui-samples/XTTS_Personalities_Meet_the_Gang_Lilya%20Stainthorpe_3f627f80-b679-41a1-bd04-eacc924f12b0_.wav"
+        },
+        {
+          "id": "e1a51d31-0f2f-4532-98d4-7b73e2481d06",
+          "name": "Ludvig Milivoj-American-Male",
+          "voice_id": "e1a51d31-0f2f-4532-98d4-7b73e2481d06",
+          "sample_url": "https://storage.googleapis.com/coqui-samples/XTTS_Personalities_Meet_the_Gang_Ludvig%20Milivoj_3f627f80-b679-41a1-bd04-eacc924f12b0_.wav"
+        },
+        {
+          "id": "99a8fa8b-db80-4278-af6e-2bb47e09fa93",
+          "name": "Luis Moray-American-Male",
+          "voice_id": "99a8fa8b-db80-4278-af6e-2bb47e09fa93",
+          "sample_url": "https://storage.googleapis.com/coqui-samples/XTTS_Personalities_Meet_the_Gang_Luis%20Moray_3f627f80-b679-41a1-bd04-eacc924f12b0_.wav"
+        },
+        {
+          "id": "dd78e7b7-5114-486d-9e4e-3c4e1843df7d",
+          "name": "Maja Ruoho-British-Female",
+          "voice_id": "dd78e7b7-5114-486d-9e4e-3c4e1843df7d",
+          "sample_url": "https://storage.googleapis.com/coqui-samples/XTTS_Personalities_Meet_the_Gang_Maja%20Ruoho_3f627f80-b679-41a1-bd04-eacc924f12b0_.wav"
+        },
+        {
+          "id": "5067963f-10e6-4003-b9d2-f52993669bcc",
+          "name": "Marcos Rudaski-American-Male",
+          "voice_id": "5067963f-10e6-4003-b9d2-f52993669bcc",
+          "sample_url": "https://storage.googleapis.com/coqui-samples/XTTS_Personalities_Meet_the_Gang_Maja%20Ruoho_3f627f80-b679-41a1-bd04-eacc924f12b0_.wav"
+        },
+        {
+          "id": "71c6c3eb-98ca-4a05-8d6b-f8c2b5f9f3a3",
+          "name": "Narelle Moon-American-Female",
+          "voice_id": "71c6c3eb-98ca-4a05-8d6b-f8c2b5f9f3a3",
+          "sample_url": "https://storage.googleapis.com/coqui-samples/XTTS_Personalities_Meet_the_Gang_Narelle%20Moon_3f627f80-b679-41a1-bd04-eacc924f12b0_.wav"
+        },
+        {
+          "id": "7be35898-4c5a-4afd-b6fb-1963a3cc9d0f",
+          "name": "Nova Hogarth-American-Female",
+          "voice_id": "7be35898-4c5a-4afd-b6fb-1963a3cc9d0f",
+          "sample_url": "https://storage.googleapis.com/coqui-samples/XTTS_Personalities_Meet_the_Gang_Nova%20Hogarth_3f627f80-b679-41a1-bd04-eacc924f12b0_.wav"
+        },
+        {
+          "id": "24fb1414-3398-458e-9286-29e06d883b33",
+          "name": "Rosemary Okafor-American-Female",
+          "voice_id": "24fb1414-3398-458e-9286-29e06d883b33",
+          "sample_url": "https://storage.googleapis.com/coqui-samples/XTTS_Personalities_Meet_the_Gang_Rosemary%20Okafor_3f627f80-b679-41a1-bd04-eacc924f12b0_.wav"
+        },
+        {
+          "id": "67c19643-429d-4cef-bb30-bf2a84ba1c84",
+          "name": "Royston Min-British-Male",
+          "voice_id": "67c19643-429d-4cef-bb30-bf2a84ba1c84",
+          "sample_url": "https://storage.googleapis.com/coqui-samples/XTTS_Personalities_Meet_the_Gang_Royston%20Min_3f627f80-b679-41a1-bd04-eacc924f12b0_.wav"
+        },
+        {
+          "id": "ebe2db86-62a6-49a1-907a-9a1360d4416e",
+          "name": "Sofia Hellen-British-Female",
+          "voice_id": "ebe2db86-62a6-49a1-907a-9a1360d4416e",
+          "sample_url": "https://storage.googleapis.com/coqui-samples/XTTS_Personalities_Meet_the_Gang_Sofia%20Hellen_3f627f80-b679-41a1-bd04-eacc924f12b0_.wav"
+        },
+        {
+          "id": "b082061d-695e-4d1b-a8f9-b5c4cb8e6e2a",
+          "name": "Suad Qasim-British-Female",
+          "voice_id": "b082061d-695e-4d1b-a8f9-b5c4cb8e6e2a",
+          "sample_url": "https://storage.googleapis.com/coqui-samples/XTTS_Personalities_Meet_the_Gang_Suad%20Qasim_3f627f80-b679-41a1-bd04-eacc924f12b0_.wav"
+        },
+        {
+          "id": "8f3b11ce-ed66-4752-a705-c05fe381a587",
+          "name": "Szofi Granger-American-Female",
+          "voice_id": "8f3b11ce-ed66-4752-a705-c05fe381a587",
+          "sample_url": "https://storage.googleapis.com/coqui-samples/XTTS_Personalities_Meet_the_Gang_Szofi%20Granger_3f627f80-b679-41a1-bd04-eacc924f12b0_.wav"
+        },
+        {
+          "id": "fd613b67-e9b8-45ae-8702-a34ff65f1b78",
+          "name": "Tammie Ema-American-Female",
+          "voice_id": "fd613b67-e9b8-45ae-8702-a34ff65f1b78",
+          "sample_url": "https://storage.googleapis.com/coqui-samples/XTTS_Personalities_Meet_the_Gang_Tammie%20Ema_3f627f80-b679-41a1-bd04-eacc924f12b0_.wav"
+        },
+        {
+          "id": "9145d03c-2da9-4893-8c92-ee9480e75830",
+          "name": "Tammy Grit-British-Female",
+          "voice_id": "9145d03c-2da9-4893-8c92-ee9480e75830",
+          "sample_url": "https://storage.googleapis.com/coqui-samples/XTTS_Personalities_Meet_the_Gang_Tammy%20Grit_3f627f80-b679-41a1-bd04-eacc924f12b0_.wav"
+        },
+        {
+          "id": "f6d81c82-1376-4dd5-9825-cd9f353cbfb9",
+          "name": "Tanja Adelina-British-Female",
+          "voice_id": "f6d81c82-1376-4dd5-9825-cd9f353cbfb9",
+          "sample_url": "https://storage.googleapis.com/coqui-samples/XTTS_Personalities_Meet_the_Gang_Tanja%20Adelina_3f627f80-b679-41a1-bd04-eacc924f12b0_.wav"
+        },
+        {
+          "id": "d4b43fc7-6e16-4664-b9ec-97246f505d8d",
+          "name": "Torcull Diarmuid-American-Male",
+          "voice_id": "d4b43fc7-6e16-4664-b9ec-97246f505d8d",
+          "sample_url": "https://storage.googleapis.com/coqui-samples/XTTS_Personalities_Meet_the_Gang_Torcull%20Diarmuid_3f627f80-b679-41a1-bd04-eacc924f12b0_.wav"
+        },
+        {
+          "id": "ff850b82-81e2-410d-be1f-ed127dc151f0",
+          "name": "Uta Obando-British-Female",
+          "voice_id": "ff850b82-81e2-410d-be1f-ed127dc151f0",
+          "sample_url": "https://storage.googleapis.com/coqui-samples/XTTS_Personalities_Meet_the_Gang_Uta%20Obando_3f627f80-b679-41a1-bd04-eacc924f12b0_.wav"
+        },
+        {
+          "id": "c791b5b5-0558-42b8-bb0b-602ac5efc0b9",
+          "name": "Viktor Eka-British-Male",
+          "voice_id": "c791b5b5-0558-42b8-bb0b-602ac5efc0b9",
+          "sample_url": "https://storage.googleapis.com/coqui-samples/XTTS_Personalities_Meet_the_Gang_Viktor%20Eka_3f627f80-b679-41a1-bd04-eacc924f12b0_.wav"
+        },
+        {
+          "id": "d2bd7ccb-1b65-4005-9578-32c4e02d8ddf",
+          "name": "Viktor Menelaos-British-Male",
+          "voice_id": "d2bd7ccb-1b65-4005-9578-32c4e02d8ddf",
+          "sample_url": "https://storage.googleapis.com/coqui-samples/XTTS_Personalities_Meet_the_Gang_Viktor%20Menelaos_3f627f80-b679-41a1-bd04-eacc924f12b0_.wav"
+        },
+        {
+          "id": "cb4f835e-7f61-4b8c-a0f6-f059bbf6f583",
+          "name": "Vjollca Johnnie-British-Female",
+          "voice_id": "cb4f835e-7f61-4b8c-a0f6-f059bbf6f583",
+          "sample_url": "https://storage.googleapis.com/coqui-samples/XTTS_Personalities_Meet_the_Gang_Vjollca%20Johnnie_3f627f80-b679-41a1-bd04-eacc924f12b0_.wav"
+        },
+        {
+          "id": "0614364f-457b-4622-b02e-3dd4ad7941c4",
+          "name": "Wulf Carlevaro-American-Male",
+          "voice_id": "0614364f-457b-4622-b02e-3dd4ad7941c4",
+          "sample_url": "https://storage.googleapis.com/coqui-samples/XTTS_Personalities_Meet_the_Gang_Wulf%20Carlevaro_3f627f80-b679-41a1-bd04-eacc924f12b0_.wav"
+        },
+        {
+          "id": "c1c04ef0-7c10-4174-b6ce-9dcdf37bc63b",
+          "name": "Xavier Hayasaka-British-Male",
+          "voice_id": "c1c04ef0-7c10-4174-b6ce-9dcdf37bc63b",
+          "sample_url": "https://storage.googleapis.com/coqui-samples/XTTS_Personalities_Meet_the_Gang_Xavier%20Hayasaka_3f627f80-b679-41a1-bd04-eacc924f12b0_.wav"
+        },
+        {
+          "id": "fc9917ef-8f32-418e-9254-e535c0c6df3d",
+          "name": "Zacharie Aimilios-American-Male",
+          "voice_id": "fc9917ef-8f32-418e-9254-e535c0c6df3d",
+          "sample_url": "https://storage.googleapis.com/coqui-samples/XTTS_Personalities_Meet_the_Gang_Zacharie%20Aimilios_3f627f80-b679-41a1-bd04-eacc924f12b0_.wav"
+        },
+        {
+          "id": "64b58ac0-54d1-4aae-8344-c52f3dfe2c9a",
+          "name": "Zofija Kendrick-American-Female",
+          "voice_id": "64b58ac0-54d1-4aae-8344-c52f3dfe2c9a",
+          "sample_url": "https://storage.googleapis.com/coqui-samples/XTTS_Personalities_Meet_the_Gang_Zofija%20Kendrick_3f627f80-b679-41a1-bd04-eacc924f12b0_.wav"
+        }
       ],
     });
   } catch (error) {
