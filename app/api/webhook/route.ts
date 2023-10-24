@@ -55,7 +55,7 @@ export async function POST(req: Request) {
           tokenCount: 0,
           messageCount: 0,
           messageLimit:1000,
-          tokenLimit:10000          
+          tokenLimit:100000          
 
         },
         create: {
@@ -63,7 +63,7 @@ export async function POST(req: Request) {
           tokenCount:0,
           messageCount: 0,
           messageLimit:1000,
-          tokenLimit:10000
+          tokenLimit:100000
         },        
     });    
   }
@@ -94,7 +94,7 @@ export async function POST(req: Request) {
           tokenCount: 0,
           messageCount: 0,
           messageLimit:7500,
-          tokenLimit:10000          
+          tokenLimit:100000          
 
         },
         create: {
@@ -102,7 +102,7 @@ export async function POST(req: Request) {
           tokenCount:0,
           messageCount: 0,
           messageLimit:7500,
-          tokenLimit:10000
+          tokenLimit:100000
         },        
     });        
   }
