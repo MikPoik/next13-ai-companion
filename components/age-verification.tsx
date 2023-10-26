@@ -32,7 +32,7 @@ export const AgeVerification = () => {
         }
     };
 
-    const containerStyle = {
+    const containerStyle: React.CSSProperties = {
         position: 'fixed',
         top: 0,
         left: 0,
@@ -46,7 +46,7 @@ export const AgeVerification = () => {
         zIndex: isConfirmed === false ? 999 : -999, // Set z-index conditionally
     };
 
-    const contentStyle = {
+    const contentStyle: React.CSSProperties = {
         backgroundColor: 'rgb(38, 38, 38)', // Grey background for the age verification box
         color: '#fff', // White text color
         padding: '20px',
@@ -54,7 +54,7 @@ export const AgeVerification = () => {
         textAlign: 'center',
     };
 
-    const buttonStyle = {
+    const buttonStyle: React.CSSProperties = {
         backgroundColor: '#006300', // Green button background
         color: '#fff', // White button text color
         padding: '10px 20px',
