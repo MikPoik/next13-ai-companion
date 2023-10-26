@@ -70,7 +70,7 @@ export const AgeVerification = () => {
                 <div style={contentStyle}>
                     <h2>Are you over 18 years old?</h2>
                     <button style={buttonStyle} onClick={() => handleConfirmation(true)}>
-                        Confirm
+                        Yes, I am over 18.
                     </button>
                 </div>
             )}

@@ -16,7 +16,6 @@ Features:
 - Server error handling using react-toast
 - Page loading state
 - Stripe monthly subscription
-- Free tier with API limiting, currently Upstash used only for rate limit
 - How to write POST, DELETE, and GET routes in route handlers (app/api)
 - How to fetch data in server react components by directly accessing database (WITHOUT API! like Magic!)
 - How to handle relations between Server and Child components!

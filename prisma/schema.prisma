@@ -83,6 +83,8 @@ model UserBalance {
   messageCount Int    @default(0)
   messageLimit Int    @default(0)
   tokenLimit   Int    @default(0)
+  firstMessage DateTime?
+  lastMessage  DateTime?
 }
 
 enum Role {

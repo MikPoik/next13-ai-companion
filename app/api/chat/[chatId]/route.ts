@@ -200,7 +200,7 @@ export async function POST(
                 voiceTokens = token_count;
                 voiceTokens = voiceTokens / 4;
             }
-
+            const currentDateTime = new Date().toISOString();
             await prismadb.userBalance.upsert({
                 where: {
                     userId: user.id
@@ -208,7 +208,8 @@ export async function POST(
                 update:
                 {
                     tokenCount: { increment: token_count + imageTokens + voiceTokens },
-                    messageCount: { increment: 1 }
+                    messageCount: { increment: 1 },
+                    lastMessage: currentDateTime
 
                 },
                 create: {
@@ -216,7 +217,8 @@ export async function POST(
                     tokenCount: 1,
                     messageCount: 1,
                     messageLimit: 20,
-                    tokenLimit: 10000
+                    tokenLimit: 10000,
+                    firstMessage: currentDateTime,
                 },
             });
 
