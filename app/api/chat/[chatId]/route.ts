@@ -5,10 +5,11 @@ import { MimeTypes, Steamship } from '@steamship/client';
 import prismadb from "@/lib/prismadb";
 import { UndoIcon } from "lucide-react";
 import axios, { AxiosError } from 'axios';
-
-export const maxDuration = 120; //2 minute timeout
-
 dotenv.config({ path: `.env` });
+
+export const maxDuration = process.env.VERCEL_FUNCTION_TIMEOUT || 120; //2 minute timeout
+
+
 
 interface SteamshipApiResponse {
     data: SteamshipBlock[];

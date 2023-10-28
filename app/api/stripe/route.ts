@@ -4,8 +4,11 @@ import { NextResponse } from "next/server";
 import prismadb from "@/lib/prismadb";
 import { stripe } from "@/lib/stripe";
 import { absoluteUrl } from "@/lib/utils";
+import dotenv from "dotenv";
+dotenv.config({ path: `.env` });
 
-export const maxDuration = 60;
+export const maxDuration = process.env.VERCEL_FUNCTION_TIMEOUT || 60;
+
 
 const settingsUrl = absoluteUrl("/settings");
 

@@ -6,7 +6,10 @@ import prismadb from "@/lib/prismadb"
 import { stripe } from "@/lib/stripe"
 import { UserButton } from "@clerk/nextjs"
 
-export const maxDuration = 60;
+import dotenv from "dotenv";
+dotenv.config({ path: `.env` });
+
+export const maxDuration = process.env.VERCEL_FUNCTION_TIMEOUT || 60;
 
 export async function POST(req: Request) {
   const body = await req.text()
