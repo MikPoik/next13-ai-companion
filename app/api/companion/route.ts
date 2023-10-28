@@ -6,7 +6,8 @@ import { checkSubscription } from "@/lib/subscription";
 import dotenv from "dotenv";
 dotenv.config({ path: `.env` });
 
-export const maxDuration = process.env.VERCEL_FUNCTION_TIMEOUT || 120;
+const env_maxDuration = process.env.VERCEL_FUNCTION_TIMEOUT || '120';
+export const maxDuration = parseInt(env_maxDuration, 10) //2 minute timeout
 
 function uuidv4() {
     return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
