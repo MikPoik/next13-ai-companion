@@ -24,6 +24,10 @@ export const AgeVerification = () => {
 
             // Save the state to local storage when the user selects "Yes"
             localStorage.setItem('age-verification-state', 'true');
+            // Use the window object to refresh the page
+            if (typeof window !== 'undefined') {
+                window.location.reload();
+            }
         } else {
             setIsConfirmed(false);
 

@@ -7,8 +7,8 @@ import { UndoIcon } from "lucide-react";
 import axios, { AxiosError } from 'axios';
 dotenv.config({ path: `.env` });
 
-const env_maxDuration = process.env.VERCEL_FUNCTION_TIMEOUT || '120';
-export const maxDuration = parseInt(env_maxDuration, 10) //2 minute timeout
+
+export const maxDuration = 120; //2 minute timeout
 
 
 

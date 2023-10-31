@@ -7,8 +7,7 @@ import { absoluteUrl } from "@/lib/utils";
 import dotenv from "dotenv";
 dotenv.config({ path: `.env` });
 
-const env_maxDuration = process.env.VERCEL_FUNCTION_TIMEOUT || '60';
-export const maxDuration = parseInt(env_maxDuration, 10) //2 minute timeout
+const maxDuration = 60;
 
 
 const settingsUrl = absoluteUrl("/settings");

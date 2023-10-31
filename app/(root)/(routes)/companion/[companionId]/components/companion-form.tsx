@@ -12,14 +12,16 @@ import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, For
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { ImageUpload } from "@/components/image-upload";
+//import { ImageUpload } from "@/components/image-upload";
 import { useToast } from "@/components/ui/use-toast";
 import { Separator } from "@/components/ui/separator";
 import { Select, SelectContent, SelectItem, SelectValue, SelectTrigger } from "@/components/ui/select";
+import { BotAvatarForm } from "@/components/bot-avatar-form";
 
 
 const PREAMBLE = `Your personality can be described as ...`;
 const PREAMBLE_BEHAVIOUR = `You behave like ...`;
+const PREAMBLE_BACKSTORY = `relevant details and facts for bot ...`;
 const PREAMBLE_SELFIE_PRE = `describe your character in detail ...`;
 const PREAMBLE_SELFIE_POST = `describe image details and effects ...`;
 
@@ -30,27 +32,30 @@ const formSchema = z.object({
     name: z.string().min(1, {
         message: "Name is required.",
     }),
-    description: z.string().min(1, {
-        message: "Description is required.",
-    }),
+    description: z.string()
+        .min(1, {
+            message: "Description is required.",
+        })
+        .max(50, { message: "Description is too long" }),
     personality: z.string().min(1, {
         message: "Personality require at least 200 characters."
     }),
     seed: z.string().min(1, {
         message: "Seed requires at least 200 characters."
     }),
-    src: z.string().min(1, {
-        message: "Image is required."
-    }),
+    src: z.string().optional(),
     categoryId: z.string().min(1, {
         message: "Category is required",
     }),
     packageName: z.string().optional(),
     isPublic: z.boolean().optional(),
     createImages: z.boolean().optional(),
-    behaviour: z.string().min(0, {
-        message: "Behaviour is required",
-    }),
+    behaviour: z.string().optional(),
+    backstory: z.string().transform((value: string) => value.trim()) // Custom validation function to trim the string
+        .refine((value: string) => value.length <= 3000, {
+            message: "Backstory is too long",
+        })
+        .optional(),
     selfiePre: z.string().optional(),
     selfiePost: z.string().optional(),
     model: z.string().min(1, {
@@ -59,7 +64,8 @@ const formSchema = z.object({
     imageModel: z.string().min(1, {
         message: "imageModel is required",
     }),
-    voiceId: z.string().optional()
+    voiceId: z.string().optional(),
+    regenerateImage: z.boolean().optional()
 });
 
 interface CompanionFormProps {
@@ -110,7 +116,9 @@ export const CompanionForm = ({
             model: "",
             createImages: true,
             imageModel: "realistic",
-            voiceId: 'none'
+            voiceId: 'none',
+            backstory: "",
+            regenerateImage: false,
 
 
         },
@@ -173,8 +181,11 @@ export const CompanionForm = ({
                         render={({ field }) => (
                             <FormItem className="flex flex-col items-center justify-center space-y-4 col-span-2">
                                 <FormControl>
-                                    <ImageUpload disabled={isLoading} onChange={field.onChange} value={field.value} />
+                                    <BotAvatarForm disabled={isLoading} onChange={field.onChange} value={field.value} />
                                 </FormControl>
+                                <FormDescription>
+                                    Image is generated from pre/post-selfie prompts.
+                                </FormDescription>
                                 <FormMessage />
                             </FormItem>
                         )}
@@ -252,8 +263,8 @@ export const CompanionForm = ({
                                         </FormControl>
                                         <SelectContent>
 
-                                            <SelectItem key="Llama2" value="Llama2">Llama2 (NSFW content)</SelectItem>
-                                            <SelectItem key="GPT3.5" value="GPT3.5">GPT-3.5</SelectItem>
+                                            <SelectItem key="NousResearch/Nous-Hermes-Llama2-13b" value="NousResearch/Nous-Hermes-Llama2-13b">Llama2 (NSFW content)</SelectItem>
+                                            <SelectItem key="gpt-3.5-turbo-0613" value="gpt-3.5-turbo-0613">GPT-3.5</SelectItem>
                                         </SelectContent>
                                     </Select>
                                     <FormDescription>
@@ -277,7 +288,7 @@ export const CompanionForm = ({
                             <FormItem>
                                 <FormLabel>Personality</FormLabel>
                                 <FormControl>
-                                    <Textarea disabled={isLoading} rows={5} className="bg-background resize-none" placeholder={PREAMBLE} {...field} />
+                                    <Input disabled={isLoading} placeholder={PREAMBLE} {...field} />
                                 </FormControl>
                                 <FormDescription>
                                     Describe in detail your companion&apos;s personality and relevant details.
@@ -286,17 +297,18 @@ export const CompanionForm = ({
                             </FormItem>
                         )}
                     />
+
                     <FormField
-                        name="behaviour"
+                        name="backstory"
                         control={form.control}
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Behaviour</FormLabel>
+                                <FormLabel>Backstory for vector memory</FormLabel>
                                 <FormControl>
-                                    <Textarea disabled={isLoading} rows={5} className="bg-background resize-none" placeholder={PREAMBLE_BEHAVIOUR} {...field} />
+                                    <Textarea disabled={isLoading} rows={4} className="bg-background resize-none" placeholder={PREAMBLE_BACKSTORY} {...field} />
                                 </FormControl>
                                 <FormDescription>
-                                    Describe in detail your companion&apos;s behaviour.
+                                    Describe relevant facts and details, bot will dynamically use these with similarity search.
                                 </FormDescription>
                                 <FormMessage />
                             </FormItem>
@@ -362,9 +374,16 @@ export const CompanionForm = ({
                                         </SelectTrigger>
                                     </FormControl>
                                     <SelectContent>
+                                        <SelectItem key="realistic-vision-v3" value="realistic-vision-v3">Realistic-Vision-v3</SelectItem>
+                                        <SelectItem key="absolute-reality-v1-8-1" value="absolute-reality-v1-8-1">Absolute-Reality-v1-8-1</SelectItem>
+                                        <SelectItem key="dark-sushi-mix-v2-25" value="dark-sushi-mix-v2-25">Dark-Sushi-mix-v2-25</SelectItem>
+                                        <SelectItem key="arcane-diffusion" value="arcane-diffusion">Arcane-Diffusion</SelectItem>
+                                        <SelectItem key="van-gogh-diffusion" value="van-gogh-diffusion">Van Gogh Diffusion</SelectItem>
+                                        <SelectItem key="neverending-dream" value="neverending-dream">Neverending Dream</SelectItem>
+                                        <SelectItem key="mo-di-diffusion" value="mo-di-diffusion">Modern Disney Diffusion</SelectItem>
+                                        <SelectItem key="synthwave-punk-v2" value="synthwave-punk-v2">Synthwave Punk V2</SelectItem>
+                                        <SelectItem key="dream-shaper-v8" value="dream-shaper-v8">Dream Shaper V8</SelectItem>
 
-                                        <SelectItem key="realistic" value="realistic">Realistic</SelectItem>
-                                        <SelectItem key="anime" value="anime">Anime</SelectItem>
                                     </SelectContent>
                                 </Select>
                                 <FormDescription>
@@ -451,34 +470,64 @@ export const CompanionForm = ({
                             </FormItem>
                         )}
                     />
-                    <FormField
-                        name="isPublic"
-                        control={form.control}
-                        render={({ field }) => {
-                            // Remove the value property from the field object
-                            const { value, ...rest } = field;
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <FormField
+                            name="isPublic"
+                            control={form.control}
+                            render={({ field }) => {
+                                // Remove the value property from the field object
+                                const { value, ...rest } = field;
 
-                            return (
-                                <FormItem>
+                                return (
+                                    <FormItem>
 
-                                    <FormControl>
-                                        <label>Public &nbsp;
-                                            <input
-                                                type="checkbox"
-                                                {...rest} // Spread the rest of the field object into the input element's props
-                                                checked={value} // Use the value property to set the checked property
-                                                style={{ width: '14px', height: '14px' }}
-                                            />
-                                        </label>
-                                    </FormControl>
-                                    <FormDescription>
-                                        (Other users can talk to the bot)
-                                    </FormDescription>
-                                    <FormMessage />
-                                </FormItem>
-                            );
-                        }}
-                    />
+                                        <FormControl>
+                                            <label>Public &nbsp;
+                                                <input
+                                                    type="checkbox"
+                                                    {...rest} // Spread the rest of the field object into the input element's props
+                                                    checked={value} // Use the value property to set the checked property
+                                                    style={{ width: '14px', height: '14px' }}
+                                                />
+                                            </label>
+                                        </FormControl>
+                                        <FormDescription>
+                                            (Other users can talk to the bot)
+                                        </FormDescription>
+                                        <FormMessage />
+                                    </FormItem>
+                                );
+                            }}
+                        />
+                        <FormField
+                            name="regenerateImage"
+                            control={form.control}
+                            render={({ field }) => {
+                                // Remove the value property from the field object
+                                const { value, ...rest } = field;
+
+                                return (
+                                    <FormItem>
+
+                                        <FormControl>
+                                            <label>Regenerate bot image  &nbsp;
+                                                <input
+                                                    type="checkbox"
+                                                    {...rest} // Spread the rest of the field object into the input element's props
+                                                    checked={value} // Use the value property to set the checked property
+                                                    style={{ width: '14px', height: '14px' }}
+                                                />
+                                            </label>
+                                        </FormControl>
+                                        <FormDescription>
+                                            (Regenerate the bot image from selfie prompt)
+                                        </FormDescription>
+                                        <FormMessage />
+                                    </FormItem>
+                                );
+                            }}
+                        />
+                    </div>
                     <div className="w-full flex justify-center">
                         <Button size="lg" disabled={isLoading}>
                             {initialData ? "Edit your companion" : "Create your companion"}

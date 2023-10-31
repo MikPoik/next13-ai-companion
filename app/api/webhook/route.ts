@@ -9,8 +9,7 @@ import { UserButton } from "@clerk/nextjs"
 import dotenv from "dotenv";
 dotenv.config({ path: `.env` });
 
-const env_maxDuration = process.env.VERCEL_FUNCTION_TIMEOUT || '60';
-export const maxDuration = parseInt(env_maxDuration, 10) //2 minute timeout
+export const maxDuration = 60;
 
 export async function POST(req: Request) {
     const body = await req.text()
