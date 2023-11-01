@@ -227,11 +227,11 @@ export async function POST(
 
         }
         //console.log(responseBlocks)
-
         return NextResponse.json(responseBlocks)
 
     } catch (error) {
         //console.log(error)
-        return new NextResponse("Internal Error", { status: 500 });
+        return NextResponse.json("I'm sorry, I had an error when generating response. \n(This message is not saved)");
+        //return new NextResponse("Internal Error", { status: 500 });
     }
 };

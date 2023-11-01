@@ -46,7 +46,7 @@ export async function DELETE(
     //console.log(response);
     return NextResponse.json({ message: "Chat history deleted successfully." });
   } catch (error) {
-    console.error("[DELETE_CHAT_HISTORY]", error);
+    console.error("[DELETE_CHAT_HISTORY]");
     return new NextResponse("Internal Error", { status: 500 });
   }
 }

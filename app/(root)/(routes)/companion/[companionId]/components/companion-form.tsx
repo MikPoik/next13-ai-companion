@@ -1,13 +1,13 @@
 "use client";
-import React, { useState } from "react"; // Import React and useState
+import React, { useState, useEffect } from "react"; // Import React and useState
 import * as z from "zod";
-import axios from "axios";
+import axios, { AxiosResponse } from "axios";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { Wand2 } from "lucide-react";
 import { Category, Companion, Voice } from "@prisma/client";
-
+//import { generateAvatarSteamship } from "@/components/SteamshipGenerateAvatar";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -16,17 +16,19 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import { Separator } from "@/components/ui/separator";
 import { Select, SelectContent, SelectItem, SelectValue, SelectTrigger } from "@/components/ui/select";
-import { BotAvatarForm } from "@/components/bot-avatar-form";
+import dotenv from "dotenv";
+dotenv.config({ path: `.env` });
+import Image from 'next/image'
 
+//Steamship bot handle for generating avatars
+const STEAMSHIP_IMG_BOT_URL = "https://mpoikkilehto.steamship.run/avatar-gen-dev/avatar-gen-dev-e4e56ee0bb9cc978f2b70430d4418366/generate_avatar";
 
 const PREAMBLE = `Your personality can be described as ...`;
 const PREAMBLE_BEHAVIOUR = `You behave like ...`;
-const PREAMBLE_BACKSTORY = `relevant details and facts for bot ...`;
-const PREAMBLE_SELFIE_PRE = `describe your character in detail ...`;
+const PREAMBLE_BACKSTORY = `relevant details and facts about the character ...`;
+const PREAMBLE_SELFIE_PRE = `describe your character appearance in detail for the image...`;
 const PREAMBLE_SELFIE_POST = `describe image details and effects ...`;
-
-
-const SEED_CHAT = `Introduction message for bot ...`;
+const SEED_CHAT = `Introduction message for the character ...`;
 
 const formSchema = z.object({
     name: z.string().min(1, {
@@ -43,7 +45,7 @@ const formSchema = z.object({
     seed: z.string().min(1, {
         message: "Seed requires at least 200 characters."
     }),
-    src: z.string().optional(),
+    src: z.string().min(1, { message: "image required" }),
     categoryId: z.string().min(1, {
         message: "Category is required",
     }),
@@ -81,8 +83,53 @@ export const CompanionForm = ({
 }: CompanionFormProps) => {
     const { toast } = useToast();
     const router = useRouter();
+    const [isImgLoading, setIsImgLoading] = useState(false);
     const [selectedVoiceId, setSelectedVoiceId] = useState(initialData?.voiceId || 'none');
     const [sampleUrl, setSampleUrl] = useState(""); // State variable to store the sample URL
+    const [imageUrl, setImageUrl] = useState(initialData?.src || "/placeholder.svg");
+    //const [newImageUrl, setNewImageUrl] = useState('');
+
+
+
+    const handleImageUpdate = async (value: string) => {
+        if (isImgLoading) return;
+        setIsImgLoading(true);
+        console.log(isImgLoading);
+        const characterAppearance = value || characterAppearanceWatch || characterAppearanceGetValues;
+        const imageModel = value || imageModelWatch || imageModelGetValues;
+        console.log(imageModel);
+        console.log(characterAppearance);
+        console.log("handleimageupdate", isImgLoading);
+
+        const data = { // Preparing data to be sent with POST request 
+            "prompt": characterAppearance,
+            "image_model": imageModel,
+        };
+
+        // Sending POST request 
+
+        axios.post(STEAMSHIP_IMG_BOT_URL, data, {
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': ''
+            }
+        }).then((response: AxiosResponse) => {
+            console.log('Response:', response);
+            const responseBlocks = JSON.stringify(response.data);
+            const parsedResponseBlocks = JSON.parse(responseBlocks);
+            const imgBlockId = parsedResponseBlocks[0].id;
+            const imgSrc = `https://api.steamship.com/api/v1/block/${imgBlockId}/raw`;
+            console.log(imgSrc);
+
+            setImageUrl(imgSrc);
+            setIsImgLoading(false);
+        }).catch((error) => {
+            console.log('Error', error);
+            setIsImgLoading(false);
+            // handle error
+        });
+
+    };
 
     const handleVoiceChange = (value: string) => {
         setSelectedVoiceId(value);
@@ -123,6 +170,11 @@ export const CompanionForm = ({
 
         },
     });
+    const { watch, getValues } = form;
+    const characterAppearanceWatch = watch("selfiePre");  // Watching specific input
+    const characterAppearanceGetValues = getValues("selfiePre");  // Get value of specific input
+    const imageModelWatch = watch("imageModel");  // Watching specific input
+    const imageModelGetValues = getValues("imageModel");  // Get value of specific input
 
     const isLoading = form.formState.isSubmitting;
 
@@ -152,6 +204,19 @@ export const CompanionForm = ({
     };
     // Define CSS styles for the button
     const buttonStyle = {
+        height: "35px",
+        fontSize: "0.9em",
+        padding: "4px 15px",
+        backgroundColor: "#fff",
+        color: "#000",
+        border: "1px solid #fff",
+        borderRadius: "6px",
+        cursor: "pointer",
+    };
+    const avatarButtonStyle = {
+        height: "35px",
+        fontSize: "0.8em",
+        width: "200px",
         padding: "4px 12px",
         backgroundColor: "#fff",
         color: "#000",
@@ -169,6 +234,127 @@ export const CompanionForm = ({
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 pb-10">
                     <div className="space-y-2 w-full col-span-2">
                         <div>
+                            <h3 className="text-lg font-medium">Companion appearance</h3>
+                            <p className="text-sm text-muted-foreground">
+                                Appearance of your Companion
+                            </p>
+                        </div>
+                        <Separator className="bg-primary/10" />
+                    </div>
+                    <FormField
+                        name="src"
+                        render={({ field }) => {
+                            useEffect(() => {
+                                field.onChange(imageUrl);
+                            }, [imageUrl]);
+                            return (
+                                <FormItem className="flex flex-col items-center justify-center space-y-4 col-span-2">
+                                    <FormControl>
+                                        <div className="space-y-4 w-full flex flex-col justify-center items-center">
+                                            <div className="relative h-40 w-40">
+                                                <Image fill src={imageUrl || "/placeholder.svg"} onChange={e => setImageUrl(e.target.value)} alt="avatar" className="rounded-lg object-cover" />  </div></div>
+                                    </FormControl>
+                                    <FormDescription>
+                                        Generate character avatar below.
+                                    </FormDescription>
+                                    <FormMessage />
+                                </FormItem>
+                            )
+                        }}
+                    />
+                    <FormField
+                        name="selfiePre"
+                        control={form.control}
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Character appearance</FormLabel>
+                                <FormControl>
+                                    <Input disabled={isLoading} className="bg-background resize-none" placeholder={PREAMBLE_SELFIE_PRE} {...field} />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                    <div className="grid grid-cols-1 md:grid-cols-1 gap-4">
+                        <FormField
+                            control={form.control}
+                            name="imageModel"
+                            render={({ field }) => (
+                                <FormItem>
+
+                                    <FormLabel>Image generator model</FormLabel>
+                                    <div className="flex items-center">
+                                        <Select disabled={isLoading} onValueChange={field.onChange} defaultValue={field.value}>
+                                            <FormControl>
+                                                <SelectTrigger className="bg-background">
+                                                    <SelectValue defaultValue={field.value} placeholder="Select a image style" />
+                                                </SelectTrigger>
+                                            </FormControl>
+                                            <SelectContent>
+                                                <SelectItem key="realistic-vision-v3" value="realistic-vision-v3">Realistic-Vision-v3</SelectItem>
+                                                <SelectItem key="absolute-reality-v1-8-1" value="absolute-reality-v1-8-1">Absolute-Reality-v1-8-1</SelectItem>
+                                                <SelectItem key="dark-sushi-mix-v2-25" value="dark-sushi-mix-v2-25">Dark-Sushi-mix-v2-25</SelectItem>
+                                                <SelectItem key="arcane-diffusion" value="arcane-diffusion">Arcane-Diffusion</SelectItem>
+                                                <SelectItem key="van-gogh-diffusion" value="van-gogh-diffusion">Van Gogh Diffusion</SelectItem>
+                                                <SelectItem key="neverending-dream" value="neverending-dream">Neverending Dream</SelectItem>
+                                                <SelectItem key="mo-di-diffusion" value="mo-di-diffusion">Modern Disney Diffusion</SelectItem>
+                                                <SelectItem key="synthwave-punk-v2" value="synthwave-punk-v2">Synthwave Punk V2</SelectItem>
+                                                <SelectItem key="dream-shaper-v8" value="dream-shaper-v8">Dream Shaper V8</SelectItem>
+
+                                            </SelectContent>
+                                        </Select>
+                                        &nbsp;&nbsp;<button // Use a plain HTML button with type="button"
+                                            type="button"
+                                            className="btn-sm" // Add the appropriate button class
+                                            style={avatarButtonStyle}
+                                            onClick={() => handleImageUpdate("")} // Call playAudio directly without arguments // Call playAudio directly
+                                            disabled={isImgLoading}
+                                        >
+                                            Generate avatar
+                                        </button>
+                                    </div>
+                                    <FormDescription>
+                                        Select the the model for generated images.
+                                    </FormDescription>
+                                    <FormMessage />
+
+                                </FormItem>
+                            )}
+                        />
+
+                        <FormField
+                            name="createImages"
+                            control={form.control}
+                            render={({ field }) => {
+                                // Remove the value property from the field object
+                                const { value, ...rest } = field;
+
+                                return (
+                                    <FormItem>
+
+                                        <FormControl>
+                                            <FormLabel>Enable Image generation in chat &nbsp;
+                                                <input
+                                                    type="checkbox"
+                                                    {...rest} // Spread the rest of the field object into the input element's props
+                                                    checked={value} // Use the value property to set the checked property
+                                                    style={{ width: '16px', height: '16px', cursor: "pointer" }}
+                                                />
+                                            </FormLabel>
+                                        </FormControl>
+                                        <FormDescription>
+                                            Bot can send images based on appearance. Generated images cost extra tokens. This option cannot be edited after creation.
+                                        </FormDescription>
+                                        <FormMessage />
+                                    </FormItem>
+                                );
+                            }}
+                        />
+
+
+                    </div>
+                    <div className="space-y-2 w-full col-span-2">
+                        <div>
                             <h3 className="text-lg font-medium">General Information</h3>
                             <p className="text-sm text-muted-foreground">
                                 General information about your Companion
@@ -176,20 +362,6 @@ export const CompanionForm = ({
                         </div>
                         <Separator className="bg-primary/10" />
                     </div>
-                    <FormField
-                        name="src"
-                        render={({ field }) => (
-                            <FormItem className="flex flex-col items-center justify-center space-y-4 col-span-2">
-                                <FormControl>
-                                    <BotAvatarForm disabled={isLoading} onChange={field.onChange} value={field.value} />
-                                </FormControl>
-                                <FormDescription>
-                                    Image is generated from pre/post-selfie prompts.
-                                </FormDescription>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <FormField
                             name="name"
@@ -308,7 +480,7 @@ export const CompanionForm = ({
                                     <Textarea disabled={isLoading} rows={4} className="bg-background resize-none" placeholder={PREAMBLE_BACKSTORY} {...field} />
                                 </FormControl>
                                 <FormDescription>
-                                    Describe relevant facts and details, bot will dynamically use these with similarity search.
+                                    Describe relevant facts and details, bot will dynamically use indexed data when responding. Data can be added but not edited.
                                 </FormDescription>
                                 <FormMessage />
                             </FormItem>
@@ -327,98 +499,9 @@ export const CompanionForm = ({
                             </FormItem>
                         )}
                     />
-                    <div className="space-y-2 w-full">
-                        <div>
-                            <h3 className="text-lg font-medium">Image generation settings</h3>
-                        </div>
-                        <Separator className="bg-primary/10" />
-                    </div>
-                    <FormField
-                        name="createImages"
-                        control={form.control}
-                        render={({ field }) => {
-                            // Remove the value property from the field object
-                            const { value, ...rest } = field;
 
-                            return (
-                                <FormItem>
 
-                                    <FormControl>
-                                        <label>Enable Image generation &nbsp;
-                                            <input
-                                                type="checkbox"
-                                                {...rest} // Spread the rest of the field object into the input element's props
-                                                checked={value} // Use the value property to set the checked property
-                                                style={{ width: '14px', height: '14px' }}
-                                            />
-                                        </label>
-                                    </FormControl>
-                                    <FormDescription>
-                                        Generated images cost extra tokens. This option cannot be edited after creation.
-                                    </FormDescription>
-                                    <FormMessage />
-                                </FormItem>
-                            );
-                        }}
-                    />
-                    <FormField
-                        control={form.control}
-                        name="imageModel"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Image style</FormLabel>
-                                <Select disabled={isLoading} onValueChange={field.onChange} defaultValue={field.value}>
-                                    <FormControl>
-                                        <SelectTrigger className="bg-background">
-                                            <SelectValue defaultValue={field.value} placeholder="Select a image style" />
-                                        </SelectTrigger>
-                                    </FormControl>
-                                    <SelectContent>
-                                        <SelectItem key="realistic-vision-v3" value="realistic-vision-v3">Realistic-Vision-v3</SelectItem>
-                                        <SelectItem key="absolute-reality-v1-8-1" value="absolute-reality-v1-8-1">Absolute-Reality-v1-8-1</SelectItem>
-                                        <SelectItem key="dark-sushi-mix-v2-25" value="dark-sushi-mix-v2-25">Dark-Sushi-mix-v2-25</SelectItem>
-                                        <SelectItem key="arcane-diffusion" value="arcane-diffusion">Arcane-Diffusion</SelectItem>
-                                        <SelectItem key="van-gogh-diffusion" value="van-gogh-diffusion">Van Gogh Diffusion</SelectItem>
-                                        <SelectItem key="neverending-dream" value="neverending-dream">Neverending Dream</SelectItem>
-                                        <SelectItem key="mo-di-diffusion" value="mo-di-diffusion">Modern Disney Diffusion</SelectItem>
-                                        <SelectItem key="synthwave-punk-v2" value="synthwave-punk-v2">Synthwave Punk V2</SelectItem>
-                                        <SelectItem key="dream-shaper-v8" value="dream-shaper-v8">Dream Shaper V8</SelectItem>
 
-                                    </SelectContent>
-                                </Select>
-                                <FormDescription>
-                                    Select the style for generated images.
-                                </FormDescription>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-                    <FormField
-                        name="selfiePre"
-                        control={form.control}
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Pre-selfie prompt</FormLabel>
-                                <FormControl>
-                                    <Input disabled={isLoading} className="bg-background resize-none" placeholder={PREAMBLE_SELFIE_PRE} {...field} />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-                    <FormField
-                        name="selfiePost"
-                        control={form.control}
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Post-selfie prompt</FormLabel>
-                                <FormControl>
-                                    <Input disabled={isLoading} className="bg-background resize-none" placeholder={PREAMBLE_SELFIE_POST} {...field} />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
                     <div className="space-y-1 w-full">
                         <div>
                             <h3 className="text-lg font-medium">Other settings</h3>
@@ -453,7 +536,7 @@ export const CompanionForm = ({
                                             ))}
                                         </SelectContent>
                                     </Select>
-                                    <button // Use a plain HTML button with type="button"
+                                    &nbsp;&nbsp;<button // Use a plain HTML button with type="button"
                                         type="button"
                                         className="btn-sm" // Add the appropriate button class
                                         style={buttonStyle}
@@ -499,34 +582,7 @@ export const CompanionForm = ({
                                 );
                             }}
                         />
-                        <FormField
-                            name="regenerateImage"
-                            control={form.control}
-                            render={({ field }) => {
-                                // Remove the value property from the field object
-                                const { value, ...rest } = field;
 
-                                return (
-                                    <FormItem>
-
-                                        <FormControl>
-                                            <label>Regenerate bot image  &nbsp;
-                                                <input
-                                                    type="checkbox"
-                                                    {...rest} // Spread the rest of the field object into the input element's props
-                                                    checked={value} // Use the value property to set the checked property
-                                                    style={{ width: '14px', height: '14px' }}
-                                                />
-                                            </label>
-                                        </FormControl>
-                                        <FormDescription>
-                                            (Regenerate the bot image from selfie prompt)
-                                        </FormDescription>
-                                        <FormMessage />
-                                    </FormItem>
-                                );
-                            }}
-                        />
                     </div>
                     <div className="w-full flex justify-center">
                         <Button size="lg" disabled={isLoading}>

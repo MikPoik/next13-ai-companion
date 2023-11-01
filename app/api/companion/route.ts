@@ -4,7 +4,7 @@ import { Steamship } from '@steamship/client';
 import prismadb from "@/lib/prismadb";
 import { checkSubscription } from "@/lib/subscription";
 import dotenv from "dotenv";
-import { generateAvatarSteamship } from "@/components/SteamshipGenerateAvatar";
+//import { generateAvatarSteamship } from "@/components/SteamshipGenerateAvatar";
 import { indexTextSteamship, } from "@/components/SteamshipIndexText";
 dotenv.config({ path: `.env` });
 
@@ -27,18 +27,14 @@ export async function POST(req: Request) {
             return new NextResponse("Unauthorized", { status: 401 });
         }
 
-        if (!name || !description || !personality || !seed || !categoryId || !model) {
+        if (!name || !description || !personality || !seed || !categoryId || !model || !src) {
             return new NextResponse("Missing required fields", { status: 400 });
         };
         var firstName = "user";
         if (user.firstName) {
             firstName = user.firstName
         }
-        //const isPro = await checkSubscription();
 
-        //if (!isPro) {
-        //  return new NextResponse("Pro subscription required", { status: 403 });
-        //}
         const bot_uuid = uuidv4().replace(/-/g, "").toLowerCase();
         const workspace_name = user.id.replace("user_", "").toLowerCase() + "-" + bot_uuid;
         const instance_handle = user.id.replace("user_", "").toLowerCase() + "-" + bot_uuid;
@@ -57,33 +53,9 @@ export async function POST(req: Request) {
         const env_packageName = process.env.STEAMSHIP_PACKAGE || packageName;
 
 
-        //Generate avatar image
+
         const client = await Steamship.use(env_packageName, instance_handle, { llm_model: llm_model, create_images: String(createImages) }, undefined, true, workspace_name);
 
-        const steamshipResponse = await generateAvatarSteamship(
-            'generate_avatar',
-            selfiePre + selfiePost,
-            user.id,
-            env_packageName,
-            instance_handle,
-            workspace_name,
-            personality_string,
-            name,
-            description_string,
-            behaviour_string,
-            selfiePre,
-            selfiePost,
-            seed,
-            llm_model,
-            imageModel,
-            createImages,
-            voiceId);
-
-        const responseBlocks = JSON.parse(steamshipResponse);
-        var imgBlockId = "";
-        imgBlockId = responseBlocks[0].id;
-        const imgSrc = `https://api.steamship.com/api/v1/block/${imgBlockId}/raw`;
-        console.log(imgSrc);
         if (backstory != null) {
             const indexTextResponse = await indexTextSteamship(
                 'index_text',
@@ -113,7 +85,7 @@ export async function POST(req: Request) {
                 categoryId,
                 userId: user.id,
                 userName: firstName,
-                src: imgSrc,
+                src: src,
                 name,
                 description: description_string,
                 personality: personality_string,
