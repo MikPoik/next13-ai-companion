@@ -62,6 +62,7 @@ async function getSteamshipResponse(
     for (let retryCount = 0; retryCount < maxRetryCount; retryCount++) {
         try {
             const instance = await Steamship.use(package_name, instance_handle, { llm_model: model, create_images: String(create_images) }, undefined, true, workspace_handle);
+            //console.log(instance);
             const response = await (instance.invoke('prompt', {
                 prompt,
                 context_id,
@@ -230,7 +231,7 @@ export async function POST(
         return NextResponse.json(responseBlocks)
 
     } catch (error) {
-        //console.log(error)
+        console.log(error)
         return NextResponse.json("I'm sorry, I had an error when generating response. \n(This message is not saved)");
         //return new NextResponse("Internal Error", { status: 500 });
     }

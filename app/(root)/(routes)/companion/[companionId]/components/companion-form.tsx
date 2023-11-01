@@ -7,7 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { Wand2 } from "lucide-react";
 import { Category, Companion, Voice } from "@prisma/client";
-//import { generateAvatarSteamship } from "@/components/SteamshipGenerateAvatar";
+import {BotAvatarForm} from "@/components/bot-avatar-form";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -45,7 +45,7 @@ const formSchema = z.object({
     seed: z.string().min(1, {
         message: "Seed requires at least 200 characters."
     }),
-    src: z.string().min(1, { message: "image required" }),
+    src: z.string().min(1, { message: "image is required" }),
     categoryId: z.string().min(1, {
         message: "Category is required",
     }),
@@ -94,12 +94,9 @@ export const CompanionForm = ({
     const handleImageUpdate = async (value: string) => {
         if (isImgLoading) return;
         setIsImgLoading(true);
-        console.log(isImgLoading);
         const characterAppearance = value || characterAppearanceWatch || characterAppearanceGetValues;
         const imageModel = value || imageModelWatch || imageModelGetValues;
-        console.log(imageModel);
-        console.log(characterAppearance);
-        console.log("handleimageupdate", isImgLoading);
+
 
         const data = { // Preparing data to be sent with POST request 
             "prompt": characterAppearance,
@@ -114,12 +111,12 @@ export const CompanionForm = ({
                 'Authorization': ''
             }
         }).then((response: AxiosResponse) => {
-            console.log('Response:', response);
+            //console.log('Response:', response);
             const responseBlocks = JSON.stringify(response.data);
             const parsedResponseBlocks = JSON.parse(responseBlocks);
             const imgBlockId = parsedResponseBlocks[0].id;
             const imgSrc = `https://api.steamship.com/api/v1/block/${imgBlockId}/raw`;
-            console.log(imgSrc);
+            //console.log(imgSrc);
 
             setImageUrl(imgSrc);
             setIsImgLoading(false);
@@ -228,6 +225,7 @@ export const CompanionForm = ({
         maxHeight: "200px", // Adjust the maximum height as needed
         overflowY: "auto",
     };
+
     return (
         <div className="h-full p-4 space-y-2 max-w-3xl mx-auto">
             <Form {...form}>
@@ -243,16 +241,14 @@ export const CompanionForm = ({
                     </div>
                     <FormField
                         name="src"
-                        render={({ field }) => {
-                            useEffect(() => {
-                                field.onChange(imageUrl);
-                            }, [imageUrl]);
-                            return (
+                        render={({ field }) => (
+                            
                                 <FormItem className="flex flex-col items-center justify-center space-y-4 col-span-2">
                                     <FormControl>
-                                        <div className="space-y-4 w-full flex flex-col justify-center items-center">
-                                            <div className="relative h-40 w-40">
-                                                <Image fill src={imageUrl || "/placeholder.svg"} onChange={e => setImageUrl(e.target.value)} alt="avatar" className="rounded-lg object-cover" />  </div></div>
+                                        <BotAvatarForm src={imageUrl} onChange={(value) => {
+                                            setImageUrl(value);
+                                            field.onChange(value);
+                                        }} disabled={isLoading} />
                                     </FormControl>
                                     <FormDescription>
                                         Generate character avatar below.
@@ -260,7 +256,7 @@ export const CompanionForm = ({
                                     <FormMessage />
                                 </FormItem>
                             )
-                        }}
+                        }
                     />
                     <FormField
                         name="selfiePre"

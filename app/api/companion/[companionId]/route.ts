@@ -68,7 +68,7 @@ export async function PATCH(
                 voiceId);
             //console.log(indexTextResponse);
             const indexTextResponseBlocks = JSON.parse(indexTextResponse);
-            console.log(indexTextResponseBlocks);
+            //console.log(indexTextResponseBlocks);
         }
         const updateCompanion = await prismadb.companion.update({
             where: {
