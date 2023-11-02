@@ -1,4 +1,3 @@
-
 async function mergePersonalityDBcolumns() {
     const { PrismaClient } = require('@prisma/client');
 
@@ -10,11 +9,18 @@ async function mergePersonalityDBcolumns() {
         // loop and update companions 
         // add content of "behaviour" column to "personality" column
         for (let companion of companions) {
-            await prisma.companion.update({
-                where: { id: companion.id },
-                data: { personality: `${companion.personality}. ${companion.behaviour}` },
-            });
-            console.log(`Updated companion ${companion.id} with personality ${companion.personality} and behaviour ${companion.behaviour}`);
+            console.log("checking: ", companion.name);
+            // Concatenate the personality and behaviour strings
+            const combined = `${companion.personality}. ${companion.behaviour}`;
+
+            // if personality does not include behaviour and combined length is under 65000
+            if (!companion.personality.includes(companion.behaviour) && combined.length < 65000) {
+                await prisma.companion.update({
+                    where: { id: companion.id },
+                    data: { personality: combined },
+                });
+                console.log(`Updated companion ${companion.id} with personality ${companion.personality} and behaviour ${companion.behaviour}`);
+            }
         }
         console.log('InstanceHandles updated successfully');
     } catch (error) {

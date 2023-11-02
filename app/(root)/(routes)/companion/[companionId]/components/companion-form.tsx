@@ -7,7 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { Wand2 } from "lucide-react";
 import { Category, Companion, Voice } from "@prisma/client";
-import {BotAvatarForm} from "@/components/bot-avatar-form";
+import { BotAvatarForm } from "@/components/bot-avatar-form";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -105,7 +105,7 @@ export const CompanionForm = ({
 
         // Sending POST request 
 
-        axios.post(STEAMSHIP_IMG_BOT_URL, data, {
+        axios.post(process.env.NEXT_PUBLIC_IMG_BOT_URL || STEAMSHIP_IMG_BOT_URL, data, {
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': ''
@@ -242,20 +242,20 @@ export const CompanionForm = ({
                     <FormField
                         name="src"
                         render={({ field }) => (
-                            
-                                <FormItem className="flex flex-col items-center justify-center space-y-4 col-span-2">
-                                    <FormControl>
-                                        <BotAvatarForm src={imageUrl} onChange={(value) => {
-                                            setImageUrl(value);
-                                            field.onChange(value);
-                                        }} disabled={isLoading} />
-                                    </FormControl>
-                                    <FormDescription>
-                                        Generate character avatar below.
-                                    </FormDescription>
-                                    <FormMessage />
-                                </FormItem>
-                            )
+
+                            <FormItem className="flex flex-col items-center justify-center space-y-4 col-span-2">
+                                <FormControl>
+                                    <BotAvatarForm src={imageUrl} onChange={(value) => {
+                                        setImageUrl(value);
+                                        field.onChange(value);
+                                    }} disabled={isLoading} />
+                                </FormControl>
+                                <FormDescription>
+                                    Generate character avatar below.
+                                </FormDescription>
+                                <FormMessage />
+                            </FormItem>
+                        )
                         }
                     />
                     <FormField
