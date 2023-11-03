@@ -2,36 +2,42 @@
 
 
 export function ChatBlock({ text, mimeType, url, id }: {
-  text?: string,
-  mimeType?: string,
-  url?: string
-  id?: string
+    text?: string,
+    mimeType?: string,
+    url?: string
+    id?: string
 }) {
-  let internalComponent = <></>
-  if (text && text.length > 1) {
-    internalComponent = <span>{text}</span>
-  } else if (mimeType) {
-    if (mimeType.startsWith("audio")) {
-      let audioSrc = `https://api.steamship.com/api/v1/block/${id}/raw`;
-      internalComponent = <audio controls={true} src={audioSrc} />
-    } else if (mimeType.startsWith("video")) {
-      internalComponent = <video controls width="250">
-        <source src={url} type={mimeType} />
-        Download the <a href={url}>video</a>
-      </video>
-    } else if (mimeType.startsWith("image")) {
-      let imgSrc = `https://api.steamship.com/api/v1/block/${id}/raw`;
-      internalComponent = <img src={imgSrc} />
+    let internalComponent = <></>
+    if (text && text.length > 1) {
+        internalComponent = <span>{text}</span>
+    } else if (mimeType) {
+        if (mimeType.startsWith("audio")) {
+            let audioSrc = ``;
+            if (!url){
+                audioSrc = `https://api.steamship.com/api/v1/block/${id}/raw`;
+            }
+            else {
+                audioSrc = url;
+            }
+            internalComponent = <audio controls={true} src={audioSrc} />
+        } else if (mimeType.startsWith("video")) {
+            internalComponent = <video controls width="250">
+                <source src={url} type={mimeType} />
+                Download the <a href={url}>video</a>
+            </video>
+        } else if (mimeType.startsWith("image")) {
+            let imgSrc = `https://api.steamship.com/api/v1/block/${id}/raw`;
+            internalComponent = <img src={imgSrc} />
+        }
+    } else if (url) {
+        internalComponent = <a href={url}>Link</a>
     }
-  } else if (url) {
-    internalComponent = <a href={url}>Link</a>
-  }
 
-  return (
-    <p className="text-sm text-gray-200 pb-2">
-      {internalComponent}
-    </p>
-  );
+    return (
+        <p className="text-sm text-gray-200 pb-2">
+            {internalComponent}
+        </p>
+    );
 }
 
 /*
@@ -41,35 +47,35 @@ export function ChatBlock({ text, mimeType, url, id }: {
  * types and can easily grow to support more metadata (such as speaker).
  */
 function uuidv4() {
-  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-    var r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
-    return v.toString(16);
-  });
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+        var r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+    });
 }
 
 export function responseToChatBlocks(completion: any) {
-  // First we try to parse completion as JSON in case we're dealing with an object.
-  //console.log("got completoin", completion, typeof completion)
-  if (typeof completion == "string") {
-    try {
-      completion = JSON.parse(completion)
-    } catch {
-      // Do nothing; we'll just treat it as a string.
-      //console.log("Couldn't parse")
+    // First we try to parse completion as JSON in case we're dealing with an object.
+    //console.log("got completoin", completion, typeof completion)
+    if (typeof completion == "string") {
+        try {
+            completion = JSON.parse(completion)
+        } catch {
+            // Do nothing; we'll just treat it as a string.
+            //console.log("Couldn't parse")
+        }
     }
-  }
-  let blocks = []
-  if (typeof completion == "string") {
-    //console.log("still string")
-    blocks.push(<ChatBlock key={uuidv4()} text={completion} />)
-  } else if (Array.isArray(completion)) {
-    //console.log("Is array")
-    for (let block of completion) {
-      blocks.push(<ChatBlock key={uuidv4()} {...block} />)
+    let blocks = []
+    if (typeof completion == "string") {
+        //console.log("still string")
+        blocks.push(<ChatBlock key={uuidv4()} text={completion} />)
+    } else if (Array.isArray(completion)) {
+        //console.log("Is array")
+        for (let block of completion) {
+            blocks.push(<ChatBlock key={uuidv4()} {...block} />)
+        }
+    } else {
+        blocks.push(<ChatBlock key={uuidv4()} {...completion} />)
     }
-  } else {
-    blocks.push(<ChatBlock key={uuidv4()} {...completion} />)
-  }
-  //console.log(blocks)
-  return blocks
+    //console.log(blocks)
+    return blocks
 }

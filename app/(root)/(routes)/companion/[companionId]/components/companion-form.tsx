@@ -225,7 +225,20 @@ export const CompanionForm = ({
         maxHeight: "200px", // Adjust the maximum height as needed
         overflowY: "auto",
     };
+    const avatarButtonStyleDimmed = {
+        // Include the styles needed for the button
+        opacity: 0.5, // Change opacity based on the loading state
+        height: "35px",
+        fontSize: "0.8em",
+        width: "200px",
+        padding: "4px 12px",
+        backgroundColor: "#fff",
+        color: "#000",
+        border: "1px solid #fff",
+        borderRadius: "6px",
+        cursor: "wait",
 
+    };
     return (
         <div className="h-full p-4 space-y-2 max-w-3xl mx-auto">
             <Form {...form}>
@@ -302,7 +315,7 @@ export const CompanionForm = ({
                                         &nbsp;&nbsp;<button // Use a plain HTML button with type="button"
                                             type="button"
                                             className="btn-sm" // Add the appropriate button class
-                                            style={avatarButtonStyle}
+                                            style={isImgLoading ? avatarButtonStyleDimmed : avatarButtonStyle}
                                             onClick={() => handleImageUpdate("")} // Call playAudio directly without arguments // Call playAudio directly
                                             disabled={isImgLoading}
                                         >
@@ -473,7 +486,7 @@ export const CompanionForm = ({
                             <FormItem>
                                 <FormLabel>Backstory for vector memory</FormLabel>
                                 <FormControl>
-                                    <Textarea disabled={isLoading} rows={4} className="bg-background resize-none" placeholder={PREAMBLE_BACKSTORY} {...field} />
+                                    <Textarea disabled={isLoading} rows={6} className="bg-background resize-none" placeholder={PREAMBLE_BACKSTORY} {...field} />
                                 </FormControl>
                                 <FormDescription>
                                     Describe relevant facts and details, bot will dynamically use indexed data when responding. Data can be added but not edited.
