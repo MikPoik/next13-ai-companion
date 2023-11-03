@@ -107,7 +107,7 @@ export async function POST(req: Request) {
 
         return NextResponse.json(companion);
     } catch (error) {
-        console.log("[COMPANION_POST] ERROR");
+        console.log("[COMPANION_POST] ERROR", error);
         return new NextResponse("Internal Error", { status: 500 });
     }
 
