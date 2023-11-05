@@ -94,7 +94,7 @@ export async function PATCH(
         });
         return NextResponse.json(companion);
     } catch (error) {
-        console.log("[COMPANION_PATCH]",error);
+        console.log("[COMPANION_PATCH]");
         return new NextResponse("Internal Error", { status: 500 });
     }
 

@@ -9,118 +9,118 @@ import { useUser } from "@clerk/nextjs";
 import { Button } from "@/components/ui/button";
 import { BotAvatar } from "@/components/bot-avatar";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/components/ui/use-toast";
 
 interface ChatHeaderProps {
-  companion: Companion & {
-    messages: Message[];
-    _count: {
-      messages: number;
+    companion: Companion & {
+        messages: Message[];
+        _count: {
+            messages: number;
+        };
     };
-  };
 };
 
 export const ChatHeader = ({
-  companion,
+    companion,
 }: ChatHeaderProps) => {
-  const router = useRouter();
-  const { user } = useUser();
-  const { toast } = useToast();
+    const router = useRouter();
+    const { user } = useUser();
+    const { toast } = useToast();
 
-  const onDelete = async () => {
-    try {
-      await axios.delete(`/api/companion/${companion.id}`);
-      toast({
-        description: "Success."
-      });
-      router.refresh();
-      router.push("/");
-    } catch (error) {
-      toast({
-        variant: "destructive",
-        description: "Something went wrong."
-      })
+    const onDelete = async () => {
+        try {
+            await axios.delete(`/api/companion/${companion.id}`);
+            toast({
+                description: "Success."
+            });
+            router.refresh();
+            router.push("/");
+        } catch (error) {
+            toast({
+                variant: "destructive",
+                description: "Something went wrong."
+            })
+        }
     }
-  }
-  const onDeleteChatHistory = async () => {
-    try {
-      await axios.delete(`/api/companion/${companion.id}/chat-history`);
-      toast({
-        description: "Chat history deleted successfully."
-      });
-      router.refresh();
-      router.push("/");
-      // You can perform any additional actions here after chat history deletion.
-    } catch (error) {
-      //console.log(error);
-      toast({
-        variant: "destructive",
-        description: "Something went wrong while deleting chat history."
-      });
+    const onDeleteChatHistory = async () => {
+        try {
+            await axios.delete(`/api/companion/${companion.id}/chat-history`);
+            toast({
+                description: "Chat history deleted successfully."
+            });
+            router.refresh();
+            router.push("/");
+            // You can perform any additional actions here after chat history deletion.
+        } catch (error) {
+            //console.log(error);
+            toast({
+                variant: "destructive",
+                description: "Something went wrong while deleting chat history."
+            });
+        }
     }
-  }
 
-  return (
-    <div className="flex w-full justify-between items-center border-b border-primary/10 pb-4">
-      <div className="flex gap-x-2 items-center">
-        <Button onClick={() => router.back()} size="icon" variant="ghost">
-          <ChevronLeft className="h-8 w-8" />
-        </Button>
-        <BotAvatar src={companion.src} />
-        <div className="flex flex-col gap-y-1">
-          <div className="flex items-center gap-x-2">
-            <p className="font-bold">{companion.name}</p>
-            <div className="flex items-center text-xs text-muted-foreground">
+    return (
+        <div className="flex w-full justify-between items-center border-b border-primary/10 pb-4">
+            <div className="flex gap-x-2 items-center">
+                <Button onClick={() => router.back()} size="icon" variant="ghost">
+                    <ChevronLeft className="h-8 w-8" />
+                </Button>
+                <BotAvatar src={companion.src} />
+                <div className="flex flex-col gap-y-1">
+                    <div className="flex items-center gap-x-2">
+                        <p className="font-bold">{companion.name}</p>
+                        <div className="flex items-center text-xs text-muted-foreground">
 
+                        </div>
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                        <span className="text-xs text-muted-foreground">There may be a delay on first response generation. Everything bot writes is made up.</span>
+                    </p>
+                </div>
             </div>
-          </div>
-          <p className="text-xs text-muted-foreground">
-            <span className="text-xs text-muted-foreground">There may be a delay on first response generation. Everything bot writes is made up.</span>
-          </p>
+            {user?.id === companion.userId ? (
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <Button variant="secondary" size="icon">
+                            <MoreVertical />
+                        </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={() => router.push(`/companion/${companion.id}`)} className="mb-2">
+                            <Edit className="w-4 h-4 mr-2" />
+                            Edit
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={onDeleteChatHistory} className="mb-2">
+                            <Trash className="w-4 h-4 mr-2" />
+                            Delete Chat history
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={onDelete} className="text-red-500">
+                            <Trash className="w-4 h-4 mr-2" />
+                            Delete
+                        </DropdownMenuItem>
+                    </DropdownMenuContent>
+                </DropdownMenu>
+            ) : (
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <Button variant="secondary" size="icon">
+                            <MoreVertical />
+                        </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={onDeleteChatHistory}>
+                            <Trash className="w-4 h-4 mr-2" />
+                            Delete Chat history
+                        </DropdownMenuItem>
+                    </DropdownMenuContent>
+                </DropdownMenu>
+            )}
         </div>
-      </div>
-      {user?.id === companion.userId ? (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="secondary" size="icon">
-              <MoreVertical />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={() => router.push(`/companion/${companion.id}`)}>
-              <Edit className="w-4 h-4 mr-2" />
-              Edit
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={onDelete}>
-              <Trash className="w-4 h-4 mr-2" />
-              Delete
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={onDeleteChatHistory}>
-              <Trash className="w-4 h-4 mr-2" />
-              Delete Chat history
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      ) : (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="secondary" size="icon">
-              <MoreVertical />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={onDeleteChatHistory}>
-              <Trash className="w-4 h-4 mr-2" />
-              Delete Chat history
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      )}
-    </div>
-  );
+    );
 };
