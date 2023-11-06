@@ -445,11 +445,12 @@ export const CompanionForm = ({
                                         <SelectContent>
 
                                             <SelectItem key="NousResearch/Nous-Hermes-Llama2-13b" value="NousResearch/Nous-Hermes-Llama2-13b">Llama2 (NSFW content)</SelectItem>
+                                            <SelectItem key="zephyr-chat" value="zephyr-chat">Zephyr (NSFW content)</SelectItem>
                                             <SelectItem key="gpt-3.5-turbo-0613" value="gpt-3.5-turbo-0613">GPT-3.5</SelectItem>
                                         </SelectContent>
                                     </Select>
                                     <FormDescription>
-                                        Select the model for your AI, for NSFW content use LLama2. (Model version cannot be changed after creation)
+                                        Select the model for your AI. (Model version cannot be changed after creation)
                                     </FormDescription>
                                     <FormMessage />
                                 </FormItem>
