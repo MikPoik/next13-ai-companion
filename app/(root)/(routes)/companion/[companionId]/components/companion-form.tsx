@@ -5,14 +5,14 @@ import axios, { AxiosResponse } from "axios";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
-import { Wand2 } from "lucide-react";
+import { Wand2,Trash2 } from "lucide-react";
 import { Category, Companion, Voice } from "@prisma/client";
-import { BotAvatarForm } from "@/components/bot-avatar-form";
+//import { BotAvatarForm } from "@/components/bot-avatar-form";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-//import { ImageUpload } from "@/components/image-upload";
+import { ImageUpload } from "@/components/image-upload";
 import { useToast } from "@/components/ui/use-toast";
 import { Separator } from "@/components/ui/separator";
 import { Select, SelectContent, SelectItem, SelectValue, SelectTrigger } from "@/components/ui/select";
@@ -88,7 +88,22 @@ export const CompanionForm = ({
     const [sampleUrl, setSampleUrl] = useState(""); // State variable to store the sample URL
     const [imageUrl, setImageUrl] = useState(initialData?.src || "/placeholder.svg");
     //const [newImageUrl, setNewImageUrl] = useState('');
-
+    
+    const onDelete = async () => {
+        try {
+            await axios.delete(`/api/companion/${initialData?.id}`);
+            //toast({
+            //    description: "Success."
+            //});
+            //router.refresh();
+            //router.push("/");
+        } catch (error) {
+            toast({
+                variant: "destructive",
+                description: "Something went wrong."
+            })
+        }
+    }
 
 
     const handleImageUpdate = async (value: string) => {
@@ -258,13 +273,13 @@ export const CompanionForm = ({
 
                             <FormItem className="flex flex-col items-center justify-center space-y-4 col-span-2">
                                 <FormControl>
-                                    <BotAvatarForm src={imageUrl} onChange={(value) => {
+                                    <ImageUpload src={imageUrl} value={field.value} onChange={(value) => {
                                         setImageUrl(value);
                                         field.onChange(value);
                                     }} disabled={isLoading} />
                                 </FormControl>
                                 <FormDescription>
-                                    Generate character avatar below.
+                                    Generate character avatar below or upload your own.
                                 </FormDescription>
                                 <FormMessage />
                             </FormItem>
@@ -599,6 +614,14 @@ export const CompanionForm = ({
                             {initialData ? "Edit your companion" : "Create your companion"}
                             <Wand2 className="w-4 h-4 ml-2" />
                         </Button>
+                        {
+                            initialData ? (
+                                <Button size="lg" disabled={isLoading} onClick={onDelete} className="text-red-500 ml-8">
+                                    Delete Companion
+                                    <Trash2 className="w-4 h-4 ml-2" />
+                                </Button>
+                            ) : null
+                        }
                     </div>
                 </form>
             </Form>

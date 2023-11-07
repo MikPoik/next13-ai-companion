@@ -22,7 +22,7 @@ export async function POST(req: Request) {
         const body = await req.json();
         const user = await currentUser();
         const { src, name, description, personality, seed, categoryId, packageName, isPublic, selfiePost, selfiePre, behaviour, model, createImages, imageModel, voiceId, backstory } = body;
-        console.log(src);
+        //console.log(src);
         if (!user || !user.id) {
             return new NextResponse("Unauthorized", { status: 401 });
         }

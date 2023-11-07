@@ -117,8 +117,7 @@ export async function DELETE(
                 id: params.companionId
             }
         });
-
-        const instance = await Steamship.use(companion.packageName, companion.instanceHandle, undefined, undefined, true, companion.workspaceName);
+        const instance = await Steamship.use(companion.packageName, companion.instanceHandle, { llm_model: companion.model, create_images: String(companion.createImages) }, undefined, true, companion.workspaceName);
         instance.delete();
 
         return NextResponse.json(companion);

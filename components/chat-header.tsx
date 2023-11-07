@@ -100,10 +100,7 @@ export const ChatHeader = ({
                             <Trash className="w-4 h-4 mr-2" />
                             Delete Chat history
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={onDelete} className="text-red-500">
-                            <Trash className="w-4 h-4 mr-2" />
-                            Delete
-                        </DropdownMenuItem>
+
                     </DropdownMenuContent>
                 </DropdownMenu>
             ) : (
