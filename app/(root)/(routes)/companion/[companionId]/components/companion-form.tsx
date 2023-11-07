@@ -5,7 +5,7 @@ import axios, { AxiosResponse } from "axios";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
-import { Wand2,Trash2 } from "lucide-react";
+import { Wand2, Trash2 } from "lucide-react";
 import { Category, Companion, Voice } from "@prisma/client";
 //import { BotAvatarForm } from "@/components/bot-avatar-form";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
@@ -88,15 +88,15 @@ export const CompanionForm = ({
     const [sampleUrl, setSampleUrl] = useState(""); // State variable to store the sample URL
     const [imageUrl, setImageUrl] = useState(initialData?.src || "/placeholder.svg");
     //const [newImageUrl, setNewImageUrl] = useState('');
-    
+
     const onDelete = async () => {
         try {
             await axios.delete(`/api/companion/${initialData?.id}`);
             //toast({
             //    description: "Success."
             //});
-            //router.refresh();
-            //router.push("/");
+            router.refresh();
+            router.push("/");
         } catch (error) {
             toast({
                 variant: "destructive",
