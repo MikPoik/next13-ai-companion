@@ -15,6 +15,8 @@ export async function POST(req: Request) {
     const body = await req.text()
     const signature = headers().get("Stripe-Signature") as string
 
+
+
     let event: Stripe.Event
 
     try {
@@ -26,8 +28,9 @@ export async function POST(req: Request) {
     } catch (error: any) {
         return new NextResponse(`Webhook Error: ${error.message}`, { status: 400 })
     }
-
+    //console.log("[STRIPE EVENT]", event);
     const session = event.data.object as Stripe.Checkout.Session
+    //console.log("[STRIPE SESSION]", session);
 
     if (event.type === "checkout.session.completed") {
         const subscription = await stripe.subscriptions.retrieve(
@@ -37,7 +40,7 @@ export async function POST(req: Request) {
         if (!session?.metadata?.userId) {
             return new NextResponse("User id is required", { status: 400 });
         }
-
+        console.log("[STRIPE CREATE SUBSCRIPTION]");
         var user_sub = await prismadb.userSubscription.create({
             data: {
                 userId: session?.metadata?.userId,
@@ -109,6 +112,36 @@ export async function POST(req: Request) {
             },
         });
     }
+    // Added condition for Stripe event: customer.subscription.updated
+    if (event.type === "customer.subscription.updated") {
+        console.log("subscription update event");
+        if (session.subscription) {
+            const subscription = await stripe.subscriptions.retrieve(
+                session.subscription as string
+            )
 
-    return new NextResponse(null, { status: 200 })
-};
+        } else {
+            console.log('session.subscription is undefined, retrieve event.')
+            //console.log(event.data.object.id)
+
+            if ((event.data.object as any).cancel_at_period_end && (event.data.object as any).canceled_at) {
+                let canceled = (event.data.object as any).cancel_at_period_end;
+                let cancel_timestamp = (event.data.object as any).canceled_at;
+                let sub_id = (event.data.object as any).id;
+                // use the value of reason
+                console.log("[STRIPE SUB CANCELED]", canceled, cancel_timestamp);
+                // delete subscription from db
+                await prismadb.userSubscription.delete({
+                    where: {
+                        stripeSubscriptionId: sub_id,
+                    },
+                });
+            }
+            else {
+                console.log("[STRIPE UNHANDLED SUB EVENT]");
+            }
+
+        }
+        return new NextResponse(null, { status: 200 })
+    };
+}

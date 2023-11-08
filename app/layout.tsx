@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import { ClerkProvider } from '@clerk/nextjs'
-
+import GoogleAnalytics from '@/components/google-analytics'
 import { cn } from '@/lib/utils';
 import { ThemeProvider } from '@/components/theme-provider'
 import { Toaster } from '@/components/ui/toaster';
@@ -12,26 +12,27 @@ import './globals.css'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'truluv.me',
-  description: 'Your customized companions.',
+    title: 'truluv.me',
+    description: 'Your customized companions.',
 }
 
 export default function RootLayout({
-  children,
+    children,
 }: {
-  children: React.ReactNode
+    children: React.ReactNode
 }) {
-  return (
-    <ClerkProvider>
-      <html lang="en">
-        <body className={cn("bg-secondary", inter.className)}>
-          <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
-            <ProModal />
-            {children}
-            <Toaster />
-          </ThemeProvider>    
-        </body>
-      </html>
-    </ClerkProvider>
-  )
+    return (
+        <ClerkProvider>
+            <html lang="en">
+                <body className={cn("bg-secondary", inter.className)}>
+                    <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
+                        <ProModal />
+                        <GoogleAnalytics />
+                        {children}
+                        <Toaster />
+                    </ThemeProvider>
+                </body>
+            </html>
+        </ClerkProvider>
+    )
 }
