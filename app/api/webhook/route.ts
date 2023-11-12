@@ -15,8 +15,6 @@ export async function POST(req: Request) {
     const body = await req.text()
     const signature = headers().get("Stripe-Signature") as string
 
-
-
     let event: Stripe.Event
 
     try {
@@ -28,9 +26,9 @@ export async function POST(req: Request) {
     } catch (error: any) {
         return new NextResponse(`Webhook Error: ${error.message}`, { status: 400 })
     }
-    //console.log("[STRIPE EVENT]", event);
+    console.log("[STRIPE EVENT]");
     const session = event.data.object as Stripe.Checkout.Session
-    //console.log("[STRIPE SESSION]", session);
+    console.log("[STRIPE SESSION]");
 
     if (event.type === "checkout.session.completed") {
         const subscription = await stripe.subscriptions.retrieve(
@@ -52,6 +50,8 @@ export async function POST(req: Request) {
                 ),
             },
         })
+        console.log("[STRIPE CREATE SUBSCRIPTION END, UPDATE BALANCE]");
+
         await prismadb.userBalance.upsert({
             where: {
                 userId: user_sub.userId
@@ -75,42 +75,65 @@ export async function POST(req: Request) {
     }
 
     if (event.type === "invoice.payment_succeeded") {
-        const subscription = await stripe.subscriptions.retrieve(
-            session.subscription as string
-        )
+        // Retrieve the invoice object from Stripe event
+        console.log("[STRIPE INVOICE PAYMENT]");
+        const invoice = event.data.object as Stripe.Invoice;
+        console.log("[INVOICE]");
+        // Check if the invoice has a subscription ID
+        if (!invoice.subscription) {
+            return new NextResponse("Subscription id is required", { status: 400 });
+        }
 
-        var sub = await prismadb.userSubscription.update({
+        // Retrieve the subscription details from Stripe using the subscription ID.
+        const subscription = await stripe.subscriptions.retrieve(
+            invoice.subscription as string
+        );
+        console.log("[SUBSCRIPTION]");
+
+        const existingSub = await prismadb.userSubscription.findUnique({
             where: {
                 stripeSubscriptionId: subscription.id,
             },
-            data: {
-                stripePriceId: subscription.items.data[0].price.id,
-                stripeCurrentPeriodEnd: new Date(
-                    subscription.current_period_end * 1000
-                ),
-            },
-        })
-
-        await prismadb.userBalance.upsert({
-            where: {
-                userId: sub.userId
-            },
-            update:
-            {
-                tokenCount: 0,
-                messageCount: 0,
-                messageLimit: 7500,
-                tokenLimit: 100000
-
-            },
-            create: {
-                userId: sub.userId,
-                tokenCount: 0,
-                messageCount: 0,
-                messageLimit: 7500,
-                tokenLimit: 100000
-            },
         });
+
+        if (existingSub) {
+            const sub = await prismadb.userSubscription.update({
+                where: {
+                    stripeSubscriptionId: subscription.id,
+                },
+                data: {
+                    stripePriceId: subscription.items.data[0].price.id,
+                    stripeCurrentPeriodEnd: new Date(
+                        subscription.current_period_end * 1000
+                    ),
+                },
+            });
+            await prismadb.userBalance.upsert({
+                where: {
+                    userId: sub.userId
+                },
+                update:
+                {
+                    tokenCount: 0,
+                    messageCount: 0,
+                    messageLimit: 7500,
+                    tokenLimit: 100000
+
+                },
+                create: {
+                    userId: sub.userId,
+                    tokenCount: 0,
+                    messageCount: 0,
+                    messageLimit: 7500,
+                    tokenLimit: 100000
+                },
+            });
+        } else {
+            // Handle the case where the subscription doesn't exist
+            // One option could be to create a new subscription record
+            console.log("[NO EXISTING SUB TO UPDATE]");
+        }
+
     }
     // Added condition for Stripe event: customer.subscription.updated
     if (event.type === "customer.subscription.updated") {
@@ -131,17 +154,18 @@ export async function POST(req: Request) {
                 // use the value of reason
                 console.log("[STRIPE SUB CANCELED]", canceled, cancel_timestamp);
                 // delete subscription from db
-                await prismadb.userSubscription.delete({
-                    where: {
-                        stripeSubscriptionId: sub_id,
-                    },
-                });
+                //await prismadb.userSubscription.delete({
+                //    where: {
+                //        stripeSubscriptionId: sub_id,
+                //    },
+                //});
             }
             else {
                 console.log("[STRIPE UNHANDLED SUB EVENT]");
             }
 
         }
-        return new NextResponse(null, { status: 200 })
+
     };
+    return new NextResponse(null, { status: 200 })
 }
