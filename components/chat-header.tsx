@@ -68,7 +68,7 @@ export const ChatHeader = ({
     return (
         <div className="flex w-full justify-between items-center border-b border-primary/10 pb-4">
             <div className="flex gap-x-2 items-center">
-                <Button onClick={() => router.back()} size="icon" variant="ghost">
+                    <Button onClick={() => router.push('/')} size="icon" variant="ghost">
                     <ChevronLeft className="h-8 w-8" />
                 </Button>
                 <BotAvatar src={companion.src} />
@@ -80,7 +80,7 @@ export const ChatHeader = ({
                         </div>
                     </div>
                     <p className="text-xs text-muted-foreground">
-                        <span className="text-xs text-muted-foreground">There may be a delay on first response generation. Everything bot writes is made up.</span>
+                        <span className="text-xs text-muted-foreground">{companion.description}</span>
                     </p>
                 </div>
             </div>

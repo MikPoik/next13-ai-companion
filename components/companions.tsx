@@ -65,10 +65,10 @@ export const Companions = ({
                                 </p>
                             </CardHeader>
                             <CardFooter className="flex items-center justify-between text-xs text-muted-foreground">
-                                {item.model === 'NousResearch/Nous-Hermes-Llama2-13b' || item.model === 'zephyr-chat'? (
-                                    <span title="NSFW content enabled" ><ShieldOff size={16} /></span>
-                                ) : (
+                                {item.model === 'gpt-3.5-turbo-0613' ? (
                                     <span title="NSFW content disabled" ><Shield size={16} /></span>
+                                ) : (
+                                    <span title="NSFW content enabled" ><ShieldOff size={16} /></span>
                                 )
                                 }
                                 |

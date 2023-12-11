@@ -34,7 +34,7 @@ export function ChatBlock({ text, mimeType, url, id }: {
     }
 
     return (
-        <p className="text-sm text-gray-200 pb-2">
+        <p className="text-sm pb-2">
             {internalComponent}
         </p>
     );

@@ -459,8 +459,11 @@ export const CompanionForm = ({
                                         </FormControl>
                                         <SelectContent>
 
-                                            <SelectItem key="NousResearch/Nous-Hermes-Llama2-13b" value="NousResearch/Nous-Hermes-Llama2-13b">Llama2 (NSFW content)</SelectItem>
-                                            <SelectItem key="zephyr-chat" value="zephyr-chat">Zephyr (NSFW content)</SelectItem>
+                                            <SelectItem key="NousResearch/Nous-Hermes-Llama2-13b" value="NousResearch/Nous-Hermes-Llama2-13b">Llama2 13b (NSFW content)</SelectItem>
+                                            <SelectItem key="NousResearch/Nous-Hermes-Llama2-70b" value="NousResearch/Nous-Hermes-Llama2-70b">Llama2 70b (NSFW content)</SelectItem>
+                                        <SelectItem key="teknium/OpenHermes-2-Mistral-7B" value="teknium/OpenHermes-2-Mistral-7B">Mistral 7b (NSFW content)</SelectItem>
+                                            <SelectItem key="Gryphe/MythoMax-L2-13b" value="Gryphe/MythoMax-L2-13b">MythoMax 13b (NSFW content)</SelectItem>
+                                            <SelectItem key="zephyr-chat" value="zephyr-chat">Zephyr 7b (NSFW content)</SelectItem>
                                             <SelectItem key="gpt-3.5-turbo-0613" value="gpt-3.5-turbo-0613">GPT-3.5</SelectItem>
                                         </SelectContent>
                                     </Select>
