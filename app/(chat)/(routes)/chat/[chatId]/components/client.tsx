@@ -1,19 +1,16 @@
 "use client";
-
 import { useCompletion } from "ai/react";
 import { FormEvent, useState } from "react";
 import { Companion, Message } from "@prisma/client";
 import { useRouter } from "next/navigation";
-
 import { ChatForm } from "@/components/chat-form";
 import { ChatHeader } from "@/components/chat-header";
 import { ChatMessages } from "@/components/chat-messages";
 import { ChatMessageProps } from "@/components/chat-message";
 import { responseToChatBlocks } from "@/components/ChatBlock";
 import { Button } from "@/components/ui/button";
+import { SendHorizonal, Sparkles } from "lucide-react";
 import { useProModal } from "@/hooks/use-pro-modal";
-import { Sparkles } from "lucide-react";
-
 interface ChatClientProps {
   isPro: boolean;
   companion: Companion & {
@@ -23,7 +20,6 @@ interface ChatClientProps {
     }
   };
 };
-
 export const ChatClient = ({
   isPro,
   companion,
@@ -34,7 +30,6 @@ export const ChatClient = ({
     role: message.role,
     content: responseToChatBlocks(message.content)
   })));
-
   const {
     input,
     isLoading,
@@ -48,36 +43,23 @@ export const ChatClient = ({
         role: "system",
         content: responseToChatBlocks(completion)
       };
-
       setMessages((current) => [...current, systemMessage]);
       setInput("");
-
       router.refresh();
     },
   });
-
   const onSubmit = (e: FormEvent<HTMLFormElement>) => {
     const userMessage: ChatMessageProps = {
       role: "user",
       content: responseToChatBlocks(input)
     };
-
     setMessages((current) => [...current, userMessage]);
-
     handleSubmit(e);
   }
-
   return (
     <div className="flex flex-col h-full p-4 space-y-2">
-
       <ChatHeader companion={companion} />
-       {//!isPro && (
-        //<Button onClick={proModal.onOpen} size="sm" variant="premium">
-          //Upgrade to increase message limit
-         // <Sparkles className="h-4 w-4 fill-white text-white ml-2" />
-       // </Button>
-      //)
-       }
+
       <ChatMessages
         companion={companion}
         isLoading={isLoading}
@@ -85,12 +67,13 @@ export const ChatClient = ({
       />
 
       <ChatForm
+        isPro={isPro}
         isLoading={isLoading}
         input={input}
         handleInputChange={handleInputChange}
+        companion={companion}
         onSubmit={onSubmit}
       />
-
     </div>
   );
 };

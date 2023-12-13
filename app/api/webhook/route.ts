@@ -162,6 +162,28 @@ export async function POST(req: Request) {
             }
             else {
                 console.log("[STRIPE UNHANDLED SUB EVENT]");
+                  const subscriptionUpdateData = event.data.object as Stripe.Subscription;
+
+                  if (subscriptionUpdateData.status === 'active') {
+                    // Your logic here to renew the subscription in your database
+                    // For example, update the `stripeCurrentPeriodEnd` field and other relevant fields
+                    const updatedSub = await prismadb.userSubscription.update({
+                      where: {
+                        stripeSubscriptionId: subscriptionUpdateData.id,
+                      },
+                      data: {
+                        // Update necessary fields to reflect the renewal
+                        stripeCurrentPeriodEnd: new Date(subscriptionUpdateData.current_period_end * 1000),
+                        // ... add other fields if necessary
+                        
+                      },
+                    });
+                      console.log("[STRIPE SUB RENEWED]");
+                    // Perform any additional logic you might need after renewing the subscription
+                    // For example: logging, notifying the user, etc.
+                  } else {
+                    // Handle other subscription update scenarios
+                  }
             }
 
         }

@@ -4,9 +4,8 @@ import Link from "next/link"
 import { Companion } from "@prisma/client"
 import { MessagesSquare, ImagePlus, ImageOff, Camera, CameraOff, EyeOff, Eye, ShieldOff, Shield, VolumeX, Volume2 } from "lucide-react";
 import { useEffect, useState } from "react";
-
+import { Sparkles } from "lucide-react";
 import { Card, CardFooter, CardHeader } from "@/components/ui/card"
-
 interface CompanionsProps {
     data: (Companion & {
         _count: {
@@ -14,17 +13,13 @@ interface CompanionsProps {
         },
     })[];
 }
-
 export const Companions = ({
     data
 }: CompanionsProps) => {
-    // add a new state variable here, to initially set `ageVerificationState` to `null`
     const [ageVerificationState, setAgeVerificationState] = useState<string | null>(null);
     useEffect(() => {
-        // gets age-verification-state from localStorage once the component is mounted.
         setAgeVerificationState(localStorage.getItem('age-verification-state'));
-    }, []); // pass empty dependencies to ensure it runs once after the component mounts.
-
+    }, []); 
     if (data.length === 0) {
         return (
             <div className="pt-10 flex flex-col items-center justify-center space-y-3">
@@ -40,8 +35,6 @@ export const Companions = ({
             </div>
         )
     }
-
-
     return (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2 pb-10">
             {ageVerificationState === 'true' &&
@@ -58,13 +51,26 @@ export const Companions = ({
                                     />
                                 </div>
                                 <p className="font-bold">
-                                    {item.name}
+                                        {item.name}
                                 </p>
                                 <p className="text-xs">
                                     {item.description}
                                 </p>
+                                <p>
+                                    <div className="flex items-center">
+                                        <span className="mr-2" title="Total messages">
+                                            <MessagesSquare className="w-3 h-3" />
+                                        </span>
+                                        <span className="text-xs font-normal">{ item._count?.messages ?? 0}</span>  
+                                    </div>
+
+                                </p>
                             </CardHeader>
                             <CardFooter className="flex items-center justify-between text-xs text-muted-foreground">
+                                {item.model !== 'gpt-3.5-turbo-0613' && item.model !== 'zephyr-chat' && (
+                                    <span title="Pro plan required"><div className="flex items-center"><Sparkles className="h-4 w-4 fill-white text-white ml-2 mr-2 opacity-70" /><span className="text-xs"></span>|</div></span>
+                                )}
+                                
                                 {item.model === 'gpt-3.5-turbo-0613' ? (
                                     <span title="NSFW content disabled" ><Shield size={16} /></span>
                                 ) : (
@@ -84,10 +90,8 @@ export const Companions = ({
                                 |
                                 {item.voiceId === 'none' ? (
                                     <span title="Voice disabled"><VolumeX size={16} /></span>
-                                ) : (<span title="Voice enabled" ><Volume2 size={16} /></span>)}|
-                                <div className="flex items-center">
-                                    <span title="Total messages" ><MessagesSquare className="w-3 h-3 mr-1" /></span>{item._count.messages}
-                                </div>
+                                ) : (<span title="Voice enabled" ><Volume2 size={16} /></span>)}
+
                             </CardFooter>
                         </Link>
                     </Card>
@@ -95,4 +99,4 @@ export const Companions = ({
             }
         </div >
     )
-} 
+}
