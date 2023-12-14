@@ -10,6 +10,12 @@ dotenv.config({ path: `.env` });
 
 
 export const maxDuration = 120; //2 minute timeout
+function uuidv4() {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+      var r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
+      return v.toString(16);
+  });
+}
 
 export async function PATCH(
     req: Request,
@@ -45,7 +51,18 @@ export async function PATCH(
             }
 
         });
+        const env_packageName = process.env.STEAMSHIP_PACKAGE || packageName;
+        let llm_model = companion.model;
+        let instance_handle = companion.instanceHandle;
+        
+        if (body['model'] != companion.model) {
+            llm_model = body['model'];
+            instance_handle = user.id.replace("user_", "").toLowerCase() + "-" +uuidv4().replace(/-/g, "").toLowerCase();
+            const client = await Steamship.use(env_packageName, instance_handle, { llm_model: llm_model, create_images: String(createImages) }, undefined, true, companion.workspaceName);
+        }
 
+        //console.log(llm_model);
+        //console.log(instance_handle);
 
         if (backstory != null && companion) {
             const indexTextResponse = await indexTextSteamship(
@@ -53,7 +70,7 @@ export async function PATCH(
                 backstory,
                 user.id,
                 companion.packageName,
-                companion.instanceHandle,
+                instance_handle,
                 companion.workspaceName,
                 personality,
                 name,
@@ -62,7 +79,7 @@ export async function PATCH(
                 selfiePre,
                 selfiePost,
                 seed,
-                companion.model,
+                llm_model,
                 imageModel,
                 createImages,
                 voiceId);
@@ -76,20 +93,22 @@ export async function PATCH(
                 userId: user.id,
             },
             data: {
-                name,
-                categoryId,
+                categoryId:categoryId,
+                name:name,
                 userId: user.id,
                 userName: firstName,
-                src,
-                description,
-                personality,
-                seed,
-                isPublic,
-                behaviour,
-                selfiePost,
-                selfiePre,
-                imageModel,
-                voiceId
+                src:src,
+                description:description,
+                personality:personality,
+                seed:seed,
+                isPublic:isPublic,
+                behaviour:behaviour,
+                selfiePost:selfiePost,
+                selfiePre:selfiePre,
+                imageModel:imageModel,
+                voiceId:voiceId,
+                model:llm_model,
+                instanceHandle:instance_handle,
             }
         });
         return NextResponse.json(companion);
