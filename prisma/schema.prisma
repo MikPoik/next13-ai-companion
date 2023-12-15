@@ -48,6 +48,7 @@ model Companion {
   voiceId        String   @default("none")
   category       Category  @relation(fields: [categoryId], references: [id])
   voice          Voice  @relation(fields: [voiceId], references: [id])
+  backstory      String  @db.LongText
   messages       Message[]
 
   @@index([categoryId])

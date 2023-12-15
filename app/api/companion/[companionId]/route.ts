@@ -6,6 +6,7 @@ import { checkSubscription } from "@/lib/subscription";
 //import { generateAvatarSteamship } from "@/components/SteamshipGenerateAvatar";
 import { indexTextSteamship, } from "@/components/SteamshipIndexText";
 import dotenv from "dotenv";
+import { create } from "domain";
 dotenv.config({ path: `.env` });
 
 
@@ -51,11 +52,18 @@ export async function PATCH(
             }
 
         });
+        
+        // Check if the companion was not found and return an error if so
+        if (!companion) {
+            return new NextResponse("Companion not found", { status: 404 });
+        }
+        
+        const packageName = "backend-test-bot";
         const env_packageName = process.env.STEAMSHIP_PACKAGE || packageName;
         let llm_model = companion.model;
         let instance_handle = companion.instanceHandle;
         
-        if (body['model'] != companion.model) {
+        if (body['model'] != companion.model || body[createImages] != companion.createImages) {
             llm_model = body['model'];
             instance_handle = user.id.replace("user_", "").toLowerCase() + "-" +uuidv4().replace(/-/g, "").toLowerCase();
             const client = await Steamship.use(env_packageName, instance_handle, { llm_model: llm_model, create_images: String(createImages) }, undefined, true, companion.workspaceName);
@@ -63,29 +71,41 @@ export async function PATCH(
 
         //console.log(llm_model);
         //console.log(instance_handle);
+        let newBackstory = ""
 
-        if (backstory != null && companion) {
-            const indexTextResponse = await indexTextSteamship(
-                'index_text',
-                backstory,
-                user.id,
-                companion.packageName,
-                instance_handle,
-                companion.workspaceName,
-                personality,
-                name,
-                description,
-                behaviour,
-                selfiePre,
-                selfiePost,
-                seed,
-                llm_model,
-                imageModel,
-                createImages,
-                voiceId);
-            //console.log(indexTextResponse);
-            const indexTextResponseBlocks = JSON.parse(indexTextResponse);
-            //console.log(indexTextResponseBlocks);
+        if (backstory.length > companion.backstory.length) {
+            newBackstory = backstory.slice(companion.backstory.length);
+            if (newBackstory.length > 0) {
+                let text_to_index = newBackstory;
+                newBackstory = companion.backstory + "\n"+ newBackstory;
+                if ( companion) {
+                    const indexTextResponse = await indexTextSteamship(
+                        'index_text',
+                        text_to_index,
+                        user.id,
+                        companion.packageName,
+                        instance_handle,
+                        companion.workspaceName,
+                        personality,
+                        name,
+                        description,
+                        behaviour,
+                        selfiePre,
+                        selfiePost,
+                        seed,
+                        llm_model,
+                        imageModel,
+                        createImages,
+                        voiceId);
+                    //console.log(indexTextResponse);
+                    const indexTextResponseBlocks = JSON.parse(indexTextResponse);
+                    //console.log(indexTextResponseBlocks);
+                }
+            }
+
+        }
+        else{
+            newBackstory = companion.backstory;
         }
         const updateCompanion = await prismadb.companion.update({
             where: {
@@ -109,6 +129,8 @@ export async function PATCH(
                 voiceId:voiceId,
                 model:llm_model,
                 instanceHandle:instance_handle,
+                backstory:newBackstory,
+                createImages:createImages,
             }
         });
         return NextResponse.json(companion);

@@ -1,6 +1,7 @@
 
-async function disableVoices() {
+async function seedBackstory() {
   const { PrismaClient } = require('@prisma/client');
+
 
   const prisma = new PrismaClient();
 
@@ -8,29 +9,20 @@ async function disableVoices() {
     // Fetch all Companion records
     const companions = await prisma.companion.findMany();
 
-    // Update the voiceId for each Companion
+    // Update the instanceHandle for each Companion
     for (const companion of companions) {
-      console.log(companion.name);
-
+      // Remove "user_" from the userId
+      console.log(companion.name)
       // Update the record in the database
       await prisma.companion.update({
         where: { id: companion.id },
         data: {
-          voiceId: 'none',
+          backstory: "\n",
         },
       });
     }
 
-    // Delete from the Voice table where name is not "none"
-    await prisma.voice.deleteMany({
-      where: {
-        name: {
-          not: "none"
-        },
-      },
-    });
-
-    console.log('Voices disabled successfully.');
+    console.log('backstory default updated successfully');
   } catch (error) {
     console.error('Error updating instanceHandles:', error);
   } finally {
@@ -38,4 +30,4 @@ async function disableVoices() {
   }
 }
 
-disableVoices();
+seedBackstory();

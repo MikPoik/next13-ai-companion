@@ -367,7 +367,7 @@ export const CompanionForm = ({
                                             </FormLabel>
                                         </FormControl>
                                         <FormDescription>
-                                            Bot can send images based on appearance. Generated images cost extra tokens. This option cannot be edited after creation.
+                                            Companion can send selfies based on appearance. Generated images cost extra tokens.
                                         </FormDescription>
                                         <FormMessage />
                                     </FormItem>
@@ -535,7 +535,7 @@ export const CompanionForm = ({
                             <h3 className="text-lg font-medium">Other settings</h3>
                         </div>
                         <Separator className="bg-primary/10" />
-                    </div>{/*
+                    </div>
                     <FormField
                         control={form.control}
                         name="voiceId"
@@ -580,7 +580,7 @@ export const CompanionForm = ({
                                 <FormMessage />
                             </FormItem>
                         )}
-                    /> */}
+                    /> 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <FormField
                             name="isPublic"

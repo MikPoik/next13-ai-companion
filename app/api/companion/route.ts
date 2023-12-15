@@ -100,7 +100,8 @@ export async function POST(req: Request) {
                 model: llm_model,
                 createImages,
                 imageModel,
-                voiceId
+                voiceId,
+                backstory
             }
         });
 
