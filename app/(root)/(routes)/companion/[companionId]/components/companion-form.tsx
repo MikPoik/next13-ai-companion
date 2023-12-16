@@ -316,14 +316,14 @@ export const CompanionForm = ({
                                             </FormControl>
                                             <SelectContent>
                                                 <SelectItem key="realistic-vision-v3" value="realistic-vision-v3">Realistic-Vision-v3</SelectItem>
-                                                <SelectItem key="absolute-reality-v1-8-1" value="absolute-reality-v1-8-1">Absolute-Reality-v1-8-1</SelectItem>
+                                                <SelectItem key="absolute-reality-v1-8-1" value="absolute-reality-v1-8-1">Absolute-Reality-v1-8-1 (Pro plan)</SelectItem>
                                                 <SelectItem key="dark-sushi-mix-v2-25" value="dark-sushi-mix-v2-25">Dark-Sushi-mix-v2-25</SelectItem>
-                                                <SelectItem key="arcane-diffusion" value="arcane-diffusion">Arcane-Diffusion</SelectItem>
-                                                <SelectItem key="van-gogh-diffusion" value="van-gogh-diffusion">Van Gogh Diffusion</SelectItem>
-                                                <SelectItem key="neverending-dream" value="neverending-dream">Neverending Dream</SelectItem>
-                                                <SelectItem key="mo-di-diffusion" value="mo-di-diffusion">Modern Disney Diffusion</SelectItem>
-                                                <SelectItem key="synthwave-punk-v2" value="synthwave-punk-v2">Synthwave Punk V2</SelectItem>
-                                                <SelectItem key="dream-shaper-v8" value="dream-shaper-v8">Dream Shaper V8</SelectItem>
+                                                <SelectItem key="arcane-diffusion" value="arcane-diffusion">Arcane-Diffusion (Pro plan)</SelectItem>
+                                                <SelectItem key="van-gogh-diffusion" value="van-gogh-diffusion">Van Gogh Diffusion (Pro plan)</SelectItem>
+                                                <SelectItem key="neverending-dream" value="neverending-dream">Neverending Dream (Pro plan)</SelectItem>
+                                                <SelectItem key="mo-di-diffusion" value="mo-di-diffusion">Modern Disney Diffusion (Pro plan)</SelectItem>
+                                                <SelectItem key="synthwave-punk-v2" value="synthwave-punk-v2">Synthwave Punk V2 (Pro plan)</SelectItem>
+                                                <SelectItem key="dream-shaper-v8" value="dream-shaper-v8">Dream Shaper V8 (Pro plan)</SelectItem>
 
                                             </SelectContent>
                                         </Select>
@@ -575,7 +575,7 @@ export const CompanionForm = ({
                                     </button>
                                 </div>
                                 <FormDescription>
-                                    Select a voice for your AI (&quot;none&quot; means voice is disabled)
+                                    Pro plan only. Select a voice for your AI (&quot;none&quot; means voice is disabled)
                                 </FormDescription>
                                 <FormMessage />
                             </FormItem>

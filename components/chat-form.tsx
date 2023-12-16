@@ -14,6 +14,8 @@ interface ChatFormProps {
     isPro: boolean;
     companion: {
         model: string;
+        voiceId: string; 
+        imageModel: string;
         // ... other companion properties
     };
 }
@@ -52,7 +54,7 @@ export const ChatForm = ({
     };
 
 
-    const canSendMessage = isPro || companion.model === 'zephyr-chat';
+    const canSendMessage =  isPro || (companion.model === 'zephyr-chat' && companion.voiceId === 'none' && (companion.imageModel === 'realistic-vision-v3' || companion.imageModel === 'dark-sushi-mix-v2-25'));
     const SubmitButtonIcon = canSendMessage ? SendHorizonal : Sparkles;
 
     return (

@@ -5,6 +5,7 @@ import { MimeTypes, Steamship } from '@steamship/client';
 import prismadb from "@/lib/prismadb";
 import { UndoIcon } from "lucide-react";
 import axios, { AxiosError } from 'axios';
+import { checkSubscription } from "@/lib/subscription";
 dotenv.config({ path: `.env` });
 
 
@@ -54,7 +55,8 @@ async function getSteamshipResponse(
     model: string,
     image_model: string,
     create_images: boolean,
-    voice_id: string
+    voice_id: string,
+    is_pro:string
 
 ): Promise<string> {
     const maxRetryCount = 3; // Maximum number of retry attempts
@@ -75,7 +77,8 @@ async function getSteamshipResponse(
                 seed,
                 model,
                 image_model,
-                voice_id
+                voice_id,
+                is_pro
             }) as Promise<SteamshipApiResponse>);
             //console.log(response.data);
             const steamshipBlock = response.data;
@@ -106,7 +109,7 @@ export async function POST(
     try {
         const { prompt } = await request.json();
         const user = await currentUser();
-
+        const isPro = await checkSubscription();
         if (!user || !user.id) {
             return new NextResponse("Unauthorized", { status: 401 });
         }
@@ -141,6 +144,7 @@ export async function POST(
             return new NextResponse("Companion not found", { status: 404 });
         }
 
+        const strIsPro = String(isPro);
         const steamshipResponse = await getSteamshipResponse(
             prompt,
             user.id,
@@ -157,7 +161,8 @@ export async function POST(
             companion.model,
             companion.imageModel,
             companion.createImages,
-            companion.voiceId);
+            companion.voiceId,
+            strIsPro);
 
         const responseBlocks = JSON.parse(steamshipResponse);
 
@@ -217,7 +222,7 @@ export async function POST(
                 },
                 create: {
                     userId: user.id,
-                    tokenCount: 1,
+                    tokenCount: token_count + imageTokens + voiceTokens,
                     messageCount: 1,
                     messageLimit: 20,
                     tokenLimit: 10000,
