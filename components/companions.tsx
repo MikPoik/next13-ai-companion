@@ -56,7 +56,17 @@ export const Companions = ({
                                         />
                                     </div>
                                     <p className="font-bold">
-                                        {item.name}
+                                         <div className=" flex items-center justify-center text-muted-foreground mb-4">
+                                        <span className="ml-2 mr-2">{item.name}</span>
+                                        {(
+                                            (item.model === 'zephyr-chat' || item.model === 'gpt-3.5-turbo-0613') &&
+                                            item.voiceId === 'none' &&
+                                            (item.imageModel === 'realistic-vision-v3' || item.imageModel === 'dark-sushi-mix-v2-25')
+                                        ) ? (
+                                            <span title="Companion is free"></span>
+                                        ) : (
+                                            <span title="Pro plan required"><div className="flex items-center"><Sparkles className="h-4 w-4 fill-white text-white opacity-70"/><span className="text-xs"></span></div></span>
+                                        )}</div>    
                                     </p>
                                     <p className="text-xs">
                                         {item.description}
@@ -66,20 +76,11 @@ export const Companions = ({
 
                                 <div className="mt-auto">
                                     <div className=" flex items-center justify-center text-muted-foreground mb-4">
-                                        <span title="Total messages" ><MessagesSquare size={15} className=" mr-2" title="Total messages" /></span>
+                                        <span title="Total messages" ><MessagesSquare size={15} className=" mr-2" /></span>
                                         <span className="text-xs font-normal">{item._count.messages ?? 0}</span>
                                     </div>
                                     <CardFooter className="flex items-center justify-between text-xs text-muted-foreground">
-                                        
-                                        {(
-                                            (item.model === 'zephyr-chat' || item.model === 'gpt-3.5-turbo-0613') &&
-                                            item.voiceId === 'none' &&
-                                            (item.imageModel === 'realistic-vision-v3' || item.imageModel === 'dark-sushi-mix-v2-25')
-                                        ) ? (
-                                            <span title="Companion is free"></span>
-                                        ) : (
-                                            <span title="Pro plan required"><div className="flex items-center"><Sparkles className="h-4 w-4 fill-white text-white opacity-70"/><span className="text-xs"></span></div></span>
-                                        )}
+
 
                                         {item.model === 'gpt-3.5-turbo-0613' ? (
                                             <span title="NSFW content disabled" ><Shield size={16} /></span>
@@ -87,17 +88,17 @@ export const Companions = ({
                                             <span title="NSFW content enabled" ><ShieldOff size={16} /></span>
                                         )
                                         }
-                                        
+                                        |
                                         {item.isPublic ? (
                                             <span title="Bot is public"><Eye size={16} /></span>
                                         ) : (
                                             <span title="Bot is private"><EyeOff size={16} /></span>
                                         )}
-                                        
+                                        |
                                         {item.createImages ? (
                                             <span title="Image generation enabled"><ImagePlus size={16} /></span>
                                         ) : (<span title="Image generation disabled" ><ImageOff size={16} /></span>)}
-                                        
+                                        |
                                         {item.voiceId === 'none' ? (
                                             <span title="Voice disabled"><VolumeX size={16} /></span>
                                         ) : (<span title="Voice enabled" ><Volume2 size={16} /></span>)}
