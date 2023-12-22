@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import axios from "axios";
+import {  useRouter } from "next/navigation";
 
 import {
   Dialog,
@@ -19,28 +19,15 @@ import { useToast } from "@/components/ui/use-toast";
 export const ProModal = () => {
   const proModal = useProModal();
   const [isMounted, setIsMounted] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const { toast } = useToast();
+  const router = useRouter();
 
   useEffect(() => {
     setIsMounted(true);
   }, []);
 
-
-  const onSubscribe = async () => {
-    try {
-      setLoading(true);
-      const response = await axios.get("/api/stripe");
-
-      window.location.href = response.data.url;
-    } catch (error) {
-      toast({
-        description: "Something went wrong",
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
+  const onSubscribe = () => {
+    router.push("/settings");
+    proModal.onClose(); // Close the ProModal Dialog
   }
 
   if (!isMounted) {
@@ -63,7 +50,7 @@ export const ProModal = () => {
             * Better image resolution<br/>
             * More image generator models<br/>
             <br/>
-            
+
           </DialogDescription>
         </DialogHeader>
         <Separator />
@@ -71,7 +58,7 @@ export const ProModal = () => {
           <p className="text-2xl font-medium">
             $9<span className="text-sm font-normal">.99 / mo</span>
           </p>
-          <Button onClick={onSubscribe} disabled={loading} variant="premium">
+          <Button onClick={onSubscribe} variant="premium">
             Subscribe
           </Button>
         </div>
