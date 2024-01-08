@@ -1,11 +1,9 @@
 "use client";
-
 import axios from "axios";
-import { ChevronLeft, Edit, MessagesSquare, MoreVertical, Trash } from "lucide-react";
+import { ChevronLeft, Edit, MessagesSquare, MoreVertical, Trash, PhoneCall } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Companion, Message } from "@prisma/client";
 import { useUser } from "@clerk/nextjs";
-
 import { Button } from "@/components/ui/button";
 import { BotAvatar } from "@/components/bot-avatar";
 import {
@@ -15,8 +13,13 @@ import {
     DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/components/ui/use-toast";
+import { CallModal } from "./call-modal"; // Import CallModal component
+import { useProModal } from "@/hooks/use-pro-modal";
+import React, { useState } from "react"; // Import useState for managing CallModal visibility
+
 
 interface ChatHeaderProps {
+    isPro: boolean
     companion: Companion & {
         messages: Message[];
         _count: {
@@ -26,12 +29,15 @@ interface ChatHeaderProps {
 };
 
 export const ChatHeader = ({
+    isPro,
     companion,
 }: ChatHeaderProps) => {
     const router = useRouter();
     const { user } = useUser();
     const { toast } = useToast();
-
+    const [isCallModalOpen, setIsCallModalOpen] = useState(false); // State hook for CallModal visibility
+    
+    const proModal = useProModal(); // Use the useProModal hook
     const onDelete = async () => {
         try {
             await axios.delete(`/api/companion/${companion.id}`);
@@ -64,9 +70,12 @@ export const ChatHeader = ({
             });
         }
     }
-
+    const handlePhoneCallClick = () => {
+                setIsCallModalOpen(true);
+    };
     return (
         <div className="flex w-full justify-between items-center border-b border-primary/10 pb-4">
+            
             <div className="flex gap-x-2 items-center">
                     <Button onClick={() => router.push('/')} size="icon" variant="ghost">
                     <ChevronLeft className="h-8 w-8" />
@@ -84,6 +93,11 @@ export const ChatHeader = ({
                     </p>
                 </div>
             </div>
+            <div className="flex items-center gap-x-2">                
+            {/* Button to open CallModal */}
+                <Button onClick={handlePhoneCallClick} variant="secondary" size="icon">
+                    <PhoneCall />
+                </Button>
             {user?.id === companion.userId ? (
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
@@ -118,6 +132,12 @@ export const ChatHeader = ({
                     </DropdownMenuContent>
                 </DropdownMenu>
             )}
+            </div>
+            {/* Call Modal */}
+            <CallModal isOpen={isCallModalOpen} onClose={() => setIsCallModalOpen(false)} companionId={companion.id} />
+
+            
         </div>
+        
     );
 };

@@ -86,9 +86,18 @@ model UserBalance {
   tokenLimit   Int    @default(0)
   firstMessage DateTime?
   lastMessage  DateTime?
+  prePaidTokens Int @default(0)
 }
 
 enum Role {
   user
   system
+}
+
+model CallLog {
+    id        String @id @default(uuid())
+    userId    String
+    companionId String
+    duration    String?
+    status    String?
 }

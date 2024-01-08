@@ -4,6 +4,7 @@ import { NextResponse } from "next/server";
 import prismadb from "@/lib/prismadb";
 import { stripe } from "@/lib/stripe";
 import { absoluteUrl } from "@/lib/utils";
+
 import dotenv from "dotenv";
 dotenv.config({ path: `.env` });
 
@@ -27,15 +28,23 @@ export async function GET() {
             }
         })
 
+
         if (userSubscription && userSubscription.stripeCustomerId) {
-            const stripeSession = await stripe.billingPortal.sessions.create({
-                customer: userSubscription.stripeCustomerId,
-                return_url: settingsUrl,
-            })
-
-            return new NextResponse(JSON.stringify({ url: stripeSession.url }))
+            const DAY_IN_MS = 86_400_000;
+            const hasValidSubscription = userSubscription && userSubscription.stripePriceId &&
+            userSubscription.stripeCurrentPeriodEnd &&
+            userSubscription.stripeCurrentPeriodEnd.getTime() + DAY_IN_MS > Date.now();
+            if (hasValidSubscription) {
+                console.log("manage subscription");
+                const stripeSession = await stripe.billingPortal.sessions.create({
+                    customer: userSubscription.stripeCustomerId,
+                    return_url: settingsUrl,
+                })
+    
+                return new NextResponse(JSON.stringify({ url: stripeSession.url }))
+            }
         }
-
+        console.log("new subscription");
         const stripeSession = await stripe.checkout.sessions.create({
             success_url: settingsUrl,
             cancel_url: settingsUrl,

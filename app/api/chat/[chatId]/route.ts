@@ -121,7 +121,7 @@ export async function POST(
         });
         //console.log(balance);
         if (balance) {
-            if (balance.tokenCount > balance.tokenLimit) {
+            if (balance.tokenCount > balance.tokenLimit+balance.prePaidTokens) {
                 return NextResponse.json("Message limit exceeded, upgrade to Pro plan for increased limit.");
             }
         }
@@ -209,6 +209,7 @@ export async function POST(
                 voiceTokens = voiceTokens / 4;
             }
             const currentDateTime = new Date().toISOString();
+            
             await prismadb.userBalance.upsert({
                 where: {
                     userId: user.id
@@ -224,7 +225,7 @@ export async function POST(
                     userId: user.id,
                     tokenCount: token_count + imageTokens + voiceTokens,
                     messageCount: 1,
-                    messageLimit: 20,
+                    messageLimit: 1000,
                     tokenLimit: 10000,
                     firstMessage: currentDateTime,
                 },

@@ -49,6 +49,7 @@ export const ProModal = () => {
             * Voice messages <br/>
             * Better image resolution<br/>
             * More image generator models<br/>
+            * Live phone calls<br/>
             <br/>
 
           </DialogDescription>
@@ -58,10 +59,17 @@ export const ProModal = () => {
           <p className="text-2xl font-medium">
             $9<span className="text-sm font-normal">.99 / mo</span>
           </p>
+        </div> <br/>
+          <div className="flex justify-between"><span className="mx-1 font-medium">Or top-up tokens</span><br/>
+            </div>
+           <div className="flex justify-between">
+            <p className="text-2xl font-medium">
+              $6<span className="text-sm font-normal">.99 / mo</span>
+            </p></div>
           <Button onClick={onSubscribe} variant="premium">
             Subscribe
           </Button>
-        </div>
+        
       </DialogContent>
     </Dialog>
   );

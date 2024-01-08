@@ -1,4 +1,5 @@
 import { SubscriptionButton } from "@/components/subscription-button";
+import {TopUpButton} from "@/components/topup-button";
 import { checkSubscription } from "@/lib/subscription";
 import prismadb from "@/lib/prismadb";
 import { auth, currentUser,redirectToSignIn } from "@clerk/nextjs";
@@ -12,6 +13,7 @@ const SettingsPage = async () => {
   }
   var tokens = 0;
   var token_limit = 10000;
+  var prepaid_tokens = 0;
   if (user) {
     const balance =  await prismadb.userBalance.findUnique({
       where: {
@@ -21,6 +23,7 @@ const SettingsPage = async () => {
     if (balance) {
       tokens = balance.tokenCount;
       token_limit = balance.tokenLimit;
+      prepaid_tokens = balance.prePaidTokens;
     }
   }
   return ( 
@@ -42,10 +45,12 @@ const SettingsPage = async () => {
         <br/>
         </div>)}
     <br/>
+        <TopUpButton isPro={isPro} />
+    <br/>
     <br/>
     <h3 className="text-lg font-medium">Usage</h3>
     <div className="text-muted-foreground text-sm">
-    You are have used {tokens} tokens out of {token_limit}. 
+    You are have used {tokens} tokens out of {token_limit+prepaid_tokens}. 
     </div>
     </div>
    );

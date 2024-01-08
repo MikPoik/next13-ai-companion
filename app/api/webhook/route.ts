@@ -31,6 +31,7 @@ export async function POST(req: Request) {
     console.log("[STRIPE SESSION]");
 
     if (event.type === "checkout.session.completed") {
+        if (session.subscription) {
         const subscription = await stripe.subscriptions.retrieve(
             session.subscription as string
         )
@@ -73,7 +74,40 @@ export async function POST(req: Request) {
             },
         });
     }
-
+    else
+    {
+            // New logic for handling one-time token top-up payment
+            if (session.amount_total === 699) {
+                // Retrieve userId from the metadata
+                const userId = session.metadata?.userId;
+                if (!userId) {
+                    return new NextResponse("Metadata with user id is required for top-up", { status: 400 });
+                }
+                // Logic for adding 50,000 tokens to user's balance
+                await prismadb.userBalance.upsert({
+                    where: {
+                        userId: userId,
+                    },
+                    update: {
+                        tokenLimit: {
+                            increment: 50000,
+                        },
+                    },
+                    create: {
+                        userId: userId,
+                        tokenCount: 0,
+                        messageCount: 0,
+                        messageLimit: 1000,
+                        tokenLimit: 60000,
+                    },
+                });
+                console.log("[STRIPE TOKEN TOP-UP SUCCESSFUL]");
+            } else {
+                // Unhandled payment amount
+                console.log("[STRIPE UNHANDLED PAYMENT AMOUNT]", session.amount_total);
+            }
+        }
+    }
     if (event.type === "invoice.payment_succeeded") {
         // Retrieve the invoice object from Stripe event
         console.log("[STRIPE INVOICE PAYMENT]");
