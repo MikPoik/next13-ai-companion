@@ -61,25 +61,37 @@ export async function POST(req: Request) {
             data: messagesToCreate
         });
 
-
-        // Calculate cost in tokens (3$ per minute / 60 seconds per minute / $0.0001 per token)
-        const costPerSecond = (3 / 60) / 0.0001;
-        // Total cost in tokens
-        const cost = Math.ceil(costPerSecond * correctedDuration);
-        console.log('Cost:', cost);
         //update userBalance
+        
         const userBalance = await prismadb.userBalance.update({
             where: {
                 userId: userId
             },
             data: {
-                tokenCount: {
-                    increment: cost
+               callTime: {
+                    decrement: correctedDuration
                 }
             }
         });
         console.log(userBalance);
-        
+        // Check if the new userBalance's callTime is below 0 after decrementing
+        if (userBalance.callTime < 0) {
+            // Handle the situation when balance is below 0
+            // For example, you might want to set it to 0 or throw an error
+            // Here we will log it and potentially you could also send a warning to the user
+            console.warn(`User balance for userId ${userId} got negative after decrement.`);
+
+            // Reset the balance to 0 if it's negative (optional step)
+             await prismadb.userBalance.update({
+                where: {
+                    userId: userId
+                },
+                data: {
+                    callTime: 0
+                }
+            });
+        }
+
         
 
     } catch (error: any) {

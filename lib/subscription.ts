@@ -6,6 +6,7 @@ export const checkSubscription = async (): Promise<boolean> => {
   if (!userId) {
     return false;
   }
+
   const userSubscription = await prismadb.userSubscription.findUnique({
     where: {
       userId: userId,
@@ -15,10 +16,16 @@ export const checkSubscription = async (): Promise<boolean> => {
       stripePriceId: true,
     },
   });
-  if (!userSubscription || !userSubscription.stripePriceId || !userSubscription.stripeCurrentPeriodEnd) {
+  const userBalance = await prismadb.userBalance.findUnique({
+    where: {
+      userId: userId,
+    }
+  });
+  if (!userSubscription || !userSubscription.stripePriceId) {
     return false;
   }
-  const hasValidSubscription = userSubscription.stripeCurrentPeriodEnd.getTime() + DAY_IN_MS > Date.now();
-
-  return hasValidSubscription;
+    const hasProTokenBalance = (userBalance?.proTokens ?? 0) > 0;
+    const hasValidSubscription = userSubscription.stripeCurrentPeriodEnd &&
+                                 (userSubscription.stripeCurrentPeriodEnd.getTime() + DAY_IN_MS) > Date.now();
+    return !!hasProTokenBalance || !!hasValidSubscription;
 };

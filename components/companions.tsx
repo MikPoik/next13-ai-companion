@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import { Card, CardFooter, CardHeader } from "@/components/ui/card"
 
 interface CompanionsProps {
+    isPro:boolean,
     data: (Companion & {
         _count: {
             messages: number
@@ -15,6 +16,7 @@ interface CompanionsProps {
 }
 
 export const Companions = ({
+    isPro,
     data
 }: CompanionsProps) => {
     const [ageVerificationState, setAgeVerificationState] = useState<string | null>(null);
@@ -65,7 +67,11 @@ export const Companions = ({
                                         ) ? (
                                             <span title="Companion is free"></span>
                                         ) : (
-                                            <span title="Pro plan required"><div className="flex items-center"><Sparkles className="h-4 w-4 fill-white text-white opacity-70"/><span className="text-xs"></span></div></span>
+                                            !isPro && (
+                                                <div title="Pro plan required" className="flex items-center">
+                                                    <Sparkles className="h-4 w-4 fill-white text-white opacity-70"/>
+                                                </div>
+                                            )
                                         )}</div>    
                                     </p>
                                     <p className="text-xs">

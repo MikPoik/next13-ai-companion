@@ -1,5 +1,6 @@
 import { SubscriptionButton } from "@/components/subscription-button";
 import {TopUpButton} from "@/components/topup-button";
+import { CallTopUpButton} from "@/components/call-topup-button";
 import { checkSubscription } from "@/lib/subscription";
 import prismadb from "@/lib/prismadb";
 import { auth, currentUser,redirectToSignIn } from "@clerk/nextjs";
@@ -13,7 +14,8 @@ const SettingsPage = async () => {
   }
   var tokens = 0;
   var token_limit = 10000;
-  var prepaid_tokens = 0;
+  var proTokens = 0;
+  var callTime = 0;
   if (user) {
     const balance =  await prismadb.userBalance.findUnique({
       where: {
@@ -23,34 +25,51 @@ const SettingsPage = async () => {
     if (balance) {
       tokens = balance.tokenCount;
       token_limit = balance.tokenLimit;
-      prepaid_tokens = balance.prePaidTokens;
+      proTokens = balance.proTokens;
+      callTime = balance.callTime;
     }
   }
+  // Convert callTime to minutes and seconds
+  const callTimeMinutes = Math.floor(callTime / 60);
+  const callTimeSeconds = callTime % 60;
   return ( 
     <div className="h-full p-4 space-y-2">
       <h3 className="text-lg font-medium">Settings</h3>
       <div className="text-muted-foreground text-sm">
-        {isPro ? "You are currently on a Pro plan." : "You are currently on a free plan."}
+        {isPro ? "You are currently on a Pro plan (Subscription or Pro tokens)." : "You are currently on a free plan."}
       </div>
       <SubscriptionButton isPro={isPro} />
         {!isPro && (
-        <div className="text-muted-foreground text-sm"><br></br>
-        <span className="text-sky-500 mx-1 font-medium">Pro</span>
-        features:<br/>
+        <div>
+            <span className="text-sky-500 mx-1 font-medium">Pro</span> plan subscription   <span className="text-sky-500 mx-1 font-medium">9.99$</span> / month.
+        <div className="text-muted-foreground text-sm">
+
         * 100 000 tokens / month<br/>
         * More NSFW llms<br/>
         * Voice messages <br/>
         * Better image resolution<br/>
         * More image generator models<br/>
         <br/>
-        </div>)}
-    <br/>
-        <TopUpButton isPro={isPro} />
+        </div></div>)}
+        <div className="text-muted-foreground text-sm">
+       Top up your account with <span className="text-sky-500 mx-1 font-medium">Pro</span>token pack:
+        </div>
+        <TopUpButton isPro={isPro} /><span className="ml-5"> </span>
+        <br/>
+        <div className="text-muted-foreground text-sm">
+        <br/>
+        Buy call time for companion:
+        </div>
+
+        <CallTopUpButton amount={5} price="4.99$" isPro={isPro} /><span className="mr-2"></span>
+        <CallTopUpButton amount={10} price="8.99$" isPro={isPro} /><span className="mr-2"></span><CallTopUpButton amount={30} price="24.99$" isPro={isPro} />
     <br/>
     <br/>
     <h3 className="text-lg font-medium">Usage</h3>
-    <div className="text-muted-foreground text-sm">
-    You are have used {tokens} tokens out of {token_limit+prepaid_tokens}. 
+    <div className="text text-sm">
+    You are have used {tokens} tokens out of {token_limit}. <br/>
+    You have {proTokens} <span className="text-sky-500 mx-1 font-medium">Pro</span> tokens.<br/>
+    You have {callTimeMinutes} minutes and {callTimeSeconds} seconds of call time
     </div>
     </div>
    );

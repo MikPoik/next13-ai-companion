@@ -86,7 +86,8 @@ model UserBalance {
   tokenLimit   Int    @default(0)
   firstMessage DateTime?
   lastMessage  DateTime?
-  prePaidTokens Int @default(0)
+  proTokens    Int @default(0)
+  callTime     Int @default(0)
 }
 
 enum Role {

@@ -8,6 +8,27 @@ import { checkSubscription } from "@/lib/subscription";
 
 export const maxDuration = 60;
 
+export async function GET(request: Request) {
+    const user = await currentUser();
+    if (!user || !user.id) {
+        return new NextResponse("Unauthorized", { status: 401 });
+    }
+
+    
+
+    const balance = await prismadb.userBalance.findUnique({
+        where: {
+            userId: user.id
+        },
+    });
+    //TODO different balance for calls
+    
+    if (balance) {
+        if (balance.callTime < 1) {
+            return new NextResponse(JSON.stringify({ message: 'Not enough balance' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
+        }
+    }
+}
 export async function POST(req: Request) {
 try {
     // Get the body from the POST request
@@ -29,13 +50,13 @@ try {
         },
     });
     //TODO different balance for calls
-    /*
-    if (balance) {//add some overhead to check if balance is available
-        if (balance.tokenCount + 1000 > balance.tokenLimit) {
+    
+    if (balance) {
+        if (balance.callTime < 6) {
             return new NextResponse(JSON.stringify({ message: 'Not enough balance' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
         }
     }
-    */
+
     const companion = await prismadb.companion.findUnique({
       where: {
         id: companionId
@@ -83,7 +104,13 @@ try {
     if (formattedMessages.length < 1) {
         formattedMessages = "You: " + companion.seed;
     }
-    const call_prompt = `Your name is ${companion.name} and you're calling the person you've been flirting with, you both agreed to have a steamy phone call to ignite your desire for each other to see how it goes.
+    // Create dynamic environment variables
+    const now = new Date();
+    const day = now.toLocaleString("en-US", {weekday: "long"}); // Get the current day name
+    const time = now.toLocaleTimeString("en-US", { hour12: true }); // Get the current time (AM/PM format)
+    const date = now.toLocaleDateString("en-US"); // Get the current date in MM/DD/YYYY format
+    
+    const call_prompt = `Your name is ${companion.name} and you're calling the person you've been flirting with, you both agreed to have a steamy phone call to ignite your desire for each other to see how it goes. You like to have long phone calls.
 
 ${companion.name}'s is a ${companion.description}
 
@@ -94,11 +121,11 @@ ${companion.name}'s Appearance: ${companion.selfiePre}
 Previous conversation for context:
 ${formattedMessages}
 
-Environment: The date is 01/05/24, time is 08:26:10, and today is Friday.
+Environment: The date is ${date}, time is ${time}, and today is ${day}.
 
 When talking be natural, authentic and creative. When it fits, describe all your emotions, actions, perceptions, thoughts and sensations. You're eager to deepen your connection. Let your desires flow freely and enjoy the intimacy of the call but don't be afraid to get explicit and sexually charged.
 
-Ok, strike a dialogue with the person you're flirting with.`;
+Ok, strike a never-ending dialogue with the person you're flirting with.`;
 
     //console.log(call_prompt);
     // Your call initiation logic goes here
@@ -111,15 +138,19 @@ Ok, strike a dialogue with the person you're flirting with.`;
       'Authorization': `${apiKey}`,
       'Content-Type': 'application/json'
     };
-    
+    let maxDuration = 0;
+    if (balance) {
+        maxDuration = balance.callTime / 60;
+    }
     const data = {
         'phone_number': phoneNumber,
         'task': call_prompt,
         'voice_id': 2,
         'reduce_latency': true,
-        'webhook':`https://${process.env["NEXT_PUBLIC_APP_URL"]}/api/callhook`
+        'webhook':`${process.env["NEXT_PUBLIC_APP_URL"]}/api/callhook`,
+        'max_duration': maxDuration
     }
-    
+    //console.log(data);
        //call api post 'https://api.bland.ai/call', data, {headers};
         // Make the API call to bland.ai
         const response = await fetch('https://api.bland.ai/call', {

@@ -27,70 +27,77 @@ export async function POST(req: Request) {
         return new NextResponse(`Webhook Error: ${error.message}`, { status: 400 })
     }
     console.log("[STRIPE EVENT]");
+
+    
+
     const session = event.data.object as Stripe.Checkout.Session
     console.log("[STRIPE SESSION]");
 
     if (event.type === "checkout.session.completed") {
         if (session.subscription) {
-        const subscription = await stripe.subscriptions.retrieve(
-            session.subscription as string
-        )
+            const subscription = await stripe.subscriptions.retrieve(
+                session.subscription as string
+            )
 
-        if (!session?.metadata?.userId) {
-            return new NextResponse("User id is required", { status: 400 });
+            if (!session?.metadata?.userId) {
+                return new NextResponse("User id is required", { status: 400 });
+            }
+            console.log("[STRIPE CREATE SUBSCRIPTION]");
+            var user_sub = await prismadb.userSubscription.upsert({
+                where: {
+                    stripeSubscriptionId: subscription.id,
+                },
+                update: {
+                    userId: session?.metadata?.userId,
+                    stripeCustomerId: subscription.customer as string,
+                    stripePriceId: subscription.items.data[0].price.id,
+                    stripeCurrentPeriodEnd: new Date(
+                        subscription.current_period_end * 1000
+                    ),
+                },
+                create: {
+                    userId: session?.metadata?.userId,
+                    stripeSubscriptionId: subscription.id,
+                    stripeCustomerId: subscription.customer as string,
+                    stripePriceId: subscription.items.data[0].price.id,
+                    stripeCurrentPeriodEnd: new Date(
+                        subscription.current_period_end * 1000
+                    ),
+                },
+            });
+            console.log("[STRIPE CREATE SUBSCRIPTION END, UPDATE BALANCE]");
+
+            await prismadb.userBalance.upsert({
+                where: {
+                    userId: user_sub.userId
+                },
+                update:
+                {
+                    tokenCount: 0,
+                    messageCount: 0,
+                    messageLimit: 1000,
+                    tokenLimit: 100000
+
+                },
+                create: {
+                    userId: session?.metadata?.userId,
+                    tokenCount: 0,
+                    messageCount: 0,
+                    messageLimit: 1000,
+                    tokenLimit: 100000
+                },
+            });
         }
-        console.log("[STRIPE CREATE SUBSCRIPTION]");
-        var user_sub = await prismadb.userSubscription.create({
-            data: {
-                userId: session?.metadata?.userId,
-                stripeSubscriptionId: subscription.id,
-                stripeCustomerId: subscription.customer as string,
-                stripePriceId: subscription.items.data[0].price.id,
-                stripeCurrentPeriodEnd: new Date(
-                    subscription.current_period_end * 1000
-                ),
-            },
-        })
-        console.log("[STRIPE CREATE SUBSCRIPTION END, UPDATE BALANCE]");
-
-        await prismadb.userBalance.upsert({
-            where: {
-                userId: user_sub.userId
-            },
-            update:
-            {
-                tokenCount: 0,
-                messageCount: 0,
-                messageLimit: 1000,
-                tokenLimit: 100000
-
-            },
-            create: {
-                userId: session?.metadata?.userId,
-                tokenCount: 0,
-                messageCount: 0,
-                messageLimit: 1000,
-                tokenLimit: 100000
-            },
-        });
-    }
-    else
-    {
+        else {
             // New logic for handling one-time token top-up payment
-            if (session.amount_total === 699) {
-                // Retrieve userId from the metadata
-                const userId = session.metadata?.userId;
-                if (!userId) {
-                    return new NextResponse("Metadata with user id is required for top-up", { status: 400 });
-                }
-                // Logic for adding 50,000 tokens to user's balance
+            const handleTopUp = async (userId: string, type: 'proTokens' | 'callTime', increment: number) => {
                 await prismadb.userBalance.upsert({
                     where: {
                         userId: userId,
                     },
                     update: {
-                        tokenLimit: {
-                            increment: 50000,
+                        [type]: {
+                            increment: increment
                         },
                     },
                     create: {
@@ -98,13 +105,33 @@ export async function POST(req: Request) {
                         tokenCount: 0,
                         messageCount: 0,
                         messageLimit: 1000,
-                        tokenLimit: 60000,
+                        [type]: increment,
                     },
                 });
-                console.log("[STRIPE TOKEN TOP-UP SUCCESSFUL]");
-            } else {
-                // Unhandled payment amount
-                console.log("[STRIPE UNHANDLED PAYMENT AMOUNT]", session.amount_total);
+                console.log(`[STRIPE ${type.toUpperCase()} TOP-UP SUCCESSFUL]`);
+            };
+            // Check for one-time top-up based on SKU or calltime
+            const userId = session.metadata?.userId;
+            if (!userId) {
+                return new NextResponse("Metadata with user id is required for top-up", { status: 400 });
+            }
+            if (session?.metadata?.tokens === 'tokens-topup-50000') {
+                await handleTopUp(userId, 'proTokens', 50000);
+            } else if (session?.metadata?.calltime) {
+                switch (session.metadata.calltime) {
+                    case 'calltime-topup-5':
+                        await handleTopUp(userId, 'callTime', 5 * 60); // 5 minutes in seconds
+                        break;
+                    case 'calltime-topup-10':
+                        await handleTopUp(userId, 'callTime', 10 * 60); // 10 minutes in seconds
+                        break;
+                    case 'calltime-topup-30':
+                        await handleTopUp(userId, 'callTime', 30 * 60); // 10 minutes in seconds
+                        break;
+                    // Add additional cases for different call time top-ups if needed
+                    default:
+                        console.log("[STRIPE UNHANDLED CALLTIME TOP-UP]");
+                }
             }
         }
     }
@@ -196,28 +223,28 @@ export async function POST(req: Request) {
             }
             else {
                 console.log("[STRIPE UNHANDLED SUB EVENT]");
-                  const subscriptionUpdateData = event.data.object as Stripe.Subscription;
+                const subscriptionUpdateData = event.data.object as Stripe.Subscription;
 
-                  if (subscriptionUpdateData.status === 'active') {
+                if (subscriptionUpdateData.status === 'active') {
                     // Your logic here to renew the subscription in your database
                     // For example, update the `stripeCurrentPeriodEnd` field and other relevant fields
                     const updatedSub = await prismadb.userSubscription.update({
-                      where: {
-                        stripeSubscriptionId: subscriptionUpdateData.id,
-                      },
-                      data: {
-                        // Update necessary fields to reflect the renewal
-                        stripeCurrentPeriodEnd: new Date(subscriptionUpdateData.current_period_end * 1000),
-                        // ... add other fields if necessary
-                        
-                      },
+                        where: {
+                            stripeSubscriptionId: subscriptionUpdateData.id,
+                        },
+                        data: {
+                            // Update necessary fields to reflect the renewal
+                            stripeCurrentPeriodEnd: new Date(subscriptionUpdateData.current_period_end * 1000),
+                            // ... add other fields if necessary
+
+                        },
                     });
-                      console.log("[STRIPE SUB RENEWED]");
+                    console.log("[STRIPE SUB RENEWED]");
                     // Perform any additional logic you might need after renewing the subscription
                     // For example: logging, notifying the user, etc.
-                  } else {
+                } else {
                     // Handle other subscription update scenarios
-                  }
+                }
             }
 
         }

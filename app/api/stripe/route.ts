@@ -42,7 +42,21 @@ export async function GET() {
                 })
     
                 return new NextResponse(JSON.stringify({ url: stripeSession.url }))
+            }else {
+                try {
+                    // Attempt to delete the user's subscription
+                    const delUserSubscription = await prismadb.userSubscription.delete({
+                        where: {
+                            userId
+                        }
+                    });
+                    
+                } catch (error) {
+                    // If there was an error during deletion, log it and inform the client
+                    console.error("Error deleting user subscription:", error);
+                }
             }
+            
         }
         console.log("new subscription");
         const stripeSession = await stripe.checkout.sessions.create({

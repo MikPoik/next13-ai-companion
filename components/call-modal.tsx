@@ -2,7 +2,7 @@
 import { DialogInput } from "@/components/ui/dialog-input";
 import { useEffect, useState } from "react";
 import {  useRouter } from "next/navigation";
-
+import { Sparkles,PhoneIncoming } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -28,13 +28,37 @@ export const CallModal: React.FC<CallModalProps> = ({ isOpen, onClose,companionI
   const [isMounted, setIsMounted] = useState(false);
   const router = useRouter();
   const [inputValue, setInputValue] = useState('');
+  const [showTopUp, setShowTopUp] = useState(false);
+  const [isFetchingBalance, setIsFetchingBalance] = useState(false);
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setInputValue(event.target.value);
   }
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
+    useEffect(() => {
+        setIsMounted(true); 
+        if (isOpen) {
+          setIsFetchingBalance(true); // Start fetching balance
+          fetch('/api/send-call', { method: 'GET' })
+            .then((response) => response.json())
+            .then((data) => {
+              if (data.message === 'Not enough balance') {
+                setShowTopUp(true);
+              } else {
+                setShowTopUp(false);
+              }
+              setIsFetchingBalance(false); // Finished fetching balance
+            })
+            .catch((error) => {
+              setIsFetchingBalance(false); // Finished fetching balance even if there's an error
+            });
+        } else {
+          setShowTopUp(false); // Reset the state when modal is closed
+          setIsFetchingBalance(false); // Reset the fetching state when modal is closed
+        }
+      }, [isOpen, toast]);
 
+  const topUp= () => {
+    router.push("/settings");
+  }
   const sendCall = () => {
       if (!inputValue) {
             toast({
@@ -114,7 +138,7 @@ export const CallModal: React.FC<CallModalProps> = ({ isOpen, onClose,companionI
             Talk to your Companion on the phone
           </DialogTitle>
           <DialogDescription className="text-center space-y-2">
-            <span className="text-sky-500 mx-1 font-medium">Live phone call</span>- 5$ / min
+            <span className="text-sky-500 mx-1 font-medium">Live phone call</span>
           </DialogDescription>
               <DialogInput
                 type="text"
@@ -128,9 +152,21 @@ export const CallModal: React.FC<CallModalProps> = ({ isOpen, onClose,companionI
         <div className="flex justify-between">
           <p className="text-2xl font-medium">
           </p>
-          <Button onClick={sendCall} variant="premium">
-            Call me
-          </Button>
+              {
+                isFetchingBalance ? (
+                  <p className="text-sm text-muted-foreground">Checking balance...</p>
+                ) : (
+                  showTopUp ? (
+                    <Button onClick={topUp} variant="premium">
+                      Top up balance <PhoneIncoming className="inline-block w-4 h-4 ml-1" />
+                    </Button>
+                  ) : (
+                    <Button onClick={sendCall} variant="premium">
+                      Call me
+                    </Button>
+                  )
+                )
+              }
         </div>
       </DialogContent>
     </Dialog>
