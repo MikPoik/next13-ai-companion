@@ -134,7 +134,7 @@ export const ChatHeader = ({
             )}
             </div>
             {/* Call Modal */}
-            <CallModal isOpen={isCallModalOpen} onClose={() => setIsCallModalOpen(false)} companionId={companion.id} />
+            <CallModal isOpen={isCallModalOpen} onClose={() => setIsCallModalOpen(false)} companionId={companion.id} companionName={companion.name} />
 
             
         </div>

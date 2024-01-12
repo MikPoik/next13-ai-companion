@@ -23,6 +23,14 @@ model Voice {
   companions Companion[]
 }
 
+model PhoneVoice {
+    id       String      @id @default(uuid())
+    name     String
+    voice_id Int
+    reduceLatency Boolean @default(true)
+    companions Companion[]
+}
+
 model Companion {
   id             String    @id @default(uuid())
   userId         String
@@ -47,8 +55,10 @@ model Companion {
   isPublic       Boolean  @default(true)
   voiceId        String   @default("none")
   category       Category  @relation(fields: [categoryId], references: [id])
-  voice          Voice  @relation(fields: [voiceId], references: [id])
-  backstory      String  @db.LongText
+  voice          Voice    @relation(fields: [voiceId], references: [id])
+  phoneVoiceId   String   @default("none")  
+  phoneVoice     PhoneVoice  @relation(fields: [phoneVoiceId], references: [id])
+  backstory      String   @db.LongText
   messages       Message[]
 
   @@index([categoryId])

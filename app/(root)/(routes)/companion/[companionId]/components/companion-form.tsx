@@ -6,7 +6,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { Wand2, Trash2 } from "lucide-react";
-import { Category, Companion, Voice } from "@prisma/client";
+import { Category, Companion, Voice, PhoneVoice } from "@prisma/client";
 //import { BotAvatarForm } from "@/components/bot-avatar-form";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
@@ -67,18 +67,21 @@ const formSchema = z.object({
         message: "imageModel is required",
     }),
     voiceId: z.string().optional(),
-    regenerateImage: z.boolean().optional()
+    regenerateImage: z.boolean().optional(),
+    phoneVoiceId: z.string().optional(),
 });
 
 interface CompanionFormProps {
     categories: Category[];
     voices: Voice[];
+    phoneVoices: PhoneVoice[];
     initialData: Companion | null;
 };
 
 export const CompanionForm = ({
     categories,
     voices,
+    phoneVoices,
     initialData
 }: CompanionFormProps) => {
     const { toast } = useToast();
@@ -178,6 +181,7 @@ export const CompanionForm = ({
             voiceId: 'none',
             backstory: "",
             regenerateImage: false,
+            phoneVoiceId: 'none',
 
 
         },
@@ -580,7 +584,44 @@ export const CompanionForm = ({
                                 <FormMessage />
                             </FormItem>
                         )}
-                    /> 
+                    />
+                    <FormField
+                        control={form.control}
+                        name="phoneVoiceId"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Phone Voice</FormLabel>
+                                <div className="flex items-center">
+                                    <Select
+                                        disabled={isLoading}
+                                        onValueChange={(value) => {
+                                            field.onChange(value);
+                                            handleVoiceChange(value);
+                                        }}
+                                        defaultValue={field.value}
+                                    >
+                                        <FormControl>
+                                            <SelectTrigger className="bg-background">
+                                                <SelectValue defaultValue={field.value} placeholder="Select a voice to use for phone calls" />
+                                            </SelectTrigger>
+                                        </FormControl>
+                                        <SelectContent style={selectContentStyle} >
+                                            {phoneVoices.map((phoneVoice) => (
+                                                <SelectItem key={phoneVoice.id} value={phoneVoice.id}>
+                                                    {phoneVoice.name}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                    &nbsp;&nbsp;
+                                </div>
+                                <FormDescription>
+                                    Select a voice used in phone calls
+                                </FormDescription>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <FormField
                             name="isPublic"

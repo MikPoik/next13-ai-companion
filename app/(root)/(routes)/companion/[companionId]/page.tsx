@@ -36,9 +36,10 @@ const CompanionIdPage = async ({
 
   const categories = await prismadb.category.findMany();
   const voices = await prismadb.voice.findMany();
+  const phoneVoices = await prismadb.phoneVoice.findMany();
   //return redirect("/");
   return (
-    <CompanionForm initialData={companion} categories={categories} voices={voices} />
+    <CompanionForm initialData={companion} categories={categories} voices={voices} phoneVoices={phoneVoices} />
   );
 }
 

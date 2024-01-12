@@ -20,16 +20,18 @@ import { useToast } from "@/components/ui/use-toast";
 interface CallModalProps {
   isOpen: boolean; // Add this prop to match what's being passed in the ChatHeader
   onClose: () => void; // Add this prop to match what's being passed in the ChatHeader
-  companionId: string;
+  companionId: string; 
+  companionName: string;
 }
 
-export const CallModal: React.FC<CallModalProps> = ({ isOpen, onClose,companionId }) => {
+export const CallModal: React.FC<CallModalProps> = ({ isOpen, onClose,companionId,companionName }) => {
   const { toast } = useToast();
   const [isMounted, setIsMounted] = useState(false);
   const router = useRouter();
   const [inputValue, setInputValue] = useState('');
   const [showTopUp, setShowTopUp] = useState(false);
   const [isFetchingBalance, setIsFetchingBalance] = useState(false);
+    const [isCalling, setIsCalling] = useState(false);
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setInputValue(event.target.value);
   }
@@ -68,7 +70,9 @@ export const CallModal: React.FC<CallModalProps> = ({ isOpen, onClose,companionI
               variant: "destructive",
             });
           return;
+          
       }
+      setIsCalling(true);
       // Set up the options for the POST request including headers and body
       const requestOptions = {
           method: 'POST',
@@ -79,13 +83,15 @@ export const CallModal: React.FC<CallModalProps> = ({ isOpen, onClose,companionI
       };
       // Use the requestOptions in the fetch call
       fetch(`/api/send-call`, requestOptions)
+          
       .then(response => response.json().then(data => ({ status: response.status, body: data.message })))
       .then(({ status, body }) => {
+          setIsCalling(false);
         console.log(status, body);
         if (status === 200) {
           toast({
             title: 'Success',
-            description: "Your Companion is calling you...",
+            description: `${companionName} is calling you...`,
             duration: 5000,
             variant: "default",
           });
@@ -116,6 +122,7 @@ export const CallModal: React.FC<CallModalProps> = ({ isOpen, onClose,companionI
         }
       })
           .catch(error => {
+              setIsCalling(false);
               console.error('Failed to request call:', error);
                 toast({
                 title: 'Network Error',
@@ -135,7 +142,7 @@ export const CallModal: React.FC<CallModalProps> = ({ isOpen, onClose,companionI
       <DialogContent>
         <DialogHeader className="space-y-4">
           <DialogTitle className="text-center">
-            Talk to your Companion on the phone
+              Talk to {companionName} on the phone
           </DialogTitle>
           <DialogDescription className="text-center space-y-2">
             <span className="text-sky-500 mx-1 font-medium">Live phone call</span>
@@ -161,7 +168,7 @@ export const CallModal: React.FC<CallModalProps> = ({ isOpen, onClose,companionI
                       Top up balance <PhoneIncoming className="inline-block w-4 h-4 ml-1" />
                     </Button>
                   ) : (
-                    <Button onClick={sendCall} variant="premium">
+                    <Button onClick={sendCall} variant="premium" disabled={isCalling}>
                       Call me
                     </Button>
                   )

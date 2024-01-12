@@ -38,19 +38,19 @@ const SettingsPage = async () => {
       <div className="text-muted-foreground text-sm">
         {isPro ? "You are currently on a Pro plan (Subscription or Pro tokens)." : "You are currently on a free plan."}
       </div>
-      <SubscriptionButton isPro={isPro} />
         {!isPro && (
         <div>
             <span className="text-sky-500 mx-1 font-medium">Pro</span> plan subscription   <span className="text-sky-500 mx-1 font-medium">9.99$</span> / month.
         <div className="text-muted-foreground text-sm">
-
         * 100 000 tokens / month<br/>
         * More NSFW llms<br/>
         * Voice messages <br/>
         * Better image resolution<br/>
-        * More image generator models<br/>
-        <br/>
+        * More image generator models<br/>        
         </div></div>)}
+      <SubscriptionButton isPro={isPro} />
+        <span className="mr-2"></span>
+        <br/><br/>
         <div className="text-muted-foreground text-sm">
        Top up your account with <span className="text-sky-500 mx-1 font-medium">Pro</span>token pack:
         </div>
