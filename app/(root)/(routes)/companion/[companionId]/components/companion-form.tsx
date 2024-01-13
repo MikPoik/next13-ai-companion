@@ -26,7 +26,7 @@ const STEAMSHIP_IMG_BOT_URL = "https://mpoikkilehto.steamship.run/avatar-gen-dev
 const PREAMBLE = `Your personality can be described as ...`;
 const PREAMBLE_BEHAVIOUR = `You behave like ...`;
 const PREAMBLE_BACKSTORY = `relevant details and facts about the character ...`;
-const PREAMBLE_SELFIE_PRE = `describe your character appearance in detail for the image...`;
+const PREAMBLE_SELFIE_PRE = `Keywords to describe your character appearance in detail: keyword, keyword...`;
 const PREAMBLE_SELFIE_POST = `describe image details and effects ...`;
 const SEED_CHAT = `Introduction message for the character ...`;
 
