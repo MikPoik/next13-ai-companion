@@ -22,7 +22,7 @@ export async function GET(request: NextRequest) {
         const params = new URL(url).searchParams;
         const tokens = params.get('tokens'); // this would be "tokens-50000"
         const calltime = params.get('calltime'); // this would be "calltime-5"
-        console.log(tokens);
+        //console.log(tokens);
         console.log(calltime);
         const { userId } = auth();
         const user = await currentUser();
@@ -30,7 +30,7 @@ export async function GET(request: NextRequest) {
         if (!userId || !user) {
             return new NextResponse("Unauthorized", { status: 401 });
         }
-        console.log(userId);
+        //console.log(userId);
         let metadata_json: Metadata = {};
         if (tokens) {
             if (tokens) {
@@ -41,7 +41,7 @@ export async function GET(request: NextRequest) {
             metadata_json['calltime'] = calltime
         }
         metadata_json['userId'] = userId;
-        console.log(metadata_json);
+        //console.log(metadata_json);
         let price_id = "";
         if (tokens) {
             if (tokens === 'tokens-topup-50000') {

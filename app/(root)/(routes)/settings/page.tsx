@@ -27,6 +27,22 @@ const SettingsPage = async () => {
       token_limit = balance.tokenLimit;
       proTokens = balance.proTokens;
       callTime = balance.callTime;
+    } else {
+        //balance record does not exist, create one
+        const currentDateTime = new Date().toISOString();
+        await prismadb.userBalance.create({
+            data: {
+                userId: user.id,
+                tokenCount: 0,
+                messageCount: 1,
+                messageLimit: 1000,
+                tokenLimit: 10000,
+                firstMessage: currentDateTime,
+                proTokens: 0,
+                callTime: 0,
+                lastMessage: currentDateTime
+            }
+        });
     }
   }
   // Convert callTime to minutes and seconds
