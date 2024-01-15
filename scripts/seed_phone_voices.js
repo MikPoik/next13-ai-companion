@@ -6,21 +6,18 @@ async function seedPhoneVoices() {
         await db.phoneVoice.createMany({
             data: [
                 {
-                    id: 'none',
-                    name: 'none',
-                    voice_id: 999
-                },
-                {
                     name: 'Matt',
                     voice_id: 0,
                     reduceLatency: true
                 },
                 {
+                    
                     name: 'Sophie',
                     voice_id: 1,
                     reduceLatency: true
                 },
                 {
+                    id: 'default',
                     name: 'Jen',
                     voice_id: 2,
                 }

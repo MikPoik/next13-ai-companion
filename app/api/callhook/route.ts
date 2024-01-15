@@ -17,7 +17,7 @@ export async function POST(req: Request) {
         const callId = data.call_id;
         const status = data.status;
         const correctedDuration = data.corrected_duration;
-        const transcripts = data.transcript;
+        const transcripts = data.transcripts;
 
 
         console.log('Call ID:', callId);
@@ -54,12 +54,14 @@ export async function POST(req: Request) {
             userId: userId,
             content: transcript.user === "assistant" ? `[{"index":null,"mimeType":null,"text":"${transcript.text}","fileId":null,"id":null,"publicData":true,"contentURL":null,"url":null,"tags":[],"uploadBytes":null,"uploadType":null}]` : transcript.text,
             role: transcript.user === "assistant" ? "system" : "user", // Changed from transcript.user to "user"
+            createdAt: new Date(transcript.created_at).toISOString(), //example 2024-01-15T09:00:35.64345+00:00 convert to ISO string
         }));
 
         // Use createMany to insert all at once
         const update_history = await prismadb.message.createMany({
             data: messagesToCreate
         });
+        //console.log(messagesToCreate)
 
         //update userBalance
 
@@ -73,7 +75,7 @@ export async function POST(req: Request) {
                 }
             }
         });
-        console.log(userBalance);
+        //console.log(userBalance);
         // Check if the new userBalance's callTime is below 0 after decrementing
         if (userBalance.callTime < 0) {
             // Handle the situation when balance is below 0
@@ -118,7 +120,7 @@ export async function POST(req: Request) {
             companion.model,
             companion.createImages,);
         const appendHistorytResponseBlocks = JSON.parse(appendHistoryResponse);
-        console.log(appendHistorytResponseBlocks);
+        //console.log(appendHistorytResponseBlocks);
 
 
 
