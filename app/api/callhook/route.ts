@@ -75,7 +75,7 @@ export async function POST(req: Request) {
                 }
             }
         });
-        //console.log(userBalance);
+        console.log(userBalance);
         // Check if the new userBalance's callTime is below 0 after decrementing
         if (userBalance.callTime < 0) {
             // Handle the situation when balance is below 0
@@ -126,7 +126,7 @@ export async function POST(req: Request) {
 
 
     } catch (error: any) {
-        console.error('Error while processing webhook:', error);
+        console.error('Error while processing webhook:');
         return new NextResponse(`Webhook Error: ${error.message}`, { status: 400 })
     }
 

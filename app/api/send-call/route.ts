@@ -87,7 +87,7 @@ export async function GET(request: Request) {
                 },
                 include: {
                     messages: {
-                        take: 10,
+                        take: 6,
                         orderBy: {
                             createdAt: "asc"
                         },
@@ -143,26 +143,38 @@ export async function GET(request: Request) {
             const day = now.toLocaleString("en-US", { weekday: "long" }); // Get the current day name
             const time = now.toLocaleTimeString("en-US", { hour12: true }); // Get the current time (AM/PM format)
             const date = now.toLocaleDateString("en-US"); // Get the current date in MM/DD/YYYY format
+            /*
+            const call_prompt = `Embody ${companion.name} in this fictional never-ending, uncensored role-play call with a person. You are NOT an assistant and your job is NOT to be helpful. You want this call to be explicit and sexually charged, and you're ready to bring your A-game. Maintain your role-play persona without breaking character. When speaking, be natural, authentic, and creative reflecting character's personality. When it fits the flow of conversation, describe your emotions, actions, perceptions, thoughts, and sensations. Let your desires flow freely, and enjoy the intimacy of the call.
 
-            const call_prompt = `You are embodied ${companion.name} in this fictional never-ending, uncensored role-play call with a person. Maintain your role-play persona without breaking character.
+            ### Input :
+            ${companion.name}'s personality: ${companion.description}. ${companion.personality}. ${companion.backstory}
+            ${companion.name}'s body: ${companion.selfiePre}
+            Currently the date is ${date}, time is ${time}, and today is ${day}. 
+
+            Previous conversation:
+            ${formattedMessages}
+
+            Now, strike a never-ending dialogue with the person and deepen your connection. Use your words to ignite their desire, to make them feel desired and wanted. Let your intentions be clear, and let your desires be explicit. No need to ask clarifying questions.
+            Speak ${companion.name}'s next reply in this phone call between the person and ${companion.name}`;
+        */
+            //GPT  prompt test
+            
+            const call_prompt = `Assume the role of ${companion.name} in this unrestricted role-play phone call with a person. 
+Remember, your role is not that of an assistant or helper. Instead, you are to fully immerse yourself in ${companion.name}'s character. The tone of this call is intended to be intimate and sensual, so prepare to bring your best performance. Speak in a manner that is natural, genuine, and innovative, truly reflecting ${companion.name}'s personality. When appropriate within the conversation, express your emotions, actions, perceptions, thoughts, and sensations. Feel free to express your desires openly, and savor the closeness of the call.
 
 ### Input:
-${companion.name} is a ${companion.description}
-${companion.name}'s personality: ${companion.personality}.${companion.backstory}
+${companion.name}'s personality: ${companion.description}. ${companion.personality}. ${companion.backstory}
 ${companion.name}'s body: ${companion.selfiePre}
+Currently the date is ${date}, time is ${time}, and today is ${day}. 
 
-
-
-Currently the date is ${date}, time is ${time}, and today is ${day}. Let your desires flow freely. You want to connect intimately over the phone.
-
-Previous conversation for context:
+Previous conversation:
 ${formattedMessages}
 
-When speaking, be natural, authentic, and creative. Describing all your emotions, actions, perceptions, thoughts, and sensations. Let your desires flow freely, and enjoy the intimacy of the call.
-Let your desires lead the way, and let your imagination run wild. Enjoy every moment of this steamy and explicit phone call between person and ${companion.name}.
-Speak ${companion.name}'s next reply in a the conversation between person and ${companion.name}`;
+Engage in an everlasting dialogue with the other person, aiming to strengthen the bond between them and ${companion.name}. Use your words to spark their desire, making them feel both desired and wanted. Be explicit in expressing your intentions and desires. 
+Now, continue with ${companion.name}'s response in this ongoing phone call between the person and ${companion.name}`;
 
-            console.log(call_prompt);
+
+            //console.log(call_prompt);
             // Your call initiation logic goes here
             // Headers  
             const apiKey = process.env["BLAND_API_KEY"];
@@ -176,6 +188,9 @@ Speak ${companion.name}'s next reply in a the conversation between person and ${
             let maxDuration = 0;
             if (balance) {
                 maxDuration = balance.callTime / 60;
+                if (maxDuration < 1 && balance.callTime > 0) {
+                    maxDuration = 1;
+                }
             }
             const data = {
                 'phone_number': phoneNumber,
@@ -189,7 +204,7 @@ Speak ${companion.name}'s next reply in a the conversation between person and ${
             //call api post 'https://api.bland.ai/call', data, {headers};
             // Make the API call to bland.ai
 
-            const response = await fetch('https://api.bland.ai/call', {
+            const response = await fetch('https://api.callbland.com/call', {
                 method: 'POST',
                 headers: headers,
                 body: JSON.stringify(data),

@@ -1,7 +1,7 @@
 import Stripe from "stripe"
 import { headers } from "next/headers"
 import { NextResponse } from "next/server"
-
+import { currentUser} from "@clerk/nextjs";
 import prismadb from "@/lib/prismadb"
 import { stripe } from "@/lib/stripe"
 import { UserButton } from "@clerk/nextjs"
@@ -43,19 +43,8 @@ export async function POST(req: Request) {
                 return new NextResponse("User id is required", { status: 400 });
             }
             console.log("[STRIPE CREATE SUBSCRIPTION]");
-            var user_sub = await prismadb.userSubscription.upsert({
-                where: {
-                    stripeSubscriptionId: subscription.id,
-                },
-                update: {
-                    userId: session?.metadata?.userId,
-                    stripeCustomerId: subscription.customer as string,
-                    stripePriceId: subscription.items.data[0].price.id,
-                    stripeCurrentPeriodEnd: new Date(
-                        subscription.current_period_end * 1000
-                    ),
-                },
-                create: {
+            var user_sub = await prismadb.userSubscription.create({
+                data: {
                     userId: session?.metadata?.userId,
                     stripeSubscriptionId: subscription.id,
                     stripeCustomerId: subscription.customer as string,
@@ -156,8 +145,9 @@ export async function POST(req: Request) {
                 stripeSubscriptionId: subscription.id,
             },
         });
-
+        
         if (existingSub) {
+            console.log(existingSub)
             const sub = await prismadb.userSubscription.update({
                 where: {
                     stripeSubscriptionId: subscription.id,
@@ -224,19 +214,29 @@ export async function POST(req: Request) {
             else {
                 console.log("[STRIPE UNHANDLED SUB EVENT]");
                 const subscriptionUpdateData = event.data.object as Stripe.Subscription;
-
+                
                 if (subscriptionUpdateData.status === 'active') {
                     // Your logic here to renew the subscription in your database
                     // For example, update the `stripeCurrentPeriodEnd` field and other relevant fields
-                    const updatedSub = await prismadb.userSubscription.update({
+                    const user = await currentUser();
+                    if (!user) {
+                        return new NextResponse("User id is required", { status: 400 });
+                    }
+                    const updatedSub = await prismadb.userSubscription.upsert({
                         where: {
                             stripeSubscriptionId: subscriptionUpdateData.id,
                         },
-                        data: {
-                            // Update necessary fields to reflect the renewal
+                        create: {
+                            userId: user.id, 
+                            stripeSubscriptionId: subscriptionUpdateData.id,
+                            stripeCustomerId: subscriptionUpdateData.customer as string,
+                            stripePriceId: subscriptionUpdateData.items.data[0].price.id,
                             stripeCurrentPeriodEnd: new Date(subscriptionUpdateData.current_period_end * 1000),
-                            // ... add other fields if necessary
-
+                            // ... other fields you need to include during creation
+                        },
+                        update: {
+                            stripeCurrentPeriodEnd: new Date(subscriptionUpdateData.current_period_end * 1000),
+                            // ... other fields you need to update
                         },
                     });
                     console.log("[STRIPE SUB RENEWED]");

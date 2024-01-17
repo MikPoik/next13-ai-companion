@@ -9,7 +9,6 @@ const RootLayout = async ({
   children: React.ReactNode;
 }) => {
   const isPro =  await checkSubscription();
-
   return ( 
     <div className="h-screen flex flex-col">
         

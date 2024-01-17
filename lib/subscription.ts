@@ -16,16 +16,23 @@ export const checkSubscription = async (): Promise<boolean> => {
       stripePriceId: true,
     },
   });
+
   const userBalance = await prismadb.userBalance.findUnique({
     where: {
       userId: userId,
     }
   });
-  if (!userSubscription || !userSubscription.stripePriceId) {
+  if (!userBalance) {
     return false;
   }
-    const hasProTokenBalance = (userBalance?.proTokens ?? 0) > 0;
-    const hasValidSubscription = userSubscription.stripeCurrentPeriodEnd &&
-                                 (userSubscription.stripeCurrentPeriodEnd.getTime() + DAY_IN_MS) > Date.now();
-    return !!hasProTokenBalance || !!hasValidSubscription;
+
+
+  const hasProTokenBalance = (userBalance?.proTokens ?? 0) > 0;
+  // Adjusted check for valid subscription
+    const hasValidSubscription = userSubscription?.stripeCurrentPeriodEnd 
+       ? (userSubscription.stripeCurrentPeriodEnd.getTime() + DAY_IN_MS) > Date.now() 
+       : false;
+
+  // Return true if has pro tokens, irrespective of valid subscription
+    return hasProTokenBalance || hasValidSubscription;
 };
