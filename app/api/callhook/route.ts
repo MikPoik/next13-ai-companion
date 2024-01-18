@@ -103,9 +103,9 @@ export async function POST(req: Request) {
         //format to json string to be parsed in steamship
         const json_messages = JSON.stringify(transcripts.map((transcript: any) => ({
             role: transcript.user === "assistant" ? "assistant" : "user",
-            content: transcript.text
+            content: transcript.text.replace(/\\n/g, ". ")
         })));
-        
+        console.log(json_messages);
         if (!companion) {
             return new NextResponse(`No companion found}`, { status: 400 })
         }

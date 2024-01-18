@@ -48,6 +48,28 @@ const SettingsPage = async () => {
     // Convert callTime to minutes and seconds
     const callTimeMinutes = Math.floor(callTime / 60);
     const callTimeSeconds = callTime % 60;
+    
+    let subcriptionButtonState = false;
+    if (isPro) {
+        //a bit duplicate check to manage sub button state
+          const DAY_IN_MS = 86_400_000;
+          const userSubscription = await prismadb.userSubscription.findUnique({
+            where: {
+              userId: user.id,
+            },
+            select: {
+              stripeCurrentPeriodEnd: true,
+              stripePriceId: true,
+            },
+          });
+
+        const hasValidSubscription = userSubscription?.stripeCurrentPeriodEnd 
+           ? (userSubscription.stripeCurrentPeriodEnd.getTime() + DAY_IN_MS) > Date.now() 
+           : false;
+        if (hasValidSubscription) {
+            subcriptionButtonState = true;
+        }
+    }
     return (
         <div className="h-full p-4 space-y-2">
             <h3 className="text-lg font-medium">Settings</h3>
@@ -64,7 +86,7 @@ const SettingsPage = async () => {
                         * Better image resolution<br />
                         * More image generator models<br />
                     </div></div>)}
-            <SubscriptionButton isPro={isPro} />
+            <SubscriptionButton isPro={subcriptionButtonState} />
             <span className="mr-2"></span>
             <br /><br />
             <div className="text-muted-foreground text-sm">
