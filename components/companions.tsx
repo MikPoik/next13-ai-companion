@@ -65,7 +65,7 @@ export const Companions = ({
                                             item.voiceId === 'none' &&
                                             (item.imageModel === 'realistic-vision-v3' || item.imageModel === 'dark-sushi-mix-v2-25')
                                         ) ? (
-                                            <span title="Companion is free"></span>
+                                            <div title="Companion is free"><span className="text-xs font-normal"></span></div>
                                         ) : (
                                             !isPro && (
                                                 <div title="Pro plan required" className="flex items-center">

@@ -10,7 +10,7 @@ export async function POST(req: Request) {
     try {
         // Read the request body as text
         const body = await req.text();
-        console.log(body);
+        //console.log(body);
         // Convert the text to a JavaScript object
         const data = JSON.parse(body);
         // Access properties from the parsed object
@@ -43,7 +43,7 @@ export async function POST(req: Request) {
                 duration: correctedDuration,
             }
         });
-        console.log(update_call_log);
+        //console.log(update_call_log);
 
         const companionId = call_sender.companionId;
         const userId = call_sender.userId;
@@ -52,7 +52,7 @@ export async function POST(req: Request) {
         const messagesToCreate = transcripts.map((transcript: any) => ({
             companionId: companionId,
             userId: userId,
-            content: transcript.user === "assistant" ? `[{"index":null,"mimeType":null,"text":"${transcript.text}","fileId":null,"id":null,"publicData":true,"contentURL":null,"url":null,"tags":[],"uploadBytes":null,"uploadType":null}]` : transcript.text,
+            content: transcript.user === "assistant" ? `[{"text":"${transcript.text.replace(/\n+/g, ". ")}"}]` :transcript.text.replace(/\n+/g, ". "),
             role: transcript.user === "assistant" ? "system" : "user", // Changed from transcript.user to "user"
             createdAt: new Date(transcript.created_at).toISOString(), //example 2024-01-15T09:00:35.64345+00:00 convert to ISO string
         }));
@@ -75,7 +75,7 @@ export async function POST(req: Request) {
                 }
             }
         });
-        console.log(userBalance);
+        //console.log(userBalance);
         // Check if the new userBalance's callTime is below 0 after decrementing
         if (userBalance.callTime < 0) {
             // Handle the situation when balance is below 0
@@ -105,7 +105,7 @@ export async function POST(req: Request) {
             role: transcript.user === "assistant" ? "assistant" : "user",
             content: transcript.text.replace(/\\n/g, ". ")
         })));
-        console.log(json_messages);
+        //console.log(json_messages);
         if (!companion) {
             return new NextResponse(`No companion found}`, { status: 400 })
         }
