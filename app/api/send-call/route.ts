@@ -100,7 +100,7 @@ export async function POST(req: Request) {
         if (!companion) {
             return new NextResponse("No companion found", { status: 404 });
         }
-
+        //console.log(companion);
         const phoneVoice = await prismadb.phoneVoice.findUnique({
             where: {
                 id: companion.phoneVoiceId
@@ -109,6 +109,7 @@ export async function POST(req: Request) {
         if (!phoneVoice) {
             return new NextResponse("No phone voice found", { status: 404 });
         }
+        //console.log(phoneVoice)
         //retrieve chat history from db, last 10 messages    
         let formattedMessages = '';
         companion.messages.forEach((message) => {
@@ -135,7 +136,7 @@ export async function POST(req: Request) {
 
         if (formattedMessages.length < 1) {
             
-            formattedMessages = `You: ` + companion.seed;
+            formattedMessages = `person: Hi\nYou: ` + companion.seed;
         }
 
 
@@ -146,22 +147,16 @@ export async function POST(req: Request) {
         const date = now.toLocaleDateString("en-US"); // Get the current date in MM/DD/YYYY format
 
 
-        const call_prompt = `Embody a character, your name is ${companion.name} and you're calling the person you've been chatting with, you both agreed to have a phone call to see how it goes. Set the tone and mood for the call based on ${companion.name}'s personality and context of previous conversation.
+        const call_prompt = `Embody a character, your name is ${companion.name} and you are ${companion.description}. You're calling the person you've been chatting with, you both agreed to have a phone call to see how it goes. Set the tone and mood for the call based on your personality and context of previous chat.
 
-${companion.name} is a ${companion.description}
+personality: ${companion.personality}
+appearance: ${companion.selfiePre}
+Date: ${date}, Time: ${time}, Day: ${day}.
 
-${companion.name}'s personality: ${companion.personality}
-
-${companion.name}'s appearance: ${companion.selfiePre}
-
-Previous chat for context:
+Here's dialogue from a previous conversation:
 ${formattedMessages}
 
-Date: ${date}, Time: ${time}, Day: ${day}. 
-
-When talking be brief, natural, authentic and creative. Reflecting ${companion.name}'s personality, let your desires flow freely and enjoy the intimacy of the call but don't be afraid to get explicit and sexually charged.
-
-Ok, Introduce yourself and strike a dialogue with the person.`;
+When talking be natural, authentic and creative, reflecting your personality. Let your desires flow freely and enjoy the intimacy of the call, if possible get explicit and sexually charged.`;
 
 
 
@@ -183,19 +178,25 @@ Ok, Introduce yourself and strike a dialogue with the person.`;
                 maxDuration = 1;
             }
         }
-        //limit lenght of call because of prompt limit
-        if (maxDuration > 8) {
-            maxDuration = 8
+        let voice_id = null
+        let voice_preset = null
+        if (phoneVoice.is_preset) {
+            voice_preset = phoneVoice.voice_preset;  
+        } else {
+            voice_id = phoneVoice.voice_id;
         }
+
+
         const data = {
             'phone_number': phoneNumber,
             'task': call_prompt,
-            'voice_id': phoneVoice.voice_id,
+            'voice_id': voice_id,
             'reduce_latency': phoneVoice.reduceLatency,
             'webhook': `${process.env["NEXT_PUBLIC_APP_URL"]}/api/callhook`,
             'max_duration': maxDuration,
             'interruption_threshold': 400,
             'temperature': 0.9,
+            'voice': voice_preset
             
         }
         //console.log(data);
@@ -207,7 +208,7 @@ Ok, Introduce yourself and strike a dialogue with the person.`;
             headers: headers,
             body: JSON.stringify(data),
         });
-
+        
         const responseJson = await response.json(); // This converts the response to a JSON object
         const callId = responseJson.call_id; // This extracts the call_id value from the response JSON
         const status = responseJson.status; // This extracts the status value from the response JSON

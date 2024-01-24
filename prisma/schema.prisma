@@ -29,6 +29,8 @@ model PhoneVoice {
     voice_id Int
     reduceLatency Boolean @default(true)
     companions Companion[]
+    is_preset   Boolean @default(false)
+    voice_preset    String @default("")
 }
 
 model Companion {
@@ -56,7 +58,7 @@ model Companion {
   voiceId        String   @default("none")
   category       Category  @relation(fields: [categoryId], references: [id])
   voice          Voice    @relation(fields: [voiceId], references: [id])
-  phoneVoiceId   String   @default("default")  
+  phoneVoiceId   String   @default("302df500-b53f-4e33-bcd7-1e06d06cebc511")  
   phoneVoice     PhoneVoice  @relation(fields: [phoneVoiceId], references: [id])
   backstory      String   @db.LongText
   messages       Message[]

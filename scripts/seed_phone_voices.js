@@ -17,12 +17,6 @@ async function seedPhoneVoices() {
                     reduceLatency: true
                 },
                 {
-                    id: 'default',
-                    name: 'default (Jen)',
-                    voice_id: 2,
-                    reduceLatency: true
-                },
-                {
                     name: 'Grace',
                     voice_id: 0,
                     reduceLatency: false
@@ -42,6 +36,21 @@ async function seedPhoneVoices() {
                     voice_id: 3,
                     reduceLatency: false
                 },
+                {
+                    name:'Paola',
+                    voice_id: -1,
+                    reduceLatency: false,
+                    is_preset:true,
+                    voice_preset:'caad7545-c58b-4b37-954c-27b93aed8dbd'
+                },
+                {   
+                    id: '302df500-b53f-4e33-bcd7-1e06d06cebc5',
+                    name:'Amilia',
+                    voice_id: -1,
+                    is_preset:true,
+                    reduceLatency: false,
+                    voice_preset:'a832ba3f-532d-47e1-97e8-a7b8c212dd98'
+                }
 
             ],
         });
