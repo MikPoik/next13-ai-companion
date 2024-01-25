@@ -54,7 +54,7 @@ export const ChatForm = ({
     };
 
 
-    const canSendMessage =  isPro || (companion.model === 'zephyr-chat' && companion.voiceId === 'none' && (companion.imageModel === 'realistic-vision-v3' || companion.imageModel === 'dark-sushi-mix-v2-25'));
+    const canSendMessage =  isPro || ((companion.model === 'zephyr-chat' || companion.model === 'gpt-3.5-turbo-0613') && companion.voiceId === 'none' && (companion.imageModel === 'realistic-vision-v3' || companion.imageModel === 'dark-sushi-mix-v2-25'));
     const SubmitButtonIcon = canSendMessage ? SendHorizonal : Sparkles;
 
     return (

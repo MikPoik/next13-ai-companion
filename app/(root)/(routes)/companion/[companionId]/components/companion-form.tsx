@@ -26,7 +26,7 @@ const STEAMSHIP_IMG_BOT_URL = "https://mpoikkilehto.steamship.run/avatar-gen-dev
 const PREAMBLE = `Your personality can be described as ...`;
 const PREAMBLE_BEHAVIOUR = `You behave like ...`;
 const PREAMBLE_BACKSTORY = `relevant details and facts about the character ...`;
-const PREAMBLE_SELFIE_PRE = `describe your character appearance in detail for the image...`;
+const PREAMBLE_SELFIE_PRE = `Keywords to describe your character appearance in detail: keyword, keyword...`;
 const PREAMBLE_SELFIE_POST = `describe image details and effects ...`;
 const SEED_CHAT = `Introduction message for the character ...`;
 
@@ -316,8 +316,8 @@ export const CompanionForm = ({
                                             </FormControl>
                                             <SelectContent>
                                                 <SelectItem key="realistic-vision-v3" value="realistic-vision-v3">Realistic-Vision-v3</SelectItem>
-                                                <SelectItem key="absolute-reality-v1-8-1" value="absolute-reality-v1-8-1">Absolute-Reality-v1-8-1 (Pro plan)</SelectItem>
                                                 <SelectItem key="dark-sushi-mix-v2-25" value="dark-sushi-mix-v2-25">Dark-Sushi-mix-v2-25</SelectItem>
+                                                <SelectItem key="absolute-reality-v1-8-1" value="absolute-reality-v1-8-1">Absolute-Reality-v1-8-1 (Pro plan)</SelectItem>                                    
                                                 <SelectItem key="arcane-diffusion" value="arcane-diffusion">Arcane-Diffusion (Pro plan)</SelectItem>
                                                 <SelectItem key="van-gogh-diffusion" value="van-gogh-diffusion">Van Gogh Diffusion (Pro plan)</SelectItem>
                                                 <SelectItem key="neverending-dream" value="neverending-dream">Neverending Dream (Pro plan)</SelectItem>
@@ -463,7 +463,7 @@ export const CompanionForm = ({
                                             <SelectItem key="NousResearch/Nous-Hermes-Llama2-70b" value="NousResearch/Nous-Hermes-Llama2-70b">Llama2 70b (NSFW, Pro plan)</SelectItem>
                                             <SelectItem key="teknium/OpenHermes-2-Mistral-7B" value="teknium/OpenHermes-2-Mistral-7B">Mistral 7b (NSFW, Pro plan)</SelectItem>
                                             <SelectItem key="Gryphe/MythoMax-L2-13b" value="Gryphe/MythoMax-L2-13b">MythoMax 13b (NSFW, Pro plan)</SelectItem>
-                                            <SelectItem key="zephyr-chat" value="zephyr-chat">Zephyr 7b (NSFW content)</SelectItem>
+                                            <SelectItem key="zephyr-chat" value="zephyr-chat">Zephyr 7b (NSFW)</SelectItem>
                                             <SelectItem key="gpt-3.5-turbo-0613" value="gpt-3.5-turbo-0613">GPT-3.5</SelectItem>
                                         </SelectContent>
                                     </Select>
