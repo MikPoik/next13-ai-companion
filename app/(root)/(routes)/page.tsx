@@ -53,6 +53,7 @@ const RootPage = async ({
     if (!Array.isArray(companions)) {
       throw new Error('Failed to retrieve companions from the database.');
     }
+
   // Calculate message count and sort the companions
       // Sort the companions by message count using the _count property
       companions.sort((a, b) => (b._count.messages || 0) - (a._count.messages || 0));
