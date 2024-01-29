@@ -47,13 +47,14 @@ export const Companions = ({
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2 pb-10">
             {ageVerificationState === 'true' &&
                 data.map((item) => (
-                    <Card key={item.name} className="bg-primary/10 rounded-xl cursor-pointer hover:opacity-75 transition border-0 flex flex-col h-full">
+                    <Card key={item.id} className="bg-primary/10 rounded-xl cursor-pointer hover:opacity-75 transition border-0 flex flex-col h-full">
                         <Link href={`/chat/${item.id}`} className="flex flex-col h-full">
                             <CardHeader className="flex flex-col items-center justify-center text-center text-muted-foreground">
                                 <div className="relative w-32 h-32">
                                     <Image
                                         src={item.src}
                                         fill
+                                        sizes="512px"
                                         className="rounded-xl object-cover"
                                         alt="Character"
                                     />
