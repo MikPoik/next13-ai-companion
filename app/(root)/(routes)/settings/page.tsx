@@ -81,10 +81,7 @@ const SettingsPage = async () => {
                     <span className="text-sky-500 mx-1 font-medium">Pro</span> plan subscription   <span className="text-sky-500 mx-1 font-medium">9.99$</span> / month.
                     <div className="text-muted-foreground text-sm">
                         * 100 000 tokens / month<br />
-                        * More NSFW llms<br />
-                        * Voice messages <br />
                         * Better image resolution<br />
-                        * More image generator models<br />
                     </div></div>)}
             <SubscriptionButton isPro={subcriptionButtonState} />
             <span className="mr-2"></span>
