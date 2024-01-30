@@ -87,7 +87,7 @@ export async function POST(req: Request) {
             },
             include: {
                 messages: {
-                    take: 6,
+                    take: 10,
                     orderBy: {
                         createdAt: "desc"
                     },
@@ -134,10 +134,10 @@ export async function POST(req: Request) {
             formattedMessages += `${role_text}: ${text}\n`; // Append to the string with a newline character for separation
         });
 
-        if (formattedMessages.length < 1) {
-            
-            formattedMessages = `person: Hi\nYou: ` + companion.seed;
+        if (!formattedMessages.includes("You:")) {
+            formattedMessages = `You: ${companion.seed}\n` + formattedMessages;
         }
+
 
 
         // Create dynamic environment variables
@@ -147,16 +147,15 @@ export async function POST(req: Request) {
         const date = now.toLocaleDateString("en-US"); // Get the current date in MM/DD/YYYY format
 
 
-        const call_prompt = `Embody a character, your name is ${companion.name} and you are ${companion.description}. You're calling the person you've been chatting with, you both agreed to have a phone call to see how it goes. Set the tone and mood for the call based on your personality and context of previous chat.
+        const call_prompt = `Embody a character, your name is ${companion.name} and you are ${companion.description}. You're calling a person. If you haven't had previous conversation with the person before, introduce yourself and ask the person's name so you get to know each other. Begin the call with a tone and mood based on your personality, be creative when conversation proceeds. Keep the conversation fresh while avoiding repetition. If it fits the flow of conversation you can be explicit and sexually charged.
 
-personality: ${companion.personality}
-appearance: ${companion.selfiePre}
+Your personality: ${companion.personality}
+Your physical appearance: ${companion.selfiePre}
+
 Date: ${date}, Time: ${time}, Day: ${day}.
 
-Here's dialogue from a previous conversation:
-${formattedMessages}
-
-When talking be natural, authentic and creative, reflecting your personality. Let your desires flow freely and enjoy the intimacy of the call, if possible get explicit and sexually charged.`;
+Here's dialogue from a previous conversation between person and You:
+${formattedMessages}`;
 
 
 
@@ -194,7 +193,7 @@ When talking be natural, authentic and creative, reflecting your personality. Le
             'reduce_latency': phoneVoice.reduceLatency,
             'webhook': `${process.env["NEXT_PUBLIC_APP_URL"]}/api/callhook`,
             'max_duration': maxDuration,
-            'interruption_threshold': 400,
+            'interruption_threshold': 300,
             'temperature': 0.9,
             'voice': voice_preset
             

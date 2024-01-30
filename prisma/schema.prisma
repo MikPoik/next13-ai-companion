@@ -58,7 +58,7 @@ model Companion {
   voiceId        String   @default("none")
   category       Category  @relation(fields: [categoryId], references: [id])
   voice          Voice    @relation(fields: [voiceId], references: [id])
-  phoneVoiceId   String   @default("302df500-b53f-4e33-bcd7-1e06d06cebc511")  
+  phoneVoiceId   String   @default("302df500-b53f-4e33-bcd7-1e06d06cebc5")  
   phoneVoice     PhoneVoice  @relation(fields: [phoneVoiceId], references: [id])
   backstory      String   @db.LongText
   messages       Message[]

@@ -4,7 +4,7 @@ import Link from "next/link"
 import { Companion } from "@prisma/client"
 import { MessagesSquare, ShieldOff, Shield, EyeOff, Eye, ImagePlus, ImageOff, VolumeX, Volume2 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { Card, CardFooter, CardHeader } from "@/components/ui/card"
+import { Card, CardFooter, CardHeader,CardContent } from "@/components/ui/card"
 
 interface CompanionsProps {
     data: (Companion & {
@@ -60,20 +60,27 @@ export const Companions = ({
                                     />
                                 </div>
                                 <p className="font-bold">
-                                    <div className="flex items-center justify-center text-muted-foreground mb-4">
+                                    <div className="flex items-center justify-center text-muted-foreground mb-0">
                                         <span className="ml-2 mr-2">{item.name}</span>
                                     </div>    
                                 </p>
+
+                            </CardHeader>
+                            <CardContent className="flex items-center justify-center text-center text-muted-foreground">
+                            <div className="mt-auto">
                                 <p className="text-xs">
                                     {item.description}
                                 </p>
-                            </CardHeader>
+                            </div>
+                            </CardContent>
+ 
                             <div className="mt-auto">
-                                <div className="flex items-center justify-center text-muted-foreground mb-4">
+                                <div className="flex items-center justify-center text-muted-foreground mb-2">
                                     <span title="Total messages"><MessagesSquare size={15} className="mr-2" /></span>
                                     <span className="text-xs font-normal">{item._count.messages ?? 0}</span>
                                 </div>
-                                <CardFooter className="flex items-center justify-between text-xs text-muted-foreground">
+                                <CardFooter className="flex items-center justify-between text-xs text-muted-foreground mb-0 pb-2">
+                                    
                                     {item.model === 'gpt-3.5-turbo-0613' ? (
                                         <span title="NSFW content disabled"><Shield size={16} /></span>
                                     ) : (
@@ -93,8 +100,11 @@ export const Companions = ({
                                     {item.voiceId === 'none' ? (
                                         <span title="Voice disabled"><VolumeX size={16} /></span>
                                     ) : (<span title="Voice enabled"><Volume2 size={16} /></span>)}
-                                </CardFooter>
+                                </CardFooter>  
+                                <div className="flex items-center justify-center text-muted-foreground text-xs mt-0 mb-2">{item.model.split('/').pop()?.toLowerCase() ?? ''}</div>
                             </div>
+                            
+                               
                         </Link>
                     </Card>
                 ))
