@@ -121,7 +121,7 @@ export async function POST(
         });
         //console.log(balance);
         if (balance) {
-            if (balance.tokenCount > balance.tokenLimit) {
+            if (balance.tokenCount > balance.tokenLimit+balance.proTokens) {
                 return NextResponse.json("Message limit exceeded, upgrade to Pro plan for increased limit.");
             }
         }
@@ -201,40 +201,67 @@ export async function POST(
                 }
             });
 
-            const token_count = roughTokenCount(responseText); //should we calculate with tiktoken?
-
-            //console.log(token_count);      
-            if (hasAudio == 1) {
-                voiceTokens = token_count;
-                voiceTokens = voiceTokens / 4;
+        const tokenCost = roughTokenCount(responseText) + imageTokens + voiceTokens;
+        const currentDateTime = new Date().toISOString();
+            
+            if (!balance) {
+                // Create the new balance record if it does not exist
+                await prismadb.userBalance.create({
+                    data: {
+                        userId: user.id,
+                        tokenCount: tokenCost,
+                        messageCount: 1,
+                        messageLimit: 1000,
+                        tokenLimit: 10000,
+                        firstMessage: currentDateTime,
+                        // Assuming initial setting for proTokens and callTime needs to be handled here as well
+                        proTokens: 0,
+                        callTime: 0,
+                        lastMessage: currentDateTime
+                    }
+                });
+            } else {
+                // Check if proTokens cover all the cost
+                if (balance.proTokens >= tokenCost) {
+                    // Decrement from proTokens only
+                    await prismadb.userBalance.update({
+                        where: {
+                            userId: user.id
+                        },
+                        data: {
+                            proTokens: {
+                                decrement: tokenCost
+                            },
+                            messageCount: {
+                                increment: 1
+                            },
+                            lastMessage: currentDateTime
+                        }
+                    });
+                } else {
+                    // Use up all proTokens and remainder goes to tokenCount
+                    const remainder = tokenCost - balance.proTokens;
+                    await prismadb.userBalance.update({
+                        where: {
+                            userId: user.id
+                        },
+                        data: {
+                            proTokens: {
+                                decrement: balance.proTokens
+                            },
+                            tokenCount: {
+                                increment: remainder
+                            },
+                            messageCount: {
+                                increment: 1
+                            },
+                            lastMessage: currentDateTime
+                        }
+                    });
+                }
             }
-            const currentDateTime = new Date().toISOString();
-            await prismadb.userBalance.upsert({
-                where: {
-                    userId: user.id
-                },
-                update:
-                {
-                    tokenCount: { increment: token_count + imageTokens + voiceTokens },
-                    messageCount: { increment: 1 },
-                    lastMessage: currentDateTime
-
-                },
-                create: {
-                    userId: user.id,
-                    tokenCount: token_count + imageTokens + voiceTokens,
-                    messageCount: 1,
-                    messageLimit: 20,
-                    tokenLimit: 10000,
-                    firstMessage: currentDateTime,
-                },
-            });
-
-
-        }
-        //console.log(responseBlocks)
         return NextResponse.json(responseBlocks)
-
+        }
     } catch (error) {
         console.log(error)
         return NextResponse.json("I'm sorry, I had an error when generating response. \n(This message is not saved)");

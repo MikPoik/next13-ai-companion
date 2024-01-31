@@ -3,6 +3,7 @@ import { Categories } from "@/components/categories";
 import { Companions } from "@/components/companions";
 import { SearchInput } from "@/components/search-input";
 import { currentUser } from "@clerk/nextjs";
+import { checkSubscription } from "@/lib/subscription";
 interface RootPageProps {
   searchParams: {
     categoryId: string;
@@ -13,6 +14,7 @@ const RootPage = async ({
   searchParams
 }: RootPageProps) => {
   const user = await currentUser();
+  const isPro = await checkSubscription();
   let user_id = user?.id || "public";
     let companions = await prismadb.companion.findMany({
       where: {

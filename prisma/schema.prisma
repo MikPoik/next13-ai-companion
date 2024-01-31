@@ -23,6 +23,16 @@ model Voice {
   companions Companion[]
 }
 
+model PhoneVoice {
+    id       String      @id @default(uuid())
+    name     String
+    voice_id Int
+    reduceLatency Boolean @default(true)
+    companions Companion[]
+    is_preset   Boolean @default(false)
+    voice_preset    String @default("")
+}
+
 model Companion {
   id             String    @id @default(uuid())
   userId         String
@@ -47,8 +57,10 @@ model Companion {
   isPublic       Boolean  @default(true)
   voiceId        String   @default("none")
   category       Category  @relation(fields: [categoryId], references: [id])
-  voice          Voice  @relation(fields: [voiceId], references: [id])
-  backstory      String  @db.LongText
+  voice          Voice    @relation(fields: [voiceId], references: [id])
+  phoneVoiceId   String   @default("302df500-b53f-4e33-bcd7-1e06d06cebc5")  
+  phoneVoice     PhoneVoice  @relation(fields: [phoneVoiceId], references: [id])
+  backstory      String   @db.LongText
   messages       Message[]
 
   @@index([categoryId])
@@ -86,9 +98,19 @@ model UserBalance {
   tokenLimit   Int    @default(0)
   firstMessage DateTime?
   lastMessage  DateTime?
+  proTokens    Int @default(0)
+  callTime     Int @default(0)
 }
 
 enum Role {
   user
   system
+}
+
+model CallLog {
+    id        String @id @default(uuid())
+    userId    String
+    companionId String
+    duration    String?
+    status    String?
 }

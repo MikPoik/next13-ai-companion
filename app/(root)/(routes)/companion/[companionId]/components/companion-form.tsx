@@ -6,7 +6,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { Wand2, Trash2 } from "lucide-react";
-import { Category, Companion, Voice } from "@prisma/client";
+import { Category, Companion, Voice, PhoneVoice } from "@prisma/client";
 //import { BotAvatarForm } from "@/components/bot-avatar-form";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
@@ -53,11 +53,7 @@ const formSchema = z.object({
     isPublic: z.boolean().optional(),
     createImages: z.boolean().optional(),
     behaviour: z.string().optional(),
-    backstory: z.string().transform((value: string) => value.trim()) // Custom validation function to trim the string
-        .refine((value: string) => value.length <= 3000, {
-            message: "Backstory is too long",
-        })
-        .optional(),
+    backstory: z.string().optional(),
     selfiePre: z.string().optional(),
     selfiePost: z.string().optional(),
     model: z.string().min(1, {
@@ -67,18 +63,21 @@ const formSchema = z.object({
         message: "imageModel is required",
     }),
     voiceId: z.string().optional(),
-    regenerateImage: z.boolean().optional()
+    regenerateImage: z.boolean().optional(),
+    phoneVoiceId: z.string().optional(),
 });
 
 interface CompanionFormProps {
     categories: Category[];
     voices: Voice[];
+    phoneVoices: PhoneVoice[];
     initialData: Companion | null;
 };
 
 export const CompanionForm = ({
     categories,
     voices,
+    phoneVoices,
     initialData
 }: CompanionFormProps) => {
     const { toast } = useToast();
@@ -178,6 +177,7 @@ export const CompanionForm = ({
             voiceId: 'none',
             backstory: "",
             regenerateImage: false,
+            phoneVoiceId: '302df500-b53f-4e33-bcd7-1e06d06cebc5',
 
 
         },
@@ -317,7 +317,7 @@ export const CompanionForm = ({
                                             <SelectContent>
                                                 <SelectItem key="realistic-vision-v3" value="realistic-vision-v3">Realistic-Vision-v3</SelectItem>
                                                 <SelectItem key="dark-sushi-mix-v2-25" value="dark-sushi-mix-v2-25">Dark-Sushi-mix-v2-25</SelectItem>
-                                                <SelectItem key="absolute-reality-v1-8-1" value="absolute-reality-v1-8-1">Absolute-Reality-v1-8-1</SelectItem>                                    
+                                                <SelectItem key="absolute-reality-v1-8-1" value="absolute-reality-v1-8-1">Absolute-Reality-v1-8-1</SelectItem>
                                                 <SelectItem key="arcane-diffusion" value="arcane-diffusion">Arcane-Diffusion</SelectItem>
                                                 <SelectItem key="van-gogh-diffusion" value="van-gogh-diffusion">Van Gogh Diffusion</SelectItem>
                                                 <SelectItem key="neverending-dream" value="neverending-dream">Neverending Dream</SelectItem>
@@ -462,7 +462,7 @@ export const CompanionForm = ({
                                             <SelectItem key="NousResearch/Nous-Hermes-Llama2-13b" value="NousResearch/Nous-Hermes-Llama2-13b">Llama2 13b (NSFW)</SelectItem>
                                             <SelectItem key="NousResearch/Nous-Hermes-Llama2-70b" value="NousResearch/Nous-Hermes-Llama2-70b">Llama2 70b (NSFW)</SelectItem>
                                             <SelectItem key="teknium/OpenHermes-2-Mistral-7B" value="teknium/OpenHermes-2-Mistral-7B">Mistral 7b (NSFW)</SelectItem>
-                                            <SelectItem key="Gryphe/MythoMax-L2-13b" value="Gryphe/MythoMax-L2-13b">MythoMax 13b (NSFW,)</SelectItem>
+                                            <SelectItem key="Gryphe/MythoMax-L2-13b" value="Gryphe/MythoMax-L2-13b">MythoMax 13b (NSFW)</SelectItem>
                                             <SelectItem key="zephyr-chat" value="zephyr-chat">Zephyr 7b (NSFW)</SelectItem>
                                             <SelectItem key="gpt-3.5-turbo-0613" value="gpt-3.5-turbo-0613">GPT-3.5</SelectItem>
                                         </SelectContent>
@@ -580,7 +580,44 @@ export const CompanionForm = ({
                                 <FormMessage />
                             </FormItem>
                         )}
-                    /> 
+                    />
+                    <FormField
+                        control={form.control}
+                        name="phoneVoiceId"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Phone Voice</FormLabel>
+                                <div className="flex items-center">
+                                    <Select
+                                        disabled={isLoading}
+                                        onValueChange={(value) => {
+                                            field.onChange(value);
+                                            handleVoiceChange(value);
+                                        }}
+                                        defaultValue={field.value}
+                                    >
+                                        <FormControl>
+                                            <SelectTrigger className="bg-background">
+                                                <SelectValue defaultValue={field.value} placeholder="Select a voice to use for phone calls" />
+                                            </SelectTrigger>
+                                        </FormControl>
+                                        <SelectContent style={selectContentStyle} >
+                                            {phoneVoices.map((phoneVoice) => (
+                                                <SelectItem key={phoneVoice.id} value={phoneVoice.id}>
+                                                    {phoneVoice.name}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                    &nbsp;&nbsp;
+                                </div>
+                                <FormDescription>
+                                    Select a voice used in phone calls
+                                </FormDescription>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <FormField
                             name="isPublic"

@@ -1,12 +1,8 @@
 import { auth } from "@clerk/nextjs";
-
 import prismadb from "@/lib/prismadb";
-
 const DAY_IN_MS = 86_400_000;
-
-export const checkSubscription = async () => {
+export const checkSubscription = async (): Promise<boolean> => {
   const { userId } = auth();
-
   if (!userId) {
     return false;
   }
@@ -16,20 +12,27 @@ export const checkSubscription = async () => {
       userId: userId,
     },
     select: {
-      stripeSubscriptionId: true,
       stripeCurrentPeriodEnd: true,
-      stripeCustomerId: true,
       stripePriceId: true,
     },
-  })
+  });
 
-  if (!userSubscription) {
+  const userBalance = await prismadb.userBalance.findUnique({
+    where: {
+      userId: userId,
+    }
+  });
+  if (!userBalance) {
     return false;
   }
 
-  const isValid =
-    userSubscription.stripePriceId &&
-    userSubscription.stripeCurrentPeriodEnd?.getTime()! + DAY_IN_MS > Date.now()
 
-  return !!isValid;
+  const hasProTokenBalance = (userBalance?.proTokens ?? 0) > 0;
+  // Adjusted check for valid subscription
+    const hasValidSubscription = userSubscription?.stripeCurrentPeriodEnd 
+       ? (userSubscription.stripeCurrentPeriodEnd.getTime() + DAY_IN_MS) > Date.now() 
+       : false;
+
+  // Return true if has pro tokens, irrespective of valid subscription
+    return hasProTokenBalance || hasValidSubscription;
 };

@@ -27,7 +27,7 @@ export async function PATCH(
     try {
         const body = await req.json();
         const user = await currentUser();
-        const { name, src, description, personality, seed, categoryId, isPublic, behaviour, selfiePost, selfiePre, imageModel, voiceId, createImages, backstory } = body;
+        const { name, src, description, personality, seed, categoryId, isPublic, behaviour, selfiePost, selfiePre, imageModel, voiceId, createImages, backstory,phoneVoiceId } = body;
         if (!params.companionId) {
             return new NextResponse("Companion ID required", { status: 400 });
         }
@@ -131,6 +131,7 @@ export async function PATCH(
                 instanceHandle:instance_handle,
                 backstory:newBackstory,
                 createImages:createImages,
+                phoneVoiceId:phoneVoiceId,
             }
         });
         return NextResponse.json(companion);
