@@ -216,7 +216,7 @@ export async function POST(
                         firstMessage: currentDateTime,
                         // Assuming initial setting for proTokens and callTime needs to be handled here as well
                         proTokens: 0,
-                        callTime: 0,
+                        callTime: 300,
                         lastMessage: currentDateTime
                     }
                 });
