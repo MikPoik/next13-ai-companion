@@ -336,9 +336,9 @@ export const CompanionForm = ({
                                                 <SelectItem key="https://civitai.com/api/download/models/156375" value="https://civitai.com/api/download/models/156375">Clearhung Anime (SDXL)</SelectItem>
                                                 <SelectItem key="https://civitai.com/api/download/models/378499" value="https://civitai.com/api/download/models/378499">Hassaku (SDXL)</SelectItem>
                                                 <SelectItem key="https://civitai.com/api/download/models/303526?type=Model&format=SafeTensor&size=full&fp=fp16" value="https://civitai.com/api/download/models/303526?type=Model&format=SafeTensor&size=full&fp=fp16">Animemix (SDXL)</SelectItem>
-                                                   <SelectItem key="https://civitai.com/api/download/models/286821" value="https://civitai.com/api/download/models/286821">Deephentai (SDXL)</SelectItem>
+                                                <SelectItem key="https://civitai.com/api/download/models/286821" value="https://civitai.com/api/download/models/286821">Deephentai (SDXL)</SelectItem>
 
-                                                
+
 
 
 
