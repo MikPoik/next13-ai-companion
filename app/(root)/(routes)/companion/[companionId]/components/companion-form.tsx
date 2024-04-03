@@ -553,6 +553,7 @@ export const CompanionForm = ({
                         </div>
                         <Separator className="bg-primary/10" />
                     </div>
+                    {/*
                     <FormField
                         control={form.control}
                         name="voiceId"
@@ -597,7 +598,7 @@ export const CompanionForm = ({
                                 <FormMessage />
                             </FormItem>
                         )}
-                    />
+                    /> */}
                     <FormField
                         control={form.control}
                         name="phoneVoiceId"
