@@ -7,7 +7,7 @@ import { UndoIcon } from "lucide-react";
 import axios, { AxiosError } from 'axios';
 import { checkSubscription } from "@/lib/subscription";
 dotenv.config({ path: `.env` });
-
+import { StreamingTextResponse} from "ai";
 
 export const maxDuration = 120; //2 minute timeout
 
@@ -260,7 +260,20 @@ export async function POST(
                     });
                 }
             }
-        return NextResponse.json(responseBlocks)
+            const Readable = require('stream').Readable;
+            // Create a stream
+            let s = new Readable({
+              read() {} // Implement the read function
+            });
+            // Stringify your responseBlocks array
+            const responseBlocksData = JSON.stringify(responseBlocks);
+            // Push the stringified data to the stream
+            s.push(responseBlocksData);
+            // Signal the end of the stream
+            s.push(null);
+            // Return a StreamingTextResponse with the stream
+            return new StreamingTextResponse(s);
+        
         }
     } catch (error) {
         console.log(error)

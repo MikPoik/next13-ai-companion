@@ -1,33 +1,35 @@
-    async function updatePublicModel() {
-      const { PrismaClient } = require('@prisma/client');
+async function updatePublicModel() {
+    const { PrismaClient } = require('@prisma/client');
 
-      const prisma = new PrismaClient();
+    const prisma = new PrismaClient();
 
-      try {
+
+    try {
         // Fetch all public Companion records with model "llama-hermes-13b"
         const companions = await prisma.companion.findMany({
-          where: {
-            isPublic: true,
-            model: "NousResearch/Nous-Hermes-Llama2-13b"
-          }
+            where: {
+                isPublic: true,
+                model: "NousResearch/Nous-Hermes-Llama2-70b"
+            }
         });
 
         // Update each companion's model to "zephyr-chat"
         for (const companion of companions) {
-          await prisma.companion.update({
-            where: { id: companion.id },
-            data: { model: "zephyr-chat" }
-          });
+            await prisma.companion.update({
+                where: { id: companion.id },
+                data: { model: "zephyr-chat" }
+            });
 
-          console.log(`Updated ${companion.name}'s model to zephyr-chat`);
+            console.log(`Updated ${companion.name}'s model to zephyr-chat`);
         }
 
         console.log('Model updated successfully');
-      } catch (error) {
+    } catch (error) {
         console.error('Error updating model:', error);
-      } finally {
+    } finally {
         await prisma.$disconnect();
-      }
-    }
 
-    updatePublicModel();
+    }
+}
+
+updatePublicModel();
