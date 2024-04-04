@@ -255,7 +255,7 @@ export const CompanionForm = ({
 
     };
     const dropdownStyle: React.CSSProperties = {
-        maxHeight: "200px", // Limit the dropdown's height
+        maxHeight: "500px", // Limit the dropdown's height
         overflowY: "auto" // Enable vertical scrolling
     };
     return (
@@ -505,7 +505,7 @@ export const CompanionForm = ({
                             <FormItem>
                                 <FormLabel>Personality</FormLabel>
                                 <FormControl>
-                                    <Input disabled={isLoading} placeholder={PREAMBLE} {...field} />
+                                    <Textarea disabled={isLoading} rows={4} className="bg-background resize-none" placeholder={PREAMBLE} {...field} />
                                 </FormControl>
                                 <FormDescription>
                                     Describe in detail your companion&apos;s personality and relevant details.
