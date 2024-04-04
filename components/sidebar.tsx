@@ -52,9 +52,9 @@ export const Sidebar = ({
             pro: false,
         },
         {
-            icon: Component,
+            icon: "discord-mark-white.svg",
             href: 'https://discord.com/invite/DFYe5TrpXg',
-            label: "Community",
+            label: "Discord",
             pro: false,
         },
     ];
@@ -72,9 +72,13 @@ export const Sidebar = ({
                                 pathname === route.href && "bg-primary/10 text-primary",
                             )}
                         >
-                            <div className="flex flex-col gap-y-2 items-center flex-1">
-                                <route.icon className="h-5 w-5" />
-                                {route.label}
+                            <div className="flex flex-col gap-y-2 items-center flex-1" title={route.label}>
+                                {typeof route.icon === 'string' ? (
+                                    <img src={`/${route.icon}`} className="h-5 w-5" alt={route.label} />
+                                ) : (
+                                    <route.icon className="h-5 w-5" />
+                                )}
+                                {/*route.label*/}
                             </div>
                         </div>
                     ))}

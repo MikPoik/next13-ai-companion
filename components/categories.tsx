@@ -42,7 +42,7 @@ export const Categories = ({
           px-2 
           md:px-4 
           py-2 
-          md:py-3 
+          md:py-2 
           rounded-md 
           bg-primary/10 
           hover:opacity-75 
@@ -65,7 +65,7 @@ export const Categories = ({
             px-2 
             md:px-4 
             py-2 
-            md:py-3 
+            md:py-2 
             rounded-md 
             bg-primary/10 
             hover:opacity-75 
