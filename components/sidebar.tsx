@@ -53,7 +53,7 @@ export const Sidebar = ({
         },
         {
             icon: "discord-mark-white.svg",
-            href: 'https://discord.com/invite/DFYe5TrpXg',
+            href: 'https://discord.com/invite/CM6a23DZQD',
             label: "Discord",
             pro: false,
         },
