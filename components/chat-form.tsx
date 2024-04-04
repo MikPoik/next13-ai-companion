@@ -32,7 +32,8 @@ export const ChatForm = ({
     const inputRef = useRef<HTMLInputElement>(null);
     const { onOpen } = useProModal();
     useEffect(() => {
-        if (!isLoading && inputRef.current) {
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth < 768;
+        if (!isLoading && inputRef.current && !isMobile) {
             inputRef.current.focus();
         }
     }, [isLoading]);
