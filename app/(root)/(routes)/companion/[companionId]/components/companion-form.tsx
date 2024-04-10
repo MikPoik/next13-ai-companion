@@ -474,8 +474,9 @@ export const CompanionForm = ({
                                             <SelectTrigger className="bg-background">
                                                 <SelectValue defaultValue={field.value} placeholder="Select a llm model" />
                                             </SelectTrigger>
-                                        </FormControl>
+                                        </FormControl>"cognitivecomputations/dolphin-2.5-mixtral-8x7b"
                                         <SelectContent>
+                                            <SelectItem key="cognitivecomputations/dolphin-2.5-mixtral-8x7b" value="cognitivecomputations/dolphin-2.5-mixtral-8x7b">Dolphin Mixtral 8x7B DPO (NSFW)</SelectItem>
                                             <SelectItem key="NousResearch/Nous-Hermes-2-Mixtral-8x7B-DPO" value="NousResearch/Nous-Hermes-2-Mixtral-8x7B-DPO">Mixtral 8x7B DPO (NSFW)</SelectItem>
                                             <SelectItem key="NousResearch/Nous-Hermes-2-Mixtral-8x7B-SFT" value="NousResearch/Nous-Hermes-2-Mixtral-8x7B-SFT">Mixtral 8x7B SFT (NSFW)</SelectItem>
                                             <SelectItem key="teknium/OpenHermes-2-Mistral-7B" value="teknium/OpenHermes-2-Mistral-7B">Mistral 7b (NSFW)</SelectItem>
