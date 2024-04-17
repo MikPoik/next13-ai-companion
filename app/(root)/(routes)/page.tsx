@@ -28,7 +28,6 @@ const RootPage = async ({
     // Fetch private companions for "My Companions" category
     companions = await prismadb.companion.findMany({
       where: {
-        isPublic: false,
         userId: user_id,
         name: {
           contains: searchParams.name,
