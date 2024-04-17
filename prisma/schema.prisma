@@ -62,6 +62,7 @@ model Companion {
   phoneVoice     PhoneVoice  @relation(fields: [phoneVoiceId], references: [id])
   backstory      String
   messages       Message[]
+  featured       Boolean @default(false)
 
   @@index([categoryId])
 }
