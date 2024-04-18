@@ -27,7 +27,7 @@ export const ChatClient = ({
   const proModal = useProModal();
   const router = useRouter();
   const [messages, setMessages] = useState<ChatMessageProps[]>(companion.messages.map(message => ({
-    role: message.role,
+      role: message.role as "user" | "system",
     content: responseToChatBlocks(message.content)
   })));
   const {
