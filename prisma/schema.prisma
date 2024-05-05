@@ -64,6 +64,8 @@ model Companion {
   backstory      String
   messages       Message[]
   featured       Boolean @default(false)
+  tags           Tag[]  @relation("CompanionsTags")
+  nsfw           Boolean @default(false)
 
   @@index([categoryId])
 }
@@ -114,4 +116,10 @@ model CallLog {
     companionId String
     duration    String?
     status    String?
+}
+
+model Tag {
+  id          String      @id @default(uuid())
+  name        String      @unique
+  companions  Companion[] @relation("CompanionsTags")
 }

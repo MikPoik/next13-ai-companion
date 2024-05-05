@@ -31,6 +31,29 @@ export const Categories = ({
 
   return (
     <div className="w-full overflow-x-auto space-x-2 flex p-1">
+      {/* Add Suggested as a manual button */}
+      <button
+        onClick={() => onClick('suggested')}
+        className={cn(`
+          flex 
+          items-center 
+          text-center 
+          text-xs 
+          md:text-sm 
+          px-2 
+          md:px-4 
+          py-2 
+          md:py-2 
+          rounded-md 
+          bg-primary/10 
+          hover:opacity-75 
+          transition
+        `,
+          'suggested' === categoryId ? 'bg-primary/25' : 'bg-primary/10'
+        )}
+      >
+        Suggested
+      </button>
       <button
         onClick={() => onClick(undefined)}
         className={cn(`
@@ -101,6 +124,7 @@ export const Categories = ({
       >
         My Companions
       </button>
+
     </div>
   )
 }

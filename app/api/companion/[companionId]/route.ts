@@ -27,7 +27,8 @@ export async function PATCH(
     try {
         const body = await req.json();
         const user = await currentUser();
-        const { name, src, description, personality, seed, categoryId, isPublic, behaviour, selfiePost, selfiePre, imageModel, voiceId, createImages, backstory,phoneVoiceId } = body;
+        const { name, src, description, personality, seed, categoryId, isPublic, behaviour, selfiePost, selfiePre, imageModel, voiceId, createImages, backstory,phoneVoiceId,tags,nsfw } = body;
+        console.log("Form tags",tags)
         if (!params.companionId) {
             return new NextResponse("Companion ID required", { status: 400 });
         }
@@ -57,6 +58,25 @@ export async function PATCH(
         if (!companion) {
             return new NextResponse("Companion not found", { status: 404 });
         }
+
+        // Process tags - to create non-existing tags and find existing ones
+        const existingTags = await prismadb.tag.findMany({
+            where: {
+                name: { in: tags },
+            },
+        });
+        const existingTagNames = existingTags.map(tag => tag.name);
+
+        // Filter out new tags that don't already exist
+        const newTags = tags.filter((tag: string) => !existingTagNames.includes(tag));
+
+        // Create new tags
+        const createdTags = await Promise.all(
+            newTags.map((tag: string) => prismadb.tag.create({ data: { name: tag } }))
+        );
+
+        // Combine existing tags with newly created tags for final update
+        const finalTags = [...existingTags, ...createdTags];
         
         const packageName = "backend-test-bot";
         const env_packageName = process.env.STEAMSHIP_PACKAGE || packageName;
@@ -132,11 +152,15 @@ export async function PATCH(
                 backstory:newBackstory,
                 createImages:createImages,
                 phoneVoiceId:phoneVoiceId,
+                tags: {
+                      set: finalTags.map(tag => ({ id: tag.id })),
+                },
+                nsfw: nsfw
             }
         });
         return NextResponse.json(companion);
     } catch (error) {
-        console.log("[COMPANION_PATCH]");
+        console.log("[COMPANION_PATCH]",error);
         return new NextResponse("Internal Error", { status: 500 });
     }
 
