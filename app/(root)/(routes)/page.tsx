@@ -25,11 +25,21 @@ const RootPage = async ({
     let user_id = user?.id || "public";
 
     let companions;
-    const tags = await prismadb.tag.findMany();
+    const tagsWithCount = await prismadb.tag.findMany({
+      include: {
+        _count: {
+          select: { companions: true }, // Counts the companions for each tag
+        },
+      },
+    });
+    // Step 2: Sort the tags by the companions count in descending order and limit to top 20
+    const sortedTags = tagsWithCount.sort((a, b) => b._count.companions - a._count.companions).slice(0, 20);
+    //console.log(sortedTags);
+    const tags = sortedTags//await prismadb.tag.findMany();
     let selectedTagIds = searchParams.tag ? searchParams.tag.split(',') : [];
-    console.log(selectedTagIds)
+    //console.log(selectedTagIds)
     const nsfw = searchParams.nsfw === 'true';
-    console.log("isNSFW", nsfw)
+
 
     // Determine if "My Companions" category has been selected
     const isMyCompanionsCategorySelected = searchParams.categoryId === "my-companions";
@@ -41,6 +51,7 @@ const RootPage = async ({
                 AND: [
                     { 
                         name: { contains: searchParams.name, mode: 'insensitive' as Prisma.QueryMode, },
+                        nsfw: nsfw,
                         ...(selectedTagIds.length > 0 ? {
                             tags: {
                                 some: { id: { in: selectedTagIds } },
@@ -62,13 +73,14 @@ const RootPage = async ({
         });
     } else if (isSuggestedCategorySelected) {
         // Example logic for suggested category, adjust based on actual criteria
-        console.log("suggested companions")
+
         companions = await prismadb.companion.findMany({
             where: {
                 AND: [
                     { 
                         featured: true, // Assuming isSuggested is a valid attribute
                         nsfw: nsfw,
+                        isPublic: true,
                         ...(selectedTagIds.length > 0 ? {
                             tags: {
                                 some: { id: { in: selectedTagIds } },

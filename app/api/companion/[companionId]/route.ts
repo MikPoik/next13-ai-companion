@@ -12,10 +12,10 @@ dotenv.config({ path: `.env` });
 
 export const maxDuration = 120; //2 minute timeout
 function uuidv4() {
-  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-      var r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
-      return v.toString(16);
-  });
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+        var r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+    });
 }
 
 export async function PATCH(
@@ -27,8 +27,8 @@ export async function PATCH(
     try {
         const body = await req.json();
         const user = await currentUser();
-        const { name, src, description, personality, seed, categoryId, isPublic, behaviour, selfiePost, selfiePre, imageModel, voiceId, createImages, backstory,phoneVoiceId,tags,nsfw } = body;
-        console.log("Form tags",tags)
+        const { name, src, description, personality, seed, categoryId, isPublic, behaviour, selfiePost, selfiePre, imageModel, voiceId, createImages, backstory, phoneVoiceId, tags, nsfw } = body;
+
         if (!params.companionId) {
             return new NextResponse("Companion ID required", { status: 400 });
         }
@@ -41,7 +41,7 @@ export async function PATCH(
             firstName = user.firstName
         }
 
-        if (!name || !src || !description || !personality || !seed || !categoryId) {
+        if (!name || !src || !description || !personality || !seed) {
             return new NextResponse("Missing required fields", { status: 400 });
         };
 
@@ -53,7 +53,7 @@ export async function PATCH(
             }
 
         });
-        
+
         // Check if the companion was not found and return an error if so
         if (!companion) {
             return new NextResponse("Companion not found", { status: 404 });
@@ -77,15 +77,15 @@ export async function PATCH(
 
         // Combine existing tags with newly created tags for final update
         const finalTags = [...existingTags, ...createdTags];
-        
+
         const packageName = "backend-test-bot";
         const env_packageName = process.env.STEAMSHIP_PACKAGE || packageName;
         let llm_model = companion.model;
         let instance_handle = companion.instanceHandle;
-        
+
         if (body['model'] != companion.model || body[createImages] != companion.createImages) {
             llm_model = body['model'];
-            instance_handle = user.id.replace("user_", "").toLowerCase() + "-" +uuidv4().replace(/-/g, "").toLowerCase();
+            instance_handle = user.id.replace("user_", "").toLowerCase() + "-" + uuidv4().replace(/-/g, "").toLowerCase();
             const client = await Steamship.use(env_packageName, instance_handle, { llm_model: llm_model, create_images: String(createImages) }, undefined, true, companion.workspaceName);
         }
 
@@ -97,8 +97,8 @@ export async function PATCH(
             newBackstory = backstory.slice(companion.backstory.length);
             if (newBackstory.length > 0) {
                 let text_to_index = newBackstory;
-                newBackstory = companion.backstory + "\n"+ newBackstory;
-                if ( companion) {
+                newBackstory = companion.backstory + "\n" + newBackstory;
+                if (companion) {
                     const indexTextResponse = await indexTextSteamship(
                         'index_text',
                         text_to_index,
@@ -124,7 +124,7 @@ export async function PATCH(
             }
 
         }
-        else{
+        else {
             newBackstory = companion.backstory;
         }
         const updateCompanion = await prismadb.companion.update({
@@ -133,34 +133,34 @@ export async function PATCH(
                 userId: user.id,
             },
             data: {
-                categoryId:categoryId,
-                name:name,
+                categoryId: "default",
+                name: name,
                 userId: user.id,
                 userName: firstName,
-                src:src,
-                description:description,
-                personality:personality,
-                seed:seed,
-                isPublic:isPublic,
-                behaviour:behaviour,
-                selfiePost:selfiePost,
-                selfiePre:selfiePre,
-                imageModel:imageModel,
-                voiceId:voiceId,
-                model:llm_model,
-                instanceHandle:instance_handle,
-                backstory:newBackstory,
-                createImages:createImages,
-                phoneVoiceId:phoneVoiceId,
+                src: src,
+                description: description,
+                personality: personality,
+                seed: seed,
+                isPublic: isPublic,
+                behaviour: behaviour,
+                selfiePost: selfiePost,
+                selfiePre: selfiePre,
+                imageModel: imageModel,
+                voiceId: voiceId,
+                model: llm_model,
+                instanceHandle: instance_handle,
+                backstory: newBackstory,
+                createImages: createImages,
+                phoneVoiceId: phoneVoiceId,
                 tags: {
-                      set: finalTags.map(tag => ({ id: tag.id })),
+                    set: finalTags.map(tag => ({ id: tag.id })),
                 },
                 nsfw: nsfw
             }
         });
         return NextResponse.json(companion);
     } catch (error) {
-        console.log("[COMPANION_PATCH]",error);
+        console.log("[COMPANION_PATCH]", error);
         return new NextResponse("Internal Error", { status: 500 });
     }
 
@@ -170,12 +170,14 @@ export async function DELETE(
     request: Request,
     { params }: { params: { companionId: string } }
 ) {
+    console.log("DELETE COMPANION")
     try {
         const user = await currentUser();
 
         if (!user) {
             return new NextResponse("Unauthorized", { status: 401 });
         }
+
 
         const companion = await prismadb.companion.delete({
             where: {
@@ -188,7 +190,7 @@ export async function DELETE(
 
         return NextResponse.json(companion);
     } catch (error) {
-        console.log("[COMPANION_DELETE]");
+        console.log("[COMPANION_DELETE]", error);
         return new NextResponse("Internal Error", { status: 500 });
     }
 };

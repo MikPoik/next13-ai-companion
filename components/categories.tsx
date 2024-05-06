@@ -52,7 +52,7 @@ export const Categories = ({
           'suggested' === categoryId ? 'bg-primary/25' : 'bg-primary/10'
         )}
       >
-        Suggested
+        Featured
       </button>
       <button
         onClick={() => onClick(undefined)}

@@ -46,9 +46,6 @@ const formSchema = z.object({
         message: "Seed requires at least 200 characters."
     }),
     src: z.string().min(1, { message: "image is required" }),
-    categoryId: z.string().min(1, {
-        message: "Category is required",
-    }),
     packageName: z.string().optional(),
     isPublic: z.boolean().optional(),
     createImages: z.boolean().optional(),
@@ -111,12 +108,14 @@ export const CompanionForm = ({
     //console.log(selectedTags)
     //const [newImageUrl, setNewImageUrl] = useState('');
 
-    const onDelete = async () => {
+    const onDelete = async (e) => {
+        e.preventDefault(); // Prevent default form submission
+        e.stopPropagation(); // Stop the event from propagating further
         try {
             await axios.delete(`/api/companion/${initialData?.id}`);
-            //toast({
-            //    description: "Success."
-            //});
+            toast({
+               description: "Success."
+            });
             router.refresh();
             router.push("/");
         } catch (error) {
@@ -191,7 +190,6 @@ export const CompanionForm = ({
             personality: "",
             seed: "",
             src: "",
-            categoryId: undefined,
             packageName: "backend-test-bot",  //steamship package name
             isPublic: true,
             behaviour: "",
@@ -498,6 +496,7 @@ export const CompanionForm = ({
                             )}
 
                         />
+                        {/*
                         <FormField
                             control={form.control}
                             name="categoryId"
@@ -523,6 +522,7 @@ export const CompanionForm = ({
                                 </FormItem>
                             )}
                         />
+                        */}
                         <FormField
                             name="tags"
                             control={form.control}
@@ -549,6 +549,9 @@ export const CompanionForm = ({
                                         </div>
 
                                     </FormControl>
+                                    <FormDescription>
+                                        Enter descriptive tags here to describe your character.
+                                    </FormDescription>
                                     <FormMessage />
                                 </FormItem>
                             )}
@@ -645,7 +648,7 @@ export const CompanionForm = ({
                                     <Textarea disabled={isLoading} rows={6} className="bg-background resize-none" placeholder={PREAMBLE_BACKSTORY} {...field} />
                                 </FormControl>
                                 <FormDescription>
-                                    Describe relevant facts and details, bot will dynamically use indexed data when responding. Data can be added but not edited.
+                                    Describe relevant facts and details, companion will dynamically use indexed data when responding. Data can be added but not edited.
                                 </FormDescription>
                                 <FormMessage />
                             </FormItem>
@@ -778,7 +781,7 @@ export const CompanionForm = ({
                                             </label>
                                         </FormControl>
                                         <FormDescription>
-                                            (Other users can talk to the bot)
+                                            (Other users can talk to the character)
                                         </FormDescription>
                                         <FormMessage />
                                     </FormItem>
