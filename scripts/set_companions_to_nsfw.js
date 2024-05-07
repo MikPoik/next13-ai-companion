@@ -9,6 +9,7 @@ async function setCompanionsToNSFW() {
     for (const companion of companions) {
         await db.companion.update({
             where: {
+                public: true,
                 id: companion.id,
             },
             data: {
@@ -19,7 +20,7 @@ async function setCompanionsToNSFW() {
     }
 
     console.log('Updating companions to NSFW complete');
-    
+
     await db.$disconnect();
 }
 
