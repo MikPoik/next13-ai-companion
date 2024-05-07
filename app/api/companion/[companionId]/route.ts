@@ -65,6 +65,7 @@ export async function PATCH(
                 name: { in: tags },
             },
         });
+
         const existingTagNames = existingTags.map(tag => tag.name);
 
         // Filter out new tags that don't already exist

@@ -108,7 +108,7 @@ export const CompanionForm = ({
     //console.log(selectedTags)
     //const [newImageUrl, setNewImageUrl] = useState('');
 
-    const onDelete = async (e) => {
+    const onDelete = async (e: React.FormEvent) => {
         e.preventDefault(); // Prevent default form submission
         e.stopPropagation(); // Stop the event from propagating further
         try {
@@ -248,12 +248,12 @@ export const CompanionForm = ({
         try {           
             const submissionData = {
               ...values,
-                tags: initialData?.tags?.map(tag => tag.name) || [],
+                tags: selectedTags,
             };
             if (initialData) {
-                await axios.patch(`/api/companion/${initialData.id}`, values);
+                await axios.patch(`/api/companion/${initialData.id}`, submissionData);
             } else {
-                await axios.post("/api/companion", values);
+                await axios.post("/api/companion", submissionData);
             }
 
             toast({
