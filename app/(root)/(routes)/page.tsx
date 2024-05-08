@@ -121,11 +121,14 @@ const RootPage = async ({
         companions = await prismadb.companion.findMany(queryObject);
     }
     if (selectedTagIds.length > 0) {
-        companions = companions.filter(companion =>
-            companion.tags.every(tag => selectedTagIds.includes(tag.id)) &&
-            companion.tags.length === selectedTagIds.length
-        );
+        companions = companions.filter(companion => {
+            // Convert companion tags to tag IDs for easier comparison
+            const companionTagIds = companion.tags.map(tag => tag.id);
+            // Check if every selectedTagId is included in companionTagIds
+            return selectedTagIds.every(tagId => companionTagIds.includes(tagId));
+        });
     }
+    
 
     if (!Array.isArray(companions)) {
         throw new Error('Failed to retrieve companions from the database.');
