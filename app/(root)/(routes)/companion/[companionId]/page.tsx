@@ -27,19 +27,24 @@ const CompanionIdPage = async ({
   //  return redirect("/");
   //}
 
-  const companion = await prismadb.companion.findUnique({
-    where: {
-      id: params.companionId,
-      userId,
-    }
-  });
+    const companion = await prismadb.companion.findUnique({
+      where: {
+        id: params.companionId,
+        userId,
+      },
+      include: {
+        tags: true, // Include the tags in the result
+      }
+    });
+
 
   const categories = await prismadb.category.findMany();
   const voices = await prismadb.voice.findMany();
   const phoneVoices = await prismadb.phoneVoice.findMany();
+  const tags = await prismadb.tag.findMany();
   //return redirect("/");
   return (
-    <CompanionForm initialData={companion} categories={categories} voices={voices} phoneVoices={phoneVoices} />
+    <CompanionForm initialData={companion} categories={categories} voices={voices} phoneVoices={phoneVoices} tags={tags} />
   );
 }
 

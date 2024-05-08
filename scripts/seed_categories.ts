@@ -6,8 +6,7 @@ async function seedCategories() {
   try {
     await db.category.createMany({
       data: [
-        { id:'nsfw', name: 'NSFW'},
-        { id:'other', name:'other'}
+        { id: 'default', name: 'default' }
 
       ],
     });

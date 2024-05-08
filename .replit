@@ -9,7 +9,7 @@ language = "nodejs"
   guessImports = true
 
 [nix]
-channel = "stable-22_05"
+channel = "stable-23_11"
 
 [env]
 XDG_CONFIG_HOME = "$REPL_HOME/.config"
@@ -43,10 +43,6 @@ externalPort = 8080
 [[ports]]
 localPort = 33987
 externalPort = 5000
-
-[[ports]]
-localPort = 35655
-externalPort = 3000
 
 [[ports]]
 localPort = 36133

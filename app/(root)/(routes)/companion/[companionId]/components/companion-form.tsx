@@ -6,7 +6,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { Wand2, Trash2 } from "lucide-react";
-import { Category, Companion, Voice, PhoneVoice } from "@prisma/client";
+import { Category, Companion, Voice, PhoneVoice,Tag } from "@prisma/client";
 //import { BotAvatarForm } from "@/components/bot-avatar-form";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
@@ -46,9 +46,6 @@ const formSchema = z.object({
         message: "Seed requires at least 200 characters."
     }),
     src: z.string().min(1, { message: "image is required" }),
-    categoryId: z.string().min(1, {
-        message: "Category is required",
-    }),
     packageName: z.string().optional(),
     isPublic: z.boolean().optional(),
     createImages: z.boolean().optional(),
@@ -65,20 +62,29 @@ const formSchema = z.object({
     voiceId: z.string().optional(),
     regenerateImage: z.boolean().optional(),
     phoneVoiceId: z.string().optional(),
+    tags: z.array(z.string()).min(1,{message:"Tags are required"}),
+    nsfw: z.boolean().optional()
 });
+
+
+type CompanionWithTags = Companion & {
+    tags: Tag[];
+}
 
 interface CompanionFormProps {
     categories: Category[];
     voices: Voice[];
     phoneVoices: PhoneVoice[];
-    initialData: Companion | null;
+    initialData: CompanionWithTags | null;
+    tags: Tag[];
 };
 
 export const CompanionForm = ({
     categories,
     voices,
     phoneVoices,
-    initialData
+    initialData,
+    tags
 }: CompanionFormProps) => {
     const { toast } = useToast();
     const router = useRouter();
@@ -86,14 +92,30 @@ export const CompanionForm = ({
     const [selectedVoiceId, setSelectedVoiceId] = useState(initialData?.voiceId || 'none');
     const [sampleUrl, setSampleUrl] = useState(""); // State variable to store the sample URL
     const [imageUrl, setImageUrl] = useState(initialData?.src || "/placeholder.svg");
+    // Assuming initialData might have a tags property, but TypeScript isn't aware of it.
+    // A helper function to assert the type of `initialData.tags`
+    function assertHasTags(data: any): data is Companion {
+        return Array.isArray(data?.tags);
+    }
+
+    const [selectedTags, setSelectedTags] = useState<string[]>(
+        assertHasTags(initialData) ? initialData.tags.map(tag => tag.name) : []
+    );
+    const [tagInput, setTagInput] = useState("");
+
+    //console.log(initialData)
+    //console.log(tags)
+    //console.log(selectedTags)
     //const [newImageUrl, setNewImageUrl] = useState('');
 
-    const onDelete = async () => {
+    const onDelete = async (e: React.FormEvent) => {
+        e.preventDefault(); // Prevent default form submission
+        e.stopPropagation(); // Stop the event from propagating further
         try {
             await axios.delete(`/api/companion/${initialData?.id}`);
-            //toast({
-            //    description: "Success."
-            //});
+            toast({
+               description: "Success."
+            });
             router.refresh();
             router.push("/");
         } catch (error) {
@@ -159,13 +181,15 @@ export const CompanionForm = ({
     };;
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
-        defaultValues: initialData || {
+        defaultValues: initialData ? {
+            ...initialData,
+            tags: initialData.tags?.map(tag => tag.id) || [], // Make sure this matches your actual data structure
+        } : {
             name: "",
             description: "",
             personality: "",
             seed: "",
             src: "",
-            categoryId: undefined,
             packageName: "backend-test-bot",  //steamship package name
             isPublic: true,
             behaviour: "",
@@ -177,12 +201,44 @@ export const CompanionForm = ({
             voiceId: 'none',
             backstory: "",
             regenerateImage: false,
-            phoneVoiceId: '302df500-b53f-4e33-bcd7-1e06d06cebc5',
+
+            phoneVoiceId: '94880846-c333-433a-ae5c-ca1cb2776387',
+            tags: [],
+            nsfw: false
+
 
 
         },
     });
-    const { watch, getValues } = form;
+    const { watch, handleSubmit, register, formState: { errors }, setValue, getValues } = form;
+    
+    const handleTagInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setTagInput(e.target.value);
+    };
+    const handleTagInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === 'Enter') {
+            e.preventDefault(); // Prevent form submission on enter
+            // Perform type assertion if you need to access specific properties of the input element
+            const target = e.target as HTMLInputElement;
+            setTagInput(target.value); // <- This line might need to be adjusted depending on your logic
+            addTag();
+        }
+    };
+    const addTag = () => {
+        let newTag = tagInput.trim();
+        if (newTag && !selectedTags.includes(newTag)) {
+            const updatedTags = [...selectedTags, newTag];
+            setSelectedTags(updatedTags); // Update state
+            setValue('tags', updatedTags); // Update form value
+            setTagInput(''); // Clear input field
+        }
+    };
+    const removeTag = (tagToRemove: string) => {
+        const updatedTags = selectedTags.filter(tag => tag !== tagToRemove);
+        setSelectedTags(updatedTags); // Update state
+        setValue('tags', updatedTags); // Update form value
+    };
+
     const characterAppearanceWatch = watch("selfiePre");  // Watching specific input
     const characterAppearanceGetValues = getValues("selfiePre");  // Get value of specific input
     const imageModelWatch = watch("imageModel");  // Watching specific input
@@ -191,11 +247,15 @@ export const CompanionForm = ({
     const isLoading = form.formState.isSubmitting;
 
     const onSubmit = async (values: z.infer<typeof formSchema>) => {
-        try {
+        try {           
+            const submissionData = {
+              ...values,
+                tags: selectedTags,
+            };
             if (initialData) {
-                await axios.patch(`/api/companion/${initialData.id}`, values);
+                await axios.patch(`/api/companion/${initialData.id}`, submissionData);
             } else {
-                await axios.post("/api/companion", values);
+                await axios.post("/api/companion", submissionData);
             }
 
             toast({
@@ -438,6 +498,7 @@ export const CompanionForm = ({
                             )}
 
                         />
+                        {/*
                         <FormField
                             control={form.control}
                             name="categoryId"
@@ -463,6 +524,41 @@ export const CompanionForm = ({
                                 </FormItem>
                             )}
                         />
+                        */}
+                        <FormField
+                            name="tags"
+                            control={form.control}
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Tags</FormLabel>
+                                    <FormControl>
+                                        <div className="flex flex-wrap gap-2 mb-2">
+                                            {selectedTags.map((tag, index) => (
+                                                <div key={index} className="flex items-center gap-1 bg-primary/10 px-1 py-1 text-center text-xs md:text-sm1 md:px-1 md:py-1 rounded-md hover:opacity-75 transition rounded-full">
+                                                    {tag}
+                                                    <button type="button" onClick={() => removeTag(tag)} className="text-red-500 hover:text-gray-700">
+                                                        &times;
+                                                    </button>
+                                                </div>
+                                            ))}
+                                            <Input 
+                                                value={tagInput} 
+                                                onChange={handleTagInputChange} 
+                                                onKeyDown={handleTagInputKeyDown} 
+                                                placeholder="Add a tag and press Enter..." 
+                                                disabled={isLoading}
+                                            />
+                                        </div>
+
+                                    </FormControl>
+                                    <FormDescription>
+                                        Enter descriptive tags here to describe your character.
+                                    </FormDescription>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                        
                         <FormField
                             control={form.control}
                             name="model"
@@ -476,12 +572,14 @@ export const CompanionForm = ({
                                             </SelectTrigger>
                                         </FormControl>
                                         <SelectContent>
-                                            {/*<SelectItem key="cognitivecomputations/dolphin-2.5-mixtral-8x7b" value="cognitivecomputations/dolphin-2.5-mixtral-8x7b">Dolphin Mixtral 8x7B DPO (NSFW)</SelectItem>*/}
-                                            <SelectItem key="NousResearch/Nous-Hermes-2-Mixtral-8x7B-DPO" value="NousResearch/Nous-Hermes-2-Mixtral-8x7B-DPO">Mixtral 8x7B DPO (NSFW)</SelectItem>
-                                            <SelectItem key="NousResearch/Nous-Hermes-2-Mixtral-8x7B-SFT" value="NousResearch/Nous-Hermes-2-Mixtral-8x7B-SFT">Mixtral 8x7B SFT (NSFW)</SelectItem>
-                                            <SelectItem key="teknium/OpenHermes-2-Mistral-7B" value="teknium/OpenHermes-2-Mistral-7B">Mistral 7b (NSFW)</SelectItem>
-                                            <SelectItem key="Gryphe/MythoMax-L2-13b" value="Gryphe/MythoMax-L2-13b">MythoMax 13b (NSFW)</SelectItem>
-                                            <SelectItem key="zephyr-chat" value="zephyr-chat">Zephyr 7b (NSFW)</SelectItem>
+
+                                            <SelectItem key="cognitivecomputations/dolphin-2.5-mixtral-8x7b" value="cognitivecomputations/dolphin-2.5-mixtral-8x7b">Dolphin 2.5 8x7B</SelectItem>
+                                            <SelectItem key="NousResearch/Nous-Hermes-2-Mixtral-8x7B-DPO" value="NousResearch/Nous-Hermes-2-Mixtral-8x7B-DPO">Mixtral 8x7B DPO</SelectItem>
+                                            <SelectItem key="NousResearch/Nous-Hermes-2-Mixtral-8x7B-SFT" value="NousResearch/Nous-Hermes-2-Mixtral-8x7B-SFT">Mixtral 8x7B SFT</SelectItem>
+                                            <SelectItem key="teknium/OpenHermes-2-Mistral-7B" value="teknium/OpenHermes-2-Mistral-7B">Mistral 7b</SelectItem>
+                                            <SelectItem key="Gryphe/MythoMax-L2-13b" value="Gryphe/MythoMax-L2-13b">MythoMax 13b</SelectItem>
+                                            <SelectItem key="zephyr-chat" value="zephyr-chat">Zephyr 7b</SelectItem>
+
                                             <SelectItem key="gpt-3.5-turbo-0613" value="gpt-3.5-turbo-0613">GPT-3.5</SelectItem>
                                         </SelectContent>
                                     </Select>
@@ -491,6 +589,34 @@ export const CompanionForm = ({
                                     <FormMessage />
                                 </FormItem>
                             )}
+                        />
+                        <FormField
+                            name="nsfw"
+                            control={form.control}
+                            render={({ field }) => {
+                                // Remove the value property from the field object
+                                const { value, ...rest } = field;
+
+                                return (
+                                    <FormItem>
+
+                                        <FormControl>
+                                            <FormLabel>NSFW &nbsp;
+                                                <input
+                                                    type="checkbox"
+                                                    {...rest} // Spread the rest of the field object into the input element's props
+                                                    checked={value} // Use the value property to set the checked property
+                                                    style={{ width: '16px', height: '16px', cursor: "pointer" }}
+                                                />
+                                            </FormLabel>
+                                        </FormControl>
+                                        <FormDescription>
+                                            Check if your companion contains or produces nsfw content.
+                                        </FormDescription>
+                                        <FormMessage />
+                                    </FormItem>
+                                );
+                            }}
                         />
                     </div>
                     <div className="space-y-2 w-full">
@@ -526,7 +652,7 @@ export const CompanionForm = ({
                                     <Textarea disabled={isLoading} rows={6} className="bg-background resize-none" placeholder={PREAMBLE_BACKSTORY} {...field} />
                                 </FormControl>
                                 <FormDescription>
-                                    Describe relevant facts and details, bot will dynamically use indexed data when responding. Data can be added but not edited.
+                                    Describe relevant facts and details, companion will dynamically use indexed data when responding. Data can be added but not edited.
                                 </FormDescription>
                                 <FormMessage />
                             </FormItem>
@@ -659,7 +785,7 @@ export const CompanionForm = ({
                                             </label>
                                         </FormControl>
                                         <FormDescription>
-                                            (Other users can talk to the bot)
+                                            (Other users can talk to the character)
                                         </FormDescription>
                                         <FormMessage />
                                     </FormItem>

@@ -21,13 +21,13 @@ export async function POST(req: Request) {
     try {
         const body = await req.json();
         const user = await currentUser();
-        const { src, name, description, personality, seed, categoryId, packageName, isPublic, selfiePost, selfiePre, behaviour, model, createImages, imageModel, voiceId, backstory,phoneVoiceId } = body;
+        const { src, name, description, personality, seed, categoryId, packageName, isPublic, selfiePost, selfiePre, behaviour, model, createImages, imageModel, voiceId, backstory,phoneVoiceId,tags,nsfw } = body;
         //console.log(src);
         if (!user || !user.id) {
             return new NextResponse("Unauthorized", { status: 401 });
         }
 
-        if (!name || !description || !personality || !seed || !categoryId || !model) {
+        if (!name || !description || !personality || !seed || !model) {
             return new NextResponse("Missing required fields", { status: 400 });
         };
         var firstName = "user";
@@ -52,7 +52,24 @@ export async function POST(req: Request) {
         const description_string = description.replace(/{{|{|}|}}/g, "");
         const env_packageName = process.env.STEAMSHIP_PACKAGE || packageName;
 
+        // Process tags - to create non-existing tags and find existing ones
+        const existingTags = await prismadb.tag.findMany({
+            where: {
+                name: { in: tags },
+            },
+        });
+        const existingTagNames = existingTags.map(tag => tag.name);
 
+        // Filter out new tags that don't already exist
+        const newTags = tags.filter((tag: string) => !existingTagNames.includes(tag));
+
+        // Create new tags
+        const createdTags = await Promise.all(
+            newTags.map((tag: string) => prismadb.tag.create({ data: { name: tag } }))
+        );
+
+        // Combine existing tags with newly created tags for final update
+        const finalTags = [...existingTags, ...createdTags];
 
         const client = await Steamship.use(env_packageName, instance_handle, { llm_model: llm_model, create_images: String(createImages) }, undefined, true, workspace_name);
 
@@ -82,7 +99,7 @@ export async function POST(req: Request) {
         //update database
         const companion = await prismadb.companion.create({
             data: {
-                categoryId,
+                categoryId:"default",
                 userId: user.id,
                 userName: firstName,
                 src: src,
@@ -103,13 +120,20 @@ export async function POST(req: Request) {
                 voiceId,
                 backstory,
                 phoneVoiceId: phoneVoiceId,
+                tags: {
+                    connectOrCreate: finalTags.map(tag => ({
+                        where: { id: tag.id },
+                        create: { id: tag.id, name: tag.name },
+                    })),
+                },
+                nsfw: nsfw
             }
         });
 
 
         return NextResponse.json(companion);
     } catch (error) {
-        console.log("[COMPANION_POST] ERROR");
+        console.log("[COMPANION_POST] ERROR",error);
         return new NextResponse("Internal Error", { status: 500 });
     }
 
