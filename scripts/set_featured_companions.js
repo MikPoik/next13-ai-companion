@@ -9,12 +9,12 @@ async function setFeaturedCompanions() {
         }
     });
     // Step 2: List of companion names to be featured
-    const featuredCompanions = ["Cassie","Allison"];
+    const featuredCompanions = ["de46919d-1325-4e91-8c70-507af16029fc","id2-2342-324"];
     // Step 3: Iterate and update featured column to true for each given name
     await Promise.all(featuredCompanions.map(async (name) => {
         await prismadb.companion.updateMany({
             where: {
-                name: name
+                id: name
             },
             data: {
                 featured: true

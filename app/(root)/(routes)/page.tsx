@@ -120,8 +120,11 @@ const RootPage = async ({
                 };
         companions = await prismadb.companion.findMany(queryObject);
     }
-    if (selectedTagIds.length > 0 ){
-        companions = companions.filter(companion => companion.tags.length > 0);
+    if (selectedTagIds.length > 0) {
+        companions = companions.filter(companion =>
+            companion.tags.every(tag => selectedTagIds.includes(tag.id)) &&
+            companion.tags.length === selectedTagIds.length
+        );
     }
 
     if (!Array.isArray(companions)) {
