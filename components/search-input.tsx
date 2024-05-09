@@ -88,7 +88,7 @@ export const SearchInput = ({ tags, selectedTags,nsfw: initialIsNSFW }: SearchIn
                     className="pl-10 bg-primary/10"
                 />
                 <button onClick={toggleNSFW} className="p-2 ml-2">
-                    {isNSFW === "true" ? <ToggleLeft size={24} className="fill-sky-500" /> : <ToggleRight size={24} className="fill-muted-foreground" />}
+                    {isNSFW === "true" ? <ToggleRight size={24} className="fill-sky-500" /> : <ToggleLeft size={24} className="fill-muted-foreground" />}
                 </button> <div className="text-xs">NSFW</div>
             </div>
             <div className="tags-container flex flex-wrap gap-2">
