@@ -31,9 +31,28 @@ const RootPage = async ({
     let tagsWithCount = null;
     if (isMyCompanionsCategorySelected) {
         tagsWithCount = await prismadb.tag.findMany({
+            where: {
+                OR: [
+                    {
+                        companions: {
+                            some: {
+                                isPublic: true,
+                            },
+                        },
+                    },
+                    {
+                        companions: {
+                            some: {
+                                userId: user_id,
+                                isPublic: false,
+                            },
+                        },
+                    },
+                ],
+            },
             include: {
                 _count: {
-                    select: { companions: true }, // Counts the companions for each tag
+                    select: { companions: true },
                 },
             },
         });
@@ -124,7 +143,7 @@ const RootPage = async ({
         let queryObject = {
             where: {
                 AND: [
-                    //searchParams.categoryId ? { categoryId: searchParams.categoryId } : {},
+
                     {
                         name: { contains: searchParams.name, mode: 'insensitive' as Prisma.QueryMode, },
                         ...nsfwFilter,
