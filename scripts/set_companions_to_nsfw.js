@@ -9,7 +9,7 @@ async function setCompanionsToNSFW() {
     for (const companion of companions) {
         await db.companion.update({
             where: {
-                public: true,
+                isPublic: true,
                 id: companion.id,
             },
             data: {

@@ -26,14 +26,36 @@ const RootPage = async ({
 
 
     let companions;
-    const tagsWithCount = await prismadb.tag.findMany({
 
-      include: {
-        _count: {
-          select: { companions: true }, // Counts the companions for each tag
-        },
-      },
-    });
+    // Determine if "My Companions" category has been selected
+    const isMyCompanionsCategorySelected = searchParams.categoryId === "my-companions";
+    const isSuggestedCategorySelected = searchParams.categoryId === "suggested";
+    let tagsWithCount = null;
+    if (isMyCompanionsCategorySelected) {
+        tagsWithCount = await prismadb.tag.findMany({
+            include: {
+                _count: {
+                    select: { companions: true }, // Counts the companions for each tag
+                },
+            },
+        });
+    } else {
+        tagsWithCount = await prismadb.tag.findMany({
+            where: {
+                companions: {
+                    some: {
+                        isPublic: true,
+                    },
+                },
+            },
+            include: {
+                _count: {
+                    select: { companions: true },
+                },
+            },
+        });
+    }
+
     // Step 2: Sort the tags by the companions count in descending order and limit to top 20
     const sortedTags = tagsWithCount.sort((a, b) => b._count.companions - a._count.companions).slice(0, 20);
     //console.log(sortedTags);
@@ -42,18 +64,21 @@ const RootPage = async ({
     //console.log(selectedTagIds)
     const nsfw = searchParams.nsfw === 'true';
 
+    let nsfwFilter = {};
+    if (nsfw) {
+        nsfwFilter = {}; // If nsfw is true, no additional filter is applied, allowing both nsfw true and false
+    } else {
+        nsfwFilter = { nsfw: false }; // If nsfw is false, only companions with nsfw = false are shown
+    }
 
-    // Determine if "My Companions" category has been selected
-    const isMyCompanionsCategorySelected = searchParams.categoryId === "my-companions";
-    const isSuggestedCategorySelected = searchParams.categoryId === "suggested";
 
     if (isMyCompanionsCategorySelected) {
         companions = await prismadb.companion.findMany({
             where: {
                 AND: [
-                    { 
+                    {
                         name: { contains: searchParams.name, mode: 'insensitive' as Prisma.QueryMode, },
-                        nsfw: nsfw,
+                        ...nsfwFilter,
                         ...(selectedTagIds.length > 0 ? {
                             tags: {
                                 some: { id: { in: selectedTagIds } },
@@ -79,9 +104,9 @@ const RootPage = async ({
         companions = await prismadb.companion.findMany({
             where: {
                 AND: [
-                    { 
+                    {
                         featured: true, // Assuming isSuggested is a valid attribute
-                        nsfw: nsfw,
+                        ...nsfwFilter,
                         isPublic: true,
                         ...(selectedTagIds.length > 0 ? {
                             tags: {
@@ -98,33 +123,39 @@ const RootPage = async ({
                 tags: true,
             },
         });
-    }else {
-        let queryObject ={
-                where: {
-                    AND: [
-                        //searchParams.categoryId ? { categoryId: searchParams.categoryId } : {},
-                        { 
-                            name: { contains: searchParams.name, mode: 'insensitive' as Prisma.QueryMode, },
-                            nsfw: nsfw,
-                            ...(selectedTagIds.length > 0 ? {
-                                tags: {
-                                    some: { id: { in: selectedTagIds } },
-                                },
-                            } : {})
-                        },
-                    ],
-                    isPublic: true,
-                },
-                include: {
-                    _count: { select: { messages: true } },
-                    tags: true,
-                },
-                };
+    } else {
+        let queryObject = {
+            where: {
+                AND: [
+                    //searchParams.categoryId ? { categoryId: searchParams.categoryId } : {},
+                    {
+                        name: { contains: searchParams.name, mode: 'insensitive' as Prisma.QueryMode, },
+                        ...nsfwFilter,
+                        ...(selectedTagIds.length > 0 ? {
+                            tags: {
+                                some: { id: { in: selectedTagIds } },
+                            },
+                        } : {})
+                    },
+                ],
+                isPublic: true,
+            },
+            include: {
+                _count: { select: { messages: true } },
+                tags: true,
+            },
+        };
         companions = await prismadb.companion.findMany(queryObject);
     }
-    if (selectedTagIds.length > 0 ){
-        companions = companions.filter(companion => companion.tags.length > 0);
+    if (selectedTagIds.length > 0) {
+        companions = companions.filter(companion => {
+            // Convert companion tags to tag IDs for easier comparison
+            const companionTagIds = companion.tags.map(tag => tag.id);
+            // Check if every selectedTagId is included in companionTagIds
+            return selectedTagIds.every(tagId => companionTagIds.includes(tagId));
+        });
     }
+
 
     if (!Array.isArray(companions)) {
         throw new Error('Failed to retrieve companions from the database.');
