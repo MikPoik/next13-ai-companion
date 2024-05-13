@@ -62,7 +62,7 @@ const formSchema = z.object({
     voiceId: z.string().optional(),
     regenerateImage: z.boolean().optional(),
     phoneVoiceId: z.string().optional(),
-    tags: z.array(z.string()).min(1,{message:"Tags are required"}),
+    tags: z.array(z.string()).optional(),
     nsfw: z.boolean().optional()
 });
 
@@ -462,7 +462,7 @@ export const CompanionForm = ({
                         </div>
                         <Separator className="bg-primary/10" />
                     </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    
                         <FormField
                             name="name"
                             control={form.control}
@@ -479,6 +479,7 @@ export const CompanionForm = ({
                                 </FormItem>
                             )}
                         />
+                        
                         <FormField
                             name="description"
                             control={form.control}
@@ -614,7 +615,7 @@ export const CompanionForm = ({
                                 );
                             }}
                         />
-                    </div>
+                    
                     <div className="space-y-2 w-full">
                         <div>
                             <h3 className="text-lg font-medium">Configuration</h3>
