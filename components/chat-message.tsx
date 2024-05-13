@@ -27,16 +27,19 @@ export const ChatMessage = ({
   const { theme } = useTheme();
   
   const onCopy = () => {
-    if (!content) {
-      return;
+    // Ensure content is an array and has at least one element
+    if (Array.isArray(content) && content.length > 0) {
+      const firstElement = content[0] as React.ReactElement<any>; // Asserting that content[0] is a React element
+      // Ensure firstElement.props.text exists and is of type string
+      if (firstElement && firstElement.props && typeof firstElement.props.text === 'string') {
+        navigator.clipboard.writeText(firstElement.props.text);
+        toast({
+          description: "Message copied to clipboard.",
+          duration: 3000,
+        });
+      }
     }
-
-    navigator.clipboard.writeText(content.toString());
-    toast({
-      description: "Message copied to clipboard.",
-      duration: 3000,
-    })
-  }
+    }
 
   return (
     <div className={cn(

@@ -34,30 +34,18 @@ const RootPage = async ({
     if (isMyCompanionsCategorySelected) {
         tagsWithCount = await prismadb.tag.findMany({
             where: {
-                OR: [
-                    {
-                        companions: {
-                            some: {
-                                isPublic: true,
-                            },
-                        },
-                    },
-                    {
-                        companions: {
-                            some: {
-                                userId: user_id,
-                                isPublic: false,
-                            },
-                        },
-                    },
-                ],
-            },
-            include: {
-                _count: {
-                    select: { companions: true },
-                },
-            },
-        });
+                          companions: {
+                              some: {
+                                  userId: user_id,                                  
+                              },
+                          },
+                      },
+                      include: {
+                          _count: {
+                              select: { companions: true },
+                          },
+                      },
+                  });
     } else {
         tagsWithCount = await prismadb.tag.findMany({
             where: {
