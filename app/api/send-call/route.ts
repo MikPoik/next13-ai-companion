@@ -184,7 +184,7 @@ ${formattedMessages}`;
         let voice_id = null
         let voice_preset = null
         if (phoneVoice.is_preset) {
-            voice_preset = phoneVoice.voice_preset;  
+            voice_preset = phoneVoice.voice_preset;
         } else {
             voice_id = phoneVoice.voice_id;
         }
@@ -199,8 +199,9 @@ ${formattedMessages}`;
             'max_duration': maxDuration,
             'interruption_threshold': 300,
             'temperature': 0.9,
-            'voice': voice_preset
-            
+            'voice': voice_preset,
+            'model': 'turbo'
+
         }
         //console.log(data);
         //call api post 'https://api.bland.ai/call', data, {headers};
@@ -211,7 +212,7 @@ ${formattedMessages}`;
             headers: headers,
             body: JSON.stringify(data),
         });
-        
+
         const responseJson = await response.json(); // This converts the response to a JSON object
         //console.log(responseJson);
         const callId = responseJson.call_id; // This extracts the call_id value from the response JSON
