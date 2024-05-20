@@ -65,7 +65,7 @@ export async function POST(req: Request) {
 
         // Create new tags
         const createdTags = await Promise.all(
-            newTags.map((tag: string) => prismadb.tag.create({ data: { name: tag } }))
+            newTags.map((tag: string) => prismadb.tag.create({ data: { name: tag.toLowerCase() } }))
         );
 
         // Combine existing tags with newly created tags for final update

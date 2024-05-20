@@ -59,8 +59,8 @@ export async function POST(req: Request) {
         const body = await req.json();
         const phoneNumber = body.phoneNumber; // Access the phone number from the request body
         const companionId = body.companionId;
-        //console.log('Phone Number:', phoneNumber);
-        //console.log('Companion ID:', companionId);
+        console.log('Phone Number:', phoneNumber);
+        console.log('Companion ID:', companionId);
         const user = await currentUser();
         if (!user || !user.id) {
             return new NextResponse("Unauthorized", { status: 401 });
@@ -80,7 +80,7 @@ export async function POST(req: Request) {
                 return new NextResponse(JSON.stringify({ message: 'Not enough balance' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
             }
         }
-        //console.log(balance)
+        console.log(balance)
         const companion = await prismadb.companion.findUnique({
             where: {
                 id: companionId
@@ -110,7 +110,7 @@ export async function POST(req: Request) {
         if (!phoneVoice) {
             return new NextResponse("No phone voice found", { status: 404 });
         }
-        //console.log(phoneVoice)
+        console.log(phoneVoice)
         //retrieve chat history from db, last 10 messages    
         let formattedMessages = '';
         companion.messages.forEach((message) => {
@@ -183,17 +183,13 @@ ${formattedMessages}`;
         }
         let voice_id = null
         let voice_preset = null
-        if (phoneVoice.is_preset) {
-            voice_preset = phoneVoice.voice_preset;
-        } else {
-            voice_id = phoneVoice.voice_id;
-        }
+
+        voice_preset = phoneVoice.voice_preset;
 
 
         const data = {
             'phone_number': phoneNumber,
             'task': call_prompt,
-            'voice_id': voice_id,
             'reduce_latency': phoneVoice.reduceLatency,
             'webhook': `${process.env["NEXT_PUBLIC_APP_URL"]}/api/callhook`,
             'max_duration': maxDuration,
@@ -203,10 +199,10 @@ ${formattedMessages}`;
             'model': 'turbo'
 
         }
-        //console.log(data);
+        console.log(data);
         //call api post 'https://api.bland.ai/call', data, {headers};
         // Make the API call to bland.ai
-        //console.log("making api call")
+        console.log("making api call")
         const response = await fetch('https://api.bland.ai/v1/calls', {
             method: 'POST',
             headers: headers,
@@ -214,10 +210,10 @@ ${formattedMessages}`;
         });
 
         const responseJson = await response.json(); // This converts the response to a JSON object
-        //console.log(responseJson);
+        console.log(responseJson);
         const callId = responseJson.call_id; // This extracts the call_id value from the response JSON
         const status = responseJson.status; // This extracts the status value from the response JSON
-        //console.log(callId, status); // This logs the call_id value
+        console.log(callId, status); // This logs the call_id value
         if (status === 'success') {
             const callLog = await prismadb.callLog.create({
                 data: {
@@ -227,7 +223,7 @@ ${formattedMessages}`;
                     status: 'call-requested',
                 }
             });
-            //console.log(callLog);
+            console.log(callLog);
         }
     } catch (error: any) {
         console.error('Error while processing send-call:', error);

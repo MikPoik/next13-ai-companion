@@ -25,9 +25,10 @@ export const Sidebar = ({
         if (url.startsWith("http")) {
             // If it's an external link, open in a new tab/window
             window.open(url, "_blank");
-        } else {
-            router.push(url);
+            return; // Add return to prevent further execution
         }
+        const currentParams = new URLSearchParams(window.location.search);
+        router.push(`${url}?${currentParams.toString()}`);
     }
 
     const routes = [

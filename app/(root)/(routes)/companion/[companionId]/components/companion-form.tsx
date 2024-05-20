@@ -195,8 +195,8 @@ export const CompanionForm = ({
             behaviour: "",
             selfiePre: "",
             selfiePost: "",
-            model: "",
-            createImages: true,
+            model: "zephyr-chat",
+            createImages: false,
             imageModel: "realistic",
             voiceId: 'none',
             backstory: "",
@@ -343,7 +343,7 @@ export const CompanionForm = ({
                                     }} disabled={isLoading} />
                                 </FormControl>
                                 <FormDescription>
-                                    Generate character avatar below or upload your own.
+                                    Generate character avatar below or click/tap blank image to upload your own.
                                 </FormDescription>
                                 <FormMessage />
                             </FormItem>
@@ -542,13 +542,16 @@ export const CompanionForm = ({
                                                     </button>
                                                 </div>
                                             ))}
+                                            <div className="flex items-center gap-2 flex-grow">
                                             <Input 
                                                 value={tagInput} 
                                                 onChange={handleTagInputChange} 
                                                 onKeyDown={handleTagInputKeyDown} 
-                                                placeholder="Add a tag and press Enter..." 
+                                                placeholder="Type tag name" 
                                                 disabled={isLoading}
+                                                className="flex-grow"
                                             />
+                                            <Button type="button" className="h-9 px-2 mx-1 whitespace-nowrap" onClick={addTag} disabled={isLoading}>Add Tag</Button></div>
                                         </div>
 
                                     </FormControl>
@@ -648,12 +651,12 @@ export const CompanionForm = ({
                         control={form.control}
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Backstory for vector memory</FormLabel>
+                                <FormLabel>Companion backstory</FormLabel>
                                 <FormControl>
                                     <Textarea disabled={isLoading} rows={6} className="bg-background resize-none" placeholder={PREAMBLE_BACKSTORY} {...field} />
                                 </FormControl>
                                 <FormDescription>
-                                    Describe relevant facts and details, companion will dynamically use indexed data when responding. Data can be added but not edited.
+                                    Describe all relevant facts and details, companion will dynamically use indexed data when responding.
                                 </FormDescription>
                                 <FormMessage />
                             </FormItem>

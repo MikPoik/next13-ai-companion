@@ -6,50 +6,49 @@ async function seedPhoneVoices() {
         await db.phoneVoice.createMany({
             data: [
                 {
-                    name: 'Matt',
+                    name: 'maya',
+                    voice_preset: 'maya',
                     voice_id: 0,
-                    reduceLatency: true
+                    reduceLatency: false
                 },
                 {
 
-                    name: 'Sophie',
+                    name: 'ryan',
+                    voice_preset: 'ryan',
                     voice_id: 1,
                     reduceLatency: true
                 },
                 {
-                    name: 'Grace',
-                    voice_id: 0,
-                    reduceLatency: false
-                },
-                {
-                    name: 'Josh',
-                    voice_id: 1,
-                    reduceLatency: false
-                },
-                {
-                    name: 'Dorothy',
+                    name: 'mason',
+                    voice_preset: 'mason',
                     voice_id: 2,
                     reduceLatency: false
                 },
                 {
-                    name: 'Ravi',
+                    name: 'tina',
+                    voice_preset: 'tina',
                     voice_id: 3,
                     reduceLatency: false
                 },
                 {
-                    name:'Paola',
-                    voice_id: -1,
-                    reduceLatency: false,
-                    is_preset:true,
-                    voice_preset:'caad7545-c58b-4b37-954c-27b93aed8dbd'
+                    name: 'matt',
+                    voice_preset: 'matt',
+                    voice_id: 4,
+                    reduceLatency: false
                 },
-                {   
-                    id: '302df500-b53f-4e33-bcd7-1e06d06cebc5',
-                    name:'Amilia',
-                    voice_id: -1,
-                    is_preset:true,
+                {
+                    name: 'evelyn',
+                    voice_preset: 'evelyn',
+                    voice_id: 5,
+                    reduceLatency: false
+                },
+                {
+                    name: 'matt',
+                    voice_preset: 'matt',
+                    voice_id: 6,
                     reduceLatency: false,
-                    voice_preset:'a832ba3f-532d-47e1-97e8-a7b8c212dd98'
+                    is_preset: false,
+
                 }
 
             ],
