@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { UserButton } from "@clerk/nextjs";
+import { UserButton,useUser,SignOutButton,SignInButton } from "@clerk/nextjs";
 import { Poppins } from "next/font/google";
 import { Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -16,6 +16,11 @@ export const Navbar = ({
     isPro
 }: NavbarProps) => {
     const proModal = useProModal();
+      const { isSignedIn, user } = useUser();
+      console.log(isSignedIn)
+      //if(!isSignedIn) {
+      //  return null;
+      //}
     return (
         <div className="fixed w-full z-50 flex justify-between items-center py-2 px-4 h-16 border-b border-primary/10 bg-secondary">
             <div className="flex items-center">
@@ -27,6 +32,8 @@ export const Navbar = ({
                 </Link>
             </div>
             <div className="flex items-center gap-x-3">
+                {!isSignedIn && ( <SignInButton><Button size="sm">Sign in</Button></SignInButton> )}
+                {isSignedIn && (  <SignOutButton><Button variant="outline">Sign out</Button></SignOutButton>)}
                 {isPro && (
                     <Link href="/settings">
                         <Button size="sm" variant="premium">

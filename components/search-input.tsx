@@ -1,4 +1,3 @@
-// components/search-input.tsx
 "use client";
 import { Tag } from "@prisma/client";
 import qs from "query-string";
@@ -8,35 +7,35 @@ import { Search, ToggleRight, ToggleLeft } from "lucide-react";
 
 import { Input } from "@/components/ui/input";
 import { useDebounce } from "@/hooks/use-debounce";
-// At the beginning of your `search-input.tsx` file
 
 interface SearchInputProps {
     tags: Tag[];
     selectedTags: string[];
     nsfw: string; // Add this line to include the nsfw prop
 }
-export const SearchInput = ({ tags, selectedTags,nsfw: initialIsNSFW }: SearchInputProps) => {
-    
+
+export const SearchInput = ({ tags, selectedTags, nsfw: initialIsNSFW }: SearchInputProps) => {
     const router = useRouter();
     const searchParams = useSearchParams();
     const categoryId = searchParams.get("categoryId");
     const name = searchParams.get("name");
-    const [isNSFW, setIsNSFW] = useState(searchParams.get("nsfw") || "false");
+
+    const [isNSFW, setIsNSFW] = useState(initialIsNSFW || "false");
+
     useEffect(() => {
-        setIsNSFW(searchParams.get("nsfw") || "false");
-    }, [searchParams]);
-    
-    // Modified toggleNSFW function
-    const toggleNSFW = async () => {
+        setIsNSFW(initialIsNSFW || "false");
+    }, [initialIsNSFW]);
+
+    const toggleNSFW = () => {
         const newState = isNSFW === "true" ? "false" : "true";
-        setIsNSFW(newState); // Set the new state directly as string
+        setIsNSFW(newState);
         const newSearchParams = new URLSearchParams(window.location.search);
         for (const param of Array.from(searchParams.keys())) {
             newSearchParams.set(param, searchParams.get(param) || '');
         }
         newSearchParams.set('nsfw', newState);
-        
-        await router.push(`${window.location.pathname}?${newSearchParams.toString()}`);
+
+        router.push(`${window.location.pathname}?${newSearchParams.toString()}`);
     };
 
     const [value, setValue] = useState(name || "");
@@ -44,8 +43,8 @@ export const SearchInput = ({ tags, selectedTags,nsfw: initialIsNSFW }: SearchIn
 
     const onTagClick = (tagId: string) => {
         const newSelectedTags = selectedTags.includes(tagId)
-            ? selectedTags.filter((id) => id !== tagId) // Uncheck the tag
-            : [...selectedTags, tagId]; // Check the tag
+            ? selectedTags.filter((id) => id !== tagId)
+            : [...selectedTags, tagId]; 
         const query = {
             name: debouncedValue,
             categoryId: categoryId,
@@ -62,6 +61,7 @@ export const SearchInput = ({ tags, selectedTags,nsfw: initialIsNSFW }: SearchIn
     const onChange: ChangeEventHandler<HTMLInputElement> = (e) => {
         setValue(e.target.value);
     };
+
     useEffect(() => {
         const query = {
             name: debouncedValue,
@@ -75,7 +75,7 @@ export const SearchInput = ({ tags, selectedTags,nsfw: initialIsNSFW }: SearchIn
         }, { skipNull: true, skipEmptyString: true });
 
         router.push(url);
-    }, [debouncedValue, searchParams,isNSFW, router, categoryId]);
+    }, [debouncedValue, searchParams, isNSFW, router, categoryId]);
 
     return (
         <div>
@@ -88,7 +88,7 @@ export const SearchInput = ({ tags, selectedTags,nsfw: initialIsNSFW }: SearchIn
                     className="pl-10 bg-primary/10"
                 />
                 <button onClick={toggleNSFW} className="p-2 ml-2">
-                    {isNSFW === "true" ? <ToggleRight size={24} className="fill-sky-500" /> : <ToggleLeft size={24} className="fill-muted-foreground" />}
+                    {isNSFW === "true" ? <ToggleRight size={26} className="fill-sky-500" /> : <ToggleLeft size={26} className="fill-muted-foreground" />}
                 </button> <div className="text-xs">NSFW</div>
             </div>
             <div className="tags-container flex flex-wrap gap-2">

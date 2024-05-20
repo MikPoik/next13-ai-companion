@@ -74,6 +74,7 @@ const RootPage = async ({
     } else {
         nsfwFilter = { nsfw: false }; // If nsfw is false, only companions with nsfw = false are shown
     }
+    //console.log(nsfw)
 
 
     if (isMyCompanionsCategorySelected) {

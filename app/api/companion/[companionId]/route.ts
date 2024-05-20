@@ -73,7 +73,7 @@ export async function PATCH(
 
         // Create new tags
         const createdTags = await Promise.all(
-            newTags.map((tag: string) => prismadb.tag.create({ data: { name: tag } }))
+            newTags.map((tag: string) => prismadb.tag.create({ data: { name: tag.toLowerCase() } }))
         );
 
         // Combine existing tags with newly created tags for final update
@@ -92,17 +92,15 @@ export async function PATCH(
 
         //console.log(llm_model);
         //console.log(instance_handle);
-        let newBackstory = ""
 
-        if (backstory.length > companion.backstory.length) {
-            newBackstory = backstory.slice(companion.backstory.length);
-            if (newBackstory.length > 0) {
-                let text_to_index = newBackstory;
-                newBackstory = companion.backstory + "\n" + newBackstory;
+        console.log("backstory"+backstory)
+        if (backstory.length != companion.backstory.length) {
+            //console.log("index text"+backstory)
+                
                 if (companion) {
                     const indexTextResponse = await indexTextSteamship(
                         'index_text',
-                        text_to_index,
+                        backstory,
                         user.id,
                         companion.packageName,
                         instance_handle,
@@ -124,9 +122,9 @@ export async function PATCH(
                 }
             }
 
-        }
+        
         else {
-            newBackstory = companion.backstory;
+            console.log("no change in backstory")
         }
         const updateCompanion = await prismadb.companion.update({
             where: {
@@ -150,7 +148,7 @@ export async function PATCH(
                 voiceId: voiceId,
                 model: llm_model,
                 instanceHandle: instance_handle,
-                backstory: newBackstory,
+                backstory: backstory,
                 createImages: createImages,
                 phoneVoiceId: phoneVoiceId,
                 tags: {

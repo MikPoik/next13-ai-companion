@@ -11,7 +11,7 @@ async function resetCompanionPhoneVoices() {
 
       await prisma.companion.updateMany({
         data: {
-          phoneVoiceId: '302df500-b53f-4e33-bcd7-1e06d06cebc5', //id of the PhoneVoice record
+          phoneVoiceId: '85dc6fb9-9d75-4f59-aeb1-07b49ff4d382', //id of the PhoneVoice record
         },
       });
 
