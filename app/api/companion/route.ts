@@ -52,16 +52,34 @@ export async function POST(req: Request) {
         const description_string = description.replace(/{{|{|}|}}/g, "");
         const env_packageName = process.env.STEAMSHIP_PACKAGE || packageName;
 
+        // Preprocess tags
+        const preprocessTags = (tags: string[]) => {
+            const tagMapping: { [key: string]: string } = {
+                "women": "woman",
+                "girl":"woman",
+                "female": "woman",
+                "nb": "non-binary",
+                "man":"men",
+                "boy":"men",
+                "male":"men",
+                "non binary":"non-binary",
+                "enby":"non-binary",
+            };
+            return tags.map(tag => tagMapping[tag.toLowerCase()] || tag.toLowerCase());
+        };
+        const processedTags = preprocessTags(tags);
+        // Process tags - to create non-existing tags and find existing ones
         // Process tags - to create non-existing tags and find existing ones
         const existingTags = await prismadb.tag.findMany({
             where: {
-                name: { in: tags },
+                name: { in: processedTags },
             },
         });
+
         const existingTagNames = existingTags.map(tag => tag.name);
 
         // Filter out new tags that don't already exist
-        const newTags = tags.filter((tag: string) => !existingTagNames.includes(tag));
+        const newTags = processedTags.filter((tag: string) => !existingTagNames.includes(tag));
 
         // Create new tags
         const createdTags = await Promise.all(
