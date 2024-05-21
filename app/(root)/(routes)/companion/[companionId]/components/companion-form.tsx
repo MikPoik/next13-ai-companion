@@ -195,7 +195,7 @@ export const CompanionForm = ({
             behaviour: "",
             selfiePre: "",
             selfiePost: "",
-            model: "zephyr-chat",
+            model: "NousResearch/Nous-Hermes-2-Mixtral-8x7B-DPO",
             createImages: false,
             imageModel: "realistic",
             voiceId: 'none',
@@ -526,14 +526,15 @@ export const CompanionForm = ({
                             )}
                         />
                         */}
-                        <FormField
-                            name="tags"
-                            control={form.control}
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Tags</FormLabel>
-                                    <FormControl>
-                                        <div className="flex flex-wrap gap-2 mb-2">
+                    <FormField
+                        name="tags"
+                        control={form.control}
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Tags</FormLabel>
+                                <FormControl>
+                                    <div className="flex flex-col gap-2 mb-2">
+                                        <div className="flex flex-wrap gap-2">
                                             {selectedTags.map((tag, index) => (
                                                 <div key={index} className="flex items-center gap-1 bg-primary/10 px-1 py-1 text-center text-xs md:text-sm1 md:px-1 md:py-1 rounded-md hover:opacity-75 transition rounded-full">
                                                     {tag}
@@ -542,7 +543,8 @@ export const CompanionForm = ({
                                                     </button>
                                                 </div>
                                             ))}
-                                            <div className="flex items-center gap-2 flex-grow">
+                                        </div>
+                                        <div className="flex items-center gap-2">
                                             <Input 
                                                 value={tagInput} 
                                                 onChange={handleTagInputChange} 
@@ -551,17 +553,17 @@ export const CompanionForm = ({
                                                 disabled={isLoading}
                                                 className="flex-grow"
                                             />
-                                            <Button type="button" className="h-9 px-2 mx-1 whitespace-nowrap" onClick={addTag} disabled={isLoading}>Add Tag</Button></div>
+                                            <Button type="button" className="h-9 px-2 mx-1 whitespace-nowrap" onClick={addTag} disabled={isLoading}>Add Tag</Button>
                                         </div>
-
-                                    </FormControl>
-                                    <FormDescription>
-                                        Enter descriptive tags here to describe your character.
-                                    </FormDescription>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
+                                    </div>
+                                </FormControl>
+                                <FormDescription>
+                                    Enter descriptive tags here to describe your character.
+                                </FormDescription>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
                         
                         <FormField
                             control={form.control}

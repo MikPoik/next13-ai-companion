@@ -58,18 +58,34 @@ export async function PATCH(
         if (!companion) {
             return new NextResponse("Companion not found", { status: 404 });
         }
-
+        // Preprocess tags
+        const preprocessTags = (tags: string[]) => {
+            const tagMapping: { [key: string]: string } = {
+                "women": "woman",
+                "girl":"woman",
+                "female": "woman",
+                "nb": "non-binary",
+                "man":"men",
+                "boy":"men",
+                "male":"men",
+                "non binary":"non-binary",
+                "enby":"non-binary",
+            };
+            return tags.map(tag => tagMapping[tag.toLowerCase()] || tag.toLowerCase());
+        };
+        const processedTags = preprocessTags(tags);
+        // Process tags - to create non-existing tags and find existing ones
         // Process tags - to create non-existing tags and find existing ones
         const existingTags = await prismadb.tag.findMany({
             where: {
-                name: { in: tags },
+                name: { in: processedTags },
             },
         });
 
         const existingTagNames = existingTags.map(tag => tag.name);
 
         // Filter out new tags that don't already exist
-        const newTags = tags.filter((tag: string) => !existingTagNames.includes(tag));
+        const newTags = processedTags.filter((tag: string) => !existingTagNames.includes(tag));
 
         // Create new tags
         const createdTags = await Promise.all(
@@ -93,7 +109,7 @@ export async function PATCH(
         //console.log(llm_model);
         //console.log(instance_handle);
 
-        console.log("backstory"+backstory)
+        //console.log("backstory"+backstory)
         if (backstory.length != companion.backstory.length) {
             //console.log("index text"+backstory)
                 
