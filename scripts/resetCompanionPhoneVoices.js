@@ -9,11 +9,11 @@ async function resetCompanionPhoneVoices() {
   try {
 
 
-      await prisma.companion.updateMany({
-        data: {
-          phoneVoiceId: '85dc6fb9-9d75-4f59-aeb1-07b49ff4d382', //id of the PhoneVoice record
-        },
-      });
+    await prisma.companion.updateMany({
+      data: {
+        phoneVoiceId: '3ee88a1a-8c02-4aed-b84b-7a69586a9b68', //id of the PhoneVoice record
+      },
+    });
 
 
     console.log('updated successfully');

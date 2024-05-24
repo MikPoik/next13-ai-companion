@@ -59,8 +59,7 @@ export const ChatHeader = ({
             toast({
                 description: "Chat history deleted successfully."
             });
-            router.refresh();
-            router.push("/");
+            window.location.reload(); 
             // You can perform any additional actions here after chat history deletion.
         } catch (error) {
             //console.log(error);
