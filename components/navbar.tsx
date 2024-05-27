@@ -17,7 +17,7 @@ export const Navbar = ({
 }: NavbarProps) => {
     const proModal = useProModal();
       const { isSignedIn, user } = useUser();
-      console.log(isSignedIn)
+      //console.log(isSignedIn)
       //if(!isSignedIn) {
       //  return null;
       //}
