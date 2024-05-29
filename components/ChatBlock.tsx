@@ -1,5 +1,6 @@
-//Heavily borrowed from a16z
+// Heavily borrowed from a16z
 
+import React from "react";
 
 export function ChatBlock({ text, mimeType, url, id }: {
     text?: string,
@@ -9,7 +10,11 @@ export function ChatBlock({ text, mimeType, url, id }: {
 }) {
     let internalComponent = <></>
     if (text && text.length > 1) {
-        internalComponent = <span>{text}</span>
+        // Check if the text contains markdown italics and apply corresponding style
+        const parts = text.split(/(\*.*?\*)/).map((part, index) => 
+            part.startsWith('*') && part.endsWith('*') ? <i key={index} style={{ color: "rgba(255,255,255,0.6)" }}>{part.slice(1, -1)}</i> : part
+        );
+        internalComponent = <span style={{lineHeight:"1.5rem"}}>{parts}</span>;
     } else if (mimeType) {
         if (mimeType.startsWith("audio")) {
             let audioSrc = ``;

@@ -1,4 +1,3 @@
-import dotenv from "dotenv";
 import { auth, currentUser } from "@clerk/nextjs";
 import { NextResponse } from "next/server";
 import { MimeTypes, Steamship } from '@steamship/client';
@@ -6,7 +5,6 @@ import prismadb from "@/lib/prismadb";
 import { UndoIcon } from "lucide-react";
 import axios, { AxiosError } from 'axios';
 import { checkSubscription } from "@/lib/subscription";
-dotenv.config({ path: `.env` });
 import { StreamingTextResponse} from "ai";
 
 export const maxDuration = 120; //2 minute timeout
@@ -36,7 +34,11 @@ function roughTokenCount(text: string): number {
     return tokens ? tokens.length : 0;
 }
 
-
+interface Message {
+    role: string;
+    content: string;
+    // Add other properties if there are any
+}
 
 
 async function getSteamshipResponse(
@@ -107,7 +109,19 @@ export async function POST(
 ) {
 
     try {
-        const { prompt } = await request.json();
+        
+        // Parse and log the request body
+        const requestBody = await request.json();
+        // Extract the latest user message as the prompt
+        const messages: Message[] = requestBody.messages;
+        const lastUserMessage = messages.reverse().find((msg: Message) => msg.role === 'user');
+        if (!lastUserMessage) {
+            return new NextResponse("Invalid request body", { status: 400 });
+        }
+        const prompt = lastUserMessage.content;
+        //console.log("Prompt received:", prompt);
+        //const { prompt } = await request.json();
+        //console.log(prompt)
         const user = await currentUser();
         const isPro = await checkSubscription();
         if (!user || !user.id) {
