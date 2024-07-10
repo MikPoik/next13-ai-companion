@@ -10,7 +10,7 @@ import { ChatForm } from "@/components/chat-form";
 import { ChatHeader } from "@/components/chat-header";
 import { responseToChatBlocks } from "@/components/ChatBlock";
 import { BeatLoader } from "react-spinners";
-import { SendHorizonal, X, RotateCcw, Trash2 } from "lucide-react";
+import { SendHorizonal, X, RotateCcw, Trash2,MoveDown } from "lucide-react";
 import { useProModal } from "@/hooks/use-pro-modal";
 import { userAgent } from "next/server";
 import { useToast } from "@/components/ui/use-toast";
@@ -55,6 +55,8 @@ export const ChatClient = ({ isPro, companion }: ChatClientProps) => {
   const proModal = useProModal();
   const router = useRouter();
   const scrollRef = useRef<ElementRef<"div">>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [isReloading, setIsReloading] = useState(false);
 
   const initialMessages: PrismaMessage[] = [
     {
@@ -95,23 +97,27 @@ export const ChatClient = ({ isPro, companion }: ChatClientProps) => {
       //console.log("Messages length in onResponse:", messagesRef.current.length);
       const lastUserMessage = messagesRef.current[messagesRef.current.length - 1];
       
+
       fetch(`/api/chat/${companion.id}/save-prompt`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prompt: lastUserMessage.content, id: lastUserMessage.id})
+        body: JSON.stringify({ prompt: lastUserMessage.content, id: lastUserMessage.id })
       }); 
-
+      
     },
     onFinish() {
       //console.log("Messages length in onFinish:", messagesRef.current.length);
       const lastUserMessage = messagesRef.current[messagesRef.current.length - 2];
       const lastAssistantMessage = messagesRef.current[messagesRef.current.length - 1];
+      
       setInput("");
-      fetch(`/api/chat/${companion.id}/save-response`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prompt: lastAssistantMessage.content, id: lastAssistantMessage.id })
-      }); 
+      if (!lastAssistantMessage.content.includes("I'm sorry, I had an error when generating response")){
+        fetch(`/api/chat/${companion.id}/save-response`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ prompt: lastAssistantMessage.content, id: lastAssistantMessage.id })
+        }); 
+      }
       router.refresh();
       bottomRef.current?.scrollIntoView({ behavior: "smooth" });
 
@@ -165,12 +171,14 @@ export const ChatClient = ({ isPro, companion }: ChatClientProps) => {
   };
   
   const handleReload = async (event: React.MouseEvent<HTMLButtonElement>) => {
+    setIsReloading(true);
     const { status, message } = await checkBalance(companion.id);
     if (status === 'error' && message) {
       toast({
         description: message,
         variant: 'destructive',
       });
+      setIsReloading(false);
       return;
     }
     if (status === "NoBalance") {
@@ -178,25 +186,45 @@ export const ChatClient = ({ isPro, companion }: ChatClientProps) => {
         description: "Not enough balance, top up your balance.",
         variant: "destructive",
       });
+      setIsReloading(false);
       return;
     }
     const lastAssistantMessage = messagesRef.current[messagesRef.current.length - 1];
-
-    fetch(`/api/chat/${companion.id}/delete-message`, {
+    if (lastAssistantMessage.id.length > 7) {
+      toast({
+        description: "Legacy chat history format, delete chat history to use updated feature",
+        variant: "destructive",
+      });
+      setIsReloading(false);
+      return;
+    }
+    await fetch(`/api/chat/${companion.id}/delete-message`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ prompt: lastAssistantMessage.content, id: lastAssistantMessage.id })
+      body: JSON.stringify({id: lastAssistantMessage.id,chatId: companion.id })
     }); 
     reload();
+    setIsReloading(false);
   };
 
-  const handleDelete = (id: string) => {
-    fetch(`/api/chat/${companion.id}/delete-message`, {
+  const handleDelete = async (id: string, id2:string) => {
+    setIsDeleting(true);
+    if (id.length > 7) {
+      toast({
+        description: "Legacy chat history format, delete chat history to use updated feature",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    await fetch(`/api/chat/${companion.id}/delete-message`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id: id })
+      body: JSON.stringify({ id: id, id2: id2, chatId: companion.id })
     }); 
-    setMessages((messages as PrismaMessage[]).filter(message => message.id !== id));
+    
+    setMessages((messages as PrismaMessage[]).filter(message => message.id !== id && message.id !== id2));
+    setIsDeleting(false);
   };
 
   const onSubmit = async (e: FormEvent<HTMLFormElement>) => {
@@ -230,12 +258,13 @@ export const ChatClient = ({ isPro, companion }: ChatClientProps) => {
     role: message.role,
     content: responseToChatBlocks(message.content),
   }));
-
+  //console.log(transformedMessages.length)
   return (
     <div className="flex flex-col h-full">
       <ChatHeader isPro={isPro} companion={companion} />
       <div style={scrollContainerStyle} className="flex-1 overflow-y-auto p-4">
-        {transformedMessages.map((message) => (
+        {transformedMessages.map((message,index) => (
+      
           <div key={message.id} className="flex items-center justify-between mb-4">
             <div className="flex-1 mr-4">
               <span className="text-sm text-gray-500">
@@ -246,9 +275,11 @@ export const ChatClient = ({ isPro, companion }: ChatClientProps) => {
                 {message.content}
               </span>
             </div>
-            <Button onClick={() => handleDelete(message.id)} className="opacity-20 group-hover:opacity-100 transition" size="icon" variant="ghost">
-              <Trash2 className="w-4 h-4" />
-            </Button>
+            {transformedMessages.length >= 2 && index === transformedMessages.length - 2 && !isLoading && message.role === "user" && (
+              <Button onClick={() => handleDelete(transformedMessages[transformedMessages.length - 1].id,transformedMessages[transformedMessages.length - 2].id)} disabled={isDeleting} className="opacity-20 group-hover:opacity-100 transition hover:bg-red-500" size="icon" variant="ghost" title="Delete message pair">
+                <Trash2 className="w-4 h-4" /><MoveDown className="w-3 h-3"/>
+              </Button>
+            )}
           </div>
         ))}
         <div ref={bottomRef} />
@@ -260,9 +291,12 @@ export const ChatClient = ({ isPro, companion }: ChatClientProps) => {
         <Button type="submit" disabled={isLoading} variant="ghost">
           <SendHorizonal className="w-4 h-4" />
         </Button>
-        <Button onClick={handleReload} disabled={isLoading} variant="ghost">
+        {transformedMessages.length >= 2 && (
+        <Button onClick={handleReload} disabled={isReloading} variant="ghost">
           <RotateCcw className="w-4 h-4" />
         </Button>
+          )}
+
       </form>
     </div>
   );
