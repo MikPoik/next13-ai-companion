@@ -59,7 +59,7 @@ export async function POST(req: Request) {
         const body = await req.json();
         const phoneNumber = body.phoneNumber; // Access the phone number from the request body
         const companionId = body.companionId;
-        console.log('Phone Number:', phoneNumber);
+        //console.log('Phone Number:', phoneNumber);
         console.log('Companion ID:', companionId);
         const user = await currentUser();
         if (!user || !user.id) {
@@ -202,7 +202,7 @@ ${formattedMessages}`;
         console.log(data);
         //call api post 'https://api.bland.ai/call', data, {headers};
         // Make the API call to bland.ai
-        console.log("making api call")
+
         const response = await fetch('https://api.bland.ai/v1/calls', {
             method: 'POST',
             headers: headers,
@@ -210,10 +210,10 @@ ${formattedMessages}`;
         });
 
         const responseJson = await response.json(); // This converts the response to a JSON object
-        console.log(responseJson);
+
         const callId = responseJson.call_id; // This extracts the call_id value from the response JSON
         const status = responseJson.status; // This extracts the status value from the response JSON
-        console.log(callId, status); // This logs the call_id value
+        //console.log(callId, status); // This logs the call_id value
         if (status === 'success') {
             const callLog = await prismadb.callLog.create({
                 data: {

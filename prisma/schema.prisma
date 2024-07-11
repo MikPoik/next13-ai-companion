@@ -74,7 +74,7 @@ model Companion {
 
 model Message {
   id          String    @id @default(uuid())
-  role        String
+  role        Role
   content     String    @db.Text
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
@@ -110,6 +110,8 @@ model UserBalance {
 enum Role {
   user
   system
+  assistant
+  function
 }
 
 model CallLog {

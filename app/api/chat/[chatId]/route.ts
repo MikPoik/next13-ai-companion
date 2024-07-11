@@ -1,4 +1,3 @@
-import dotenv from "dotenv";
 import { auth, currentUser } from "@clerk/nextjs";
 import { NextResponse } from "next/server";
 import { MimeTypes, Steamship } from '@steamship/client';
@@ -6,9 +5,7 @@ import prismadb from "@/lib/prismadb";
 import { UndoIcon } from "lucide-react";
 import axios, { AxiosError } from 'axios';
 import { checkSubscription } from "@/lib/subscription";
-dotenv.config({ path: `.env` });
 import { StreamingTextResponse} from "ai";
-
 export const maxDuration = 120; //2 minute timeout
 
 
@@ -36,7 +33,12 @@ function roughTokenCount(text: string): number {
     return tokens ? tokens.length : 0;
 }
 
-
+interface Message {
+    role: string;
+    content: string;
+    id: string;
+    // Add other properties if there are any
+}
 
 
 async function getSteamshipResponse(
@@ -107,13 +109,26 @@ export async function POST(
 ) {
 
     try {
-        const { prompt } = await request.json();
+        
+        // Parse and log the request body
+        const requestBody = await request.json();
+        //console.log("Request body:", requestBody);
+        // Extract the latest user message as the prompt
+        const messages: Message[] = requestBody.messages;
+        const lastUserMessage = messages.reverse().find((msg: Message) => msg.role === 'user');
+        if (!lastUserMessage) {
+            return new NextResponse("Invalid request body", { status: 400 });
+        }
+        
+        const prompt = lastUserMessage.content;
+
+
         const user = await currentUser();
         const isPro = await checkSubscription();
         if (!user || !user.id) {
             return new NextResponse("Unauthorized", { status: 401 });
         }
-
+    
         const balance = await prismadb.userBalance.findUnique({
             where: {
                 userId: user.id
@@ -125,18 +140,9 @@ export async function POST(
                 return NextResponse.json("Message limit exceeded, upgrade to Pro plan for increased limit.");
             }
         }
-        const companion = await prismadb.companion.update({
+        const companion = await prismadb.companion.findUnique({
             where: {
-                id: params.chatId
-            },
-            data: {
-                messages: {
-                    create: {
-                        content: prompt,
-                        role: "user",
-                        userId: user.id,
-                    },
-                },
+                id: params.chatId,
             }
         });
 
@@ -185,21 +191,8 @@ export async function POST(
         }
         //console.log(responseLength);
         //console.log(responseText);
+       
         if (responseLength > 0) {
-            await prismadb.companion.update({
-                where: {
-                    id: params.chatId
-                },
-                data: {
-                    messages: {
-                        create: {
-                            content: steamshipResponse,
-                            role: "system",
-                            userId: user.id,
-                        },
-                    },
-                }
-            });
 
         const tokenCost = roughTokenCount(responseText) + imageTokens + voiceTokens;
         const currentDateTime = new Date().toISOString();
