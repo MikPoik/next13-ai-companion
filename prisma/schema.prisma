@@ -66,6 +66,7 @@ model Companion {
   featured       Boolean @default(false)
   tags           Tag[]  @relation("CompanionsTags")
   nsfw           Boolean @default(false)
+  voiceAgentId   String?
 
   @@index([categoryId])
 }

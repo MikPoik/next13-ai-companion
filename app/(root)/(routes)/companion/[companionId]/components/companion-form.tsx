@@ -262,7 +262,12 @@ export const CompanionForm = ({
             });
 
             router.refresh();
-            router.push("/");
+            if(initialData){
+                router.push(`/chat/${initialData.id}`);
+            }
+            else {
+                router.push("/")
+            }
         } catch (error) {
             //console.log(error);
             toast({

@@ -7,7 +7,7 @@ import { checkSubscription } from "@/lib/subscription";
 import { indexTextSteamship, } from "@/components/SteamshipIndexText";
 import dotenv from "dotenv";
 import { create } from "domain";
-dotenv.config({ path: `.env` });
+import {getBolnaAgentJson} from "@/lib/bolna";
 
 
 export const maxDuration = 120; //2 minute timeout
@@ -142,6 +142,16 @@ export async function PATCH(
         else {
             console.log("no change in backstory")
         }
+          //update bolna agent, add bolna agent id to companion db table
+            const apiKey = process.env["BOLNA_API_KEY"];
+            if (!apiKey) {
+                throw new Error('BOLNA_API_KEY is not defined in environment variables');
+            }
+            const headers = {
+                'Authorization': `Bearer ${apiKey}`,
+                'Content-Type': 'application/json'
+            };
+
         const updateCompanion = await prismadb.companion.update({
             where: {
                 id: params.companionId,
@@ -173,6 +183,37 @@ export async function PATCH(
                 nsfw: nsfw
             }
         });
+        let voiceAgentId = companion.voiceAgentId;
+        let bolna_json = getBolnaAgentJson(name);
+        
+        if (!updateCompanion.voiceAgentId) {
+            bolna_json = getBolnaAgentJson(companion.name)
+            const response = await fetch('https://api.bolna.dev/agent', {
+                method: 'POST',
+                headers: headers,
+                body: JSON.stringify(bolna_json),
+            });
+            const result = await response.json();
+            const voice_agent_id = result.agent_id;            
+            const updateCompanion = await prismadb.companion.update({
+                where: {
+                    id: companion.id,
+                },
+                data: {
+                    voiceAgentId: voice_agent_id,
+                }
+                });
+            voiceAgentId = voice_agent_id;
+        }
+        const response = await fetch(`https://api.bolna.dev/agent/${updateCompanion.voiceAgentId}`, {
+            method: 'PUT',
+            headers: headers,
+            body: JSON.stringify(bolna_json),
+        });
+        const result = await response.json();
+        const voice_agent_id = result.agent_id;
+        const status = result.status;
+        
         return NextResponse.json(companion);
     } catch (error) {
         console.log("[COMPANION_PATCH]", error);
