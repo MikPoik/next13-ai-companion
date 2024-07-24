@@ -81,7 +81,7 @@ export async function POST(req: Request) {
                 return new NextResponse(JSON.stringify({ message: 'Not enough balance' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
             }
         }
-        console.log(balance)
+        console.log("user balance: ",balance)
         const companion = await prismadb.companion.findUnique({
             where: {
                 id: companionId
@@ -107,11 +107,11 @@ export async function POST(req: Request) {
                 id: companion.phoneVoiceId
             }
         });
-
+        console.log("phoneVoice: ",phoneVoice)
         if (!phoneVoice) {
             return new NextResponse("No phone voice found", { status: 404 });
         }
-        //console.log(phoneVoice)
+        
         //retrieve chat history from db, last 10 messages    
         let formattedMessages = ''
 
@@ -132,6 +132,7 @@ export async function POST(req: Request) {
             } catch (parseError) {
                 // Directly use the content if not parsed correctly
                 text = message.content.replace(EMOJI_PATTERN, '');
+                text = message.content.replace(/\*[^\*]+\*/g, '');
                 console.error('Error parsing message content: ', parseError);
             }
             let roleText = role === 'system' || role === 'assistant' ? 'assistant' : 'user';
@@ -139,7 +140,7 @@ export async function POST(req: Request) {
         });
 
         if (!formattedMessages.includes("assistant:")) {
-            formattedMessages += `\n\nHere is transcript of last phone call between {character_name} and user:\n\nassistant:  ${companion.seed.replace(EMOJI_PATTERN, '')}\n` + formattedMessages;
+            formattedMessages += `\n\nHere is transcript of last phone call between ${companion.name} and user:\n\nassistant:  ${companion.seed.replace(EMOJI_PATTERN, '')}\n` + formattedMessages;
         }
 
         console.log(formattedMessages);
@@ -199,11 +200,18 @@ export async function POST(req: Request) {
         }
         */
         let voice_agent_id = companion.voiceAgentId;
+
+        
+        const create_bolna_agent_json = getBolnaAgentJson(companion.name,phoneVoice.bolnaVoice,phoneVoice.bolnaProvider,phoneVoice.bolnaVoiceId,phoneVoice.bolnaModel,phoneVoice.bolnaElevenlabTurbo,phoneVoice.bolnaPollyEngine,phoneVoice.bolnaPollyLanguage)
+        console.log("json body: ", JSON.stringify(create_bolna_agent_json, null, 2));
+
+        
         console.log("check agent id")
+        console.log(voice_agent_id)
         if (!companion.voiceAgentId) {
             //if companion does not exist
             console.log("companion voice agent id not set")
-            const create_bolna_agent_json = getBolnaAgentJson(companion.name)
+
             
             const response = await fetch('https://api.bolna.dev/agent', {
                 method: 'POST',
@@ -227,12 +235,13 @@ export async function POST(req: Request) {
             
         }
         //update voice agent template
-       
+       console.log("update voice agent template")
         const update_voice_agent = await fetch(`https://api.bolna.dev/agent/${voice_agent_id}`, {
             method: 'PUT',
             headers: headers,
-            body: JSON.stringify(getBolnaAgentJson(companion.name)),
+            body: JSON.stringify(create_bolna_agent_json),
         });
+        
         console.log("Update agent: ",await update_voice_agent.json())
         
 
@@ -258,7 +267,7 @@ export async function POST(req: Request) {
             body: JSON.stringify(data),
         });
         */
-        
+        console.log("Make Bolna API call")
         const response = await fetch('https://api.bolna.dev/call', {
             method: 'POST',
             headers: headers,

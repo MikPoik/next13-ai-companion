@@ -32,6 +32,14 @@ model PhoneVoice {
     companions Companion[]
     is_preset   Boolean @default(false)
     voice_preset    String @default("")
+    
+    bolnaProvider  String @default("elevenlabs")
+    bolnaVoiceId   String @default("21m00Tcm4TlvDq8ikWAM")
+    bolnaModel    String @default("eleven_multilingual_v2")
+    bolnaVoice String @default("Rachel")
+    bolnaElevenlabTurbo Boolean @default(false)
+    bolnaPollyLanguage  String @default("en-AU")
+    bolnaPollyEngine String @default("neural")
 }
 
 model Companion {

@@ -195,7 +195,7 @@ export const CompanionForm = ({
             behaviour: "",
             selfiePre: "",
             selfiePost: "",
-            model: "NousResearch/Nous-Hermes-2-Mixtral-8x7B-DPO",
+            model: "teknium/OpenHermes-2-Mistral-7B",
             createImages: false,
             imageModel: "realistic",
             voiceId: 'none',
