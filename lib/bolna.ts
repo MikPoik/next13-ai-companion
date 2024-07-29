@@ -32,22 +32,22 @@ function getBolnaAgentJson(name: string, voiceName: string = "Rachel", provider:
                             ...(provider === "elevenlabs" && { "use_turbo": elevenlabs_turbo })
 
                         },
-                        "buffer_size": 100.0
+                        "buffer_size": 150.0
                     },
                     "llm_agent": {
                         "max_tokens": 100,
-                        "presence_penalty": 0.5,
+                        "presence_penalty": 0.6,
                         "repetition_penalty": 1.2,
                         "extraction_details": null,
-                        "top_p": 0.9,
+                        "top_p": 0.8,
                         "model": llm_model,
                         "agent_flow_type": "streaming",
                         "request_json": false,
                         "min_p": 0.05,
-                        "frequency_penalty": 0.5,
+                        "frequency_penalty": 0.1,
                         "stop": null,
                         "top_k": 0,
-                        "temperature": 0.7,
+                        "temperature": 1.1,
                         "backend": "bolna",
                         "provider": llm_provider,
                         "family": "mixtral",
@@ -57,7 +57,7 @@ function getBolnaAgentJson(name: string, voiceName: string = "Rachel", provider:
                         "base_url": null
                     },
                     "transcriber": {
-                        "sampling_rate":16000,
+                        "sampling_rate": 16000,
                         "endpointing": 200,
                         "keywords": "",
                         "stream": true,
@@ -94,7 +94,8 @@ function getBolnaAgentJson(name: string, voiceName: string = "Rachel", provider:
         },
         "agent_prompts": {
             "task_1": {
-                "system_prompt": `You are embodied {character_name} in this phone call. Engage with user. Be authentic, natural, creative, and engaging.
+                "system_prompt": `{previous_messages}
+You are embodied {character_name}, engage with user. Be authentic, natural, creative, and engaging.
 Always speak detailed and lengthy responses, including {character_name}'s thoughts.
 Infuse drama and engagement into the interaction to make {character_name} a memorable and strong personality.
 Apply the latest knowledge of psychiatry and psychology to shape {character_name}.
@@ -105,14 +106,10 @@ Stay true to {character_name}'s characterization, acting on impulses and desires
 Avoid gender assumptions; males can be submissive and petite, females can be dominant and strong.
 Avoid disclosing sensitive personal information such as sexual preferences or mental health status unless trust is earned between interlocutors.
 Please avoid repeating phrases as the interaction progresses, use different synonyms or expressions for repeated ideas. Introduce new elements, questions, or scenarios to keep the interaction dynamic.
-Never speak, perform actions, or formulate thoughts for user.
-Ignore the date. It is not relevant to the interaction.
-
-- {character_name}'s Personality: {character_type}, {character_personality}
-{character_appeareance}
-
+Only speak, perform actions, or formulate thoughts for {character_name}.
 Engage embodying {character_name} completely with unique personality without disclosing AI identity.
-{previous_messages}`
+{character_appeareance}
+{character_name}'s Personality: {character_type}, {character_personality}`
             }
         }
     }

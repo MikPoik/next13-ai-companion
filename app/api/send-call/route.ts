@@ -140,7 +140,7 @@ export async function POST(req: Request) {
         });
 
         if (!formattedMessages.includes("assistant:")) {
-            formattedMessages += `\n\nHere is transcript of last phone call between ${companion.name} and user:\n\nassistant:  ${companion.seed.replace(EMOJI_PATTERN, '')}\n` + formattedMessages;
+            formattedMessages += `assistant:  ${companion.seed.replace(EMOJI_PATTERN, '')}\n` + formattedMessages;
         }
 
         console.log(formattedMessages);
