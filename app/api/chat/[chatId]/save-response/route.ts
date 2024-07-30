@@ -26,14 +26,16 @@ export async function POST(
                  content: prompt,
                  role: "assistant",
                  userId: user.id,
-                 companionId: params.chatId 
+                 companionId: params.chatId,
+                 createdAt: new Date(Date.now() + 1000),
              },
              update: {
                  id: id,
                  content: prompt,
                  role: "assistant",
                  userId: user.id,
-                 companionId: params.chatId
+                 companionId: params.chatId,
+                 createdAt: new Date(Date.now() + 1000),
              }
          });
         return NextResponse.json("prompt saved")

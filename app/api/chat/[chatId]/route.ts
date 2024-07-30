@@ -1,13 +1,15 @@
+
 import { auth, currentUser } from "@clerk/nextjs";
 import { NextResponse } from "next/server";
-import { MimeTypes, Steamship } from '@steamship/client';
-import prismadb from "@/lib/prismadb";
+import { MimeTypes, Steamship, SteamshipStream, } from '@steamship/client';
 import { UndoIcon } from "lucide-react";
 import axios, { AxiosError } from 'axios';
-import { checkSubscription } from "@/lib/subscription";
-import { StreamingTextResponse} from "ai";
-export const maxDuration = 120; //2 minute timeout
 
+
+import { StreamingTextResponse } from "ai";
+
+export const maxDuration = 120; //2 minute timeout
+export const runtime = 'edge';
 
 
 interface SteamshipApiResponse {
@@ -33,12 +35,7 @@ function roughTokenCount(text: string): number {
     return tokens ? tokens.length : 0;
 }
 
-interface Message {
-    role: string;
-    content: string;
-    id: string;
-    // Add other properties if there are any
-}
+
 
 
 async function getSteamshipResponse(
@@ -58,7 +55,7 @@ async function getSteamshipResponse(
     image_model: string,
     create_images: boolean,
     voice_id: string,
-    is_pro:string
+    is_pro: string
 
 ): Promise<string> {
     const maxRetryCount = 3; // Maximum number of retry attempts
@@ -109,165 +106,38 @@ export async function POST(
 ) {
 
     try {
-        
-        // Parse and log the request body
-        const requestBody = await request.json();
-        //console.log("Request body:", requestBody);
-        // Extract the latest user message as the prompt
-        const messages: Message[] = requestBody.messages;
-        const lastUserMessage = messages.reverse().find((msg: Message) => msg.role === 'user');
-        if (!lastUserMessage) {
-            return new NextResponse("Invalid request body", { status: 400 });
+        const requestText = await request.json();
+        const { messages } = requestText;
+        // Find the most recent user message
+        const mostRecentUserMessage = messages.slice().reverse().find(msg => msg.role === "user");
+        if (!mostRecentUserMessage) {
+            return new NextResponse("No user message found", { status: 400 });
         }
-        
-        const prompt = lastUserMessage.content;
-
-
+        const prompt = mostRecentUserMessage.content;
+        //console.log(prompt);
         const user = await currentUser();
-        const isPro = await checkSubscription();
+
         if (!user || !user.id) {
             return new NextResponse("Unauthorized", { status: 401 });
         }
-    
-        const balance = await prismadb.userBalance.findUnique({
-            where: {
-                userId: user.id
+
+
+        const steamship = new Steamship({ apiKey: process.env.STEAMSHIP_API_KEY })
+        const response = await steamship.agent.respondAsync({
+            url: "https://mpoikkilehto.steamship.run/b00d8164-6f2e-4c54-b454-a58cc6eaf9a9/b00d8164-6f2e-4c54-b454-a58cc6eaf9a9/",
+            input: {
+                prompt,
+                context_id: user.id
             },
-        });
-        //console.log(balance);
-        if (balance) {
-            if (balance.tokenCount > balance.tokenLimit+balance.proTokens) {
-                return NextResponse.json("Message limit exceeded, upgrade to Pro plan for increased limit.");
-            }
-        }
-        const companion = await prismadb.companion.findUnique({
-            where: {
-                id: params.chatId,
-            }
+        })
+        const stream = await SteamshipStream(response, steamship, {
+            streamTimeoutSeconds: 15,
+            format: "json-no-inner-stream"
         });
 
-        if (!companion) {
-            return new NextResponse("Companion not found", { status: 404 });
-        }
+        return new Response(stream);
 
-        const strIsPro = String(isPro);
-        const steamshipResponse = await getSteamshipResponse(
-            prompt,
-            user.id,
-            companion.packageName,
-            companion.instanceHandle,
-            companion.workspaceName,
-            companion.personality,
-            companion.name,
-            companion.description,
-            companion.behaviour,
-            companion.selfiePre,
-            companion.selfiePost,
-            companion.seed,
-            companion.model,
-            companion.imageModel,
-            companion.createImages,
-            companion.voiceId,
-            strIsPro);
 
-        const responseBlocks = JSON.parse(steamshipResponse);
-
-        //console.log(steamshipResponse)
-        var imageTokens = 0;
-        var voiceTokens = 0;
-        var responseLength = 0;
-        var responseText = "";
-        var hasAudio = 0;
-        for (const block of responseBlocks) {
-            //console.log(block);
-            if ((block.text && block.text.length > 1)) {
-                responseLength += block.text.length;
-                responseText += block.text
-            } else if (block.mimeType.startsWith("image")) {
-                imageTokens += 500;
-            } else if (block.mimeType.startsWith("audio")) {
-                hasAudio = 1;
-            }
-        }
-        //console.log(responseLength);
-        //console.log(responseText);
-       
-        if (responseLength > 0) {
-
-        const tokenCost = roughTokenCount(responseText) + imageTokens + voiceTokens;
-        const currentDateTime = new Date().toISOString();
-            
-            if (!balance) {
-                // Create the new balance record if it does not exist
-                await prismadb.userBalance.create({
-                    data: {
-                        userId: user.id,
-                        tokenCount: tokenCost,
-                        messageCount: 1,
-                        messageLimit: 1000,
-                        tokenLimit: 10000,
-                        firstMessage: currentDateTime,
-                        // Assuming initial setting for proTokens and callTime needs to be handled here as well
-                        proTokens: 0,
-                        callTime: 300,
-                        lastMessage: currentDateTime
-                    }
-                });
-            } else {
-                // Check if proTokens cover all the cost
-                if (balance.proTokens >= tokenCost) {
-                    // Decrement from proTokens only
-                    await prismadb.userBalance.update({
-                        where: {
-                            userId: user.id
-                        },
-                        data: {
-                            proTokens: {
-                                decrement: tokenCost
-                            },
-                            messageCount: {
-                                increment: 1
-                            },
-                            lastMessage: currentDateTime
-                        }
-                    });
-                } else {
-                    // Use up all proTokens and remainder goes to tokenCount
-                    const remainder = tokenCost - balance.proTokens;
-                    await prismadb.userBalance.update({
-                        where: {
-                            userId: user.id
-                        },
-                        data: {
-                            proTokens: {
-                                decrement: balance.proTokens
-                            },
-                            tokenCount: {
-                                increment: remainder
-                            },
-                            messageCount: {
-                                increment: 1
-                            },
-                            lastMessage: currentDateTime
-                        }
-                    });
-                }
-            }
-            const Readable = require('stream').Readable;
-            // Create a stream
-            let s = new Readable({
-              read() {} // Implement the read function
-            });
-            // Stringify your responseBlocks array
-            const responseBlocksData = JSON.stringify(responseBlocks);
-            // Push the stringified data to the stream
-            s.push(responseBlocksData);
-            // Signal the end of the stream
-            s.push(null);
-            // Return a StreamingTextResponse with the stream
-            return new StreamingTextResponse(s);
-        
-        }
     } catch (error) {
         console.log(error)
         return NextResponse.json("I'm sorry, I had an error when generating response. \n(This message is not saved)");
