@@ -1,15 +1,18 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState,useRef } from 'react';
 
 
 interface StreamContentProps {
     blockId: string;
     onContentUpdate?: (newContent: string) => void;
+    accumulatedContentRef?: React.MutableRefObject<string>;
+    onStreamFinish?: () => void;
 }
 
-export const StreamContent: React.FC<StreamContentProps> = ({ blockId, onContentUpdate }) => {
+export const StreamContent: React.FC<StreamContentProps> = ({ blockId, onContentUpdate,accumulatedContentRef  }) => {
     const [content, setContent] = useState<string>('');
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
+
 
     useEffect(() => {
         setIsLoading(false);
@@ -30,8 +33,9 @@ export const StreamContent: React.FC<StreamContentProps> = ({ blockId, onContent
                 while (true) {
                     const { done, value } = await reader.read();
                     if (done) break;
-                    console.log(decoder.decode(value))
+                   //console.log(decoder.decode(value))
                     accumulatedContent += decoder.decode(value, { stream: true });
+                     if (accumulatedContentRef) accumulatedContentRef.current = accumulatedContent;
                     // Update to set content in chunks as received without waiting for the entire message.
                     // For each chunk received, concatenate with existing content and update state.
                     
@@ -61,7 +65,7 @@ export const StreamContent: React.FC<StreamContentProps> = ({ blockId, onContent
     }, [blockId]);
 
     if (isLoading) {
-        return <div>Loading... Test very long string lorem ipsum lorem ipsumlorem ipsumlorem ipsumlorem ipsumlorem ipsumlorem ipsumlorem ipsum</div>;
+        return <div></div>;
     }
 
     if (error) {

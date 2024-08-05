@@ -26,4 +26,6 @@ export type ExtendedBlock = Block & {
    * What is the message type of this block?
    */
   messageType?: string;
+
+  role?: string;
 };

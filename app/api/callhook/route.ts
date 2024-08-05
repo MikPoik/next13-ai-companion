@@ -3,7 +3,7 @@ import { NextResponse } from "next/server"
 import prismadb from "@/lib/prismadb"
 import { UserButton } from "@clerk/nextjs"
 import { appendHistorySteamship, } from "@/components/SteamshipAppendHistory";
-import { Steamship } from '@steamship/client';
+import { Steamship as SteamshipV2 } from 'steamship-client-v2';
 import {Role } from "@prisma/client";
 export const maxDuration = 60;
 
@@ -130,7 +130,7 @@ export async function POST(req: Request) {
             return new NextResponse(`No companion found}`, { status: 400 });
         }
         console.log("apped history to steamship")
-        const client = await Steamship.use(companion.packageName, companion.instanceHandle, { llm_model: companion.model, create_images: String(companion.createImages) }, undefined, true, companion.workspaceName);
+        const client = await SteamshipV2.use(companion.packageName, companion.instanceHandle, { llm_model: companion.model, create_images: String(companion.createImages) }, undefined, true, companion.workspaceName);
         const appendHistoryResponse = await appendHistorySteamship(
             'append_history',
             json_messages,

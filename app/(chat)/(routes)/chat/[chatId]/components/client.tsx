@@ -27,11 +27,11 @@ interface ChatClientProps {
     };
   };
 }
-interface ChatMessageType {
+interface LocalChatMessageType {
   id: string;
   role: Role;
   content: string; // Update based on your actual structure
-  blockId: string; // Add blockId here
+  //blockId: string; // Add blockId here
   createdAt:Date,
   // Include any other fields that are necessary
 }
@@ -47,7 +47,7 @@ const scrollContainerStyle: React.CSSProperties = {
 };
 
 const transformChatMessageToPrismaMessage = (
-  message: ChatMessageType,
+  message: LocalChatMessageType,
   companionId: string
 ): PrismaMessage => {
   return {
@@ -71,11 +71,12 @@ export const ChatClient = ({ isPro, companion }: ChatClientProps) => {
   const scrollRef = useRef<ElementRef<"div">>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isReloading, setIsReloading] = useState(false);
-
+   const accumulatedContentRef = useRef<string | "">("");
+  
   const initialMessages: PrismaMessage[] = [
     {
       id: "seed",
-      role: Role.system,
+      role: Role.assistant,
       content: companion.seed,
       createdAt: new Date(),
       updatedAt: new Date(),
@@ -91,6 +92,8 @@ export const ChatClient = ({ isPro, companion }: ChatClientProps) => {
     })),
   ];
 
+  
+  //console.log("Initial Messages", initialMessages)
   const {
     messages, // This will be ChatMessage[]
     setMessages,
@@ -105,37 +108,60 @@ export const ChatClient = ({ isPro, companion }: ChatClientProps) => {
     reload,
   } = useChat({
     api: `/api/chat/${companion.id}`,
-    initialMessages: initialMessages.map((message) => ({
+    initialMessages: initialMessages as unknown as ChatMessageType[], // Type cast // Transform content here,
+    body: {
+      chatId: `${companion.id}`,
+    },
+    /*initialMessages: initialMessages.map((message) => ({
       ...message,
-      content: chatMessagesJsonlToBlocks([message], ""), // Transform content here
-    })) as unknown as ChatMessageType[], // Type cast
-    
-    onResponse:async (response) => {
+      content: chatMessagesJsonlToBlocks([message], "")
+    */
+    onResponse(response) {
+      console.log("OnResponse: ",response)
       //console.log("Messages length in onResponse:", messagesRef.current.length);
       const lastUserMessage = messagesRef.current[messagesRef.current.length - 1];
-      
+      console.log("Last user Message ", lastUserMessage)
 
       fetch(`/api/chat/${companion.id}/save-prompt`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ prompt: lastUserMessage.content, id: lastUserMessage.id })
       }); 
-      
+      bottomRef.current?.scrollIntoView({ behavior: "smooth" });
     },
-    onFinish: (message) => {
+    
+    onFinish(message){
+      console.log("OnFinish Message: ",message)
       //console.log("Messages length in onFinish:", messagesRef.current.length);
+      const finalContent = accumulatedContentRef.current; // Access the final accumulated content
+      console.log("Final streamed content: ", finalContent);
       const lastUserMessage = messagesRef.current[messagesRef.current.length - 2];
       const lastAssistantMessage = messagesRef.current[messagesRef.current.length - 1];
-      
+      console.log("On Finish call ",lastAssistantMessage.content)
       setInput("");
       if (!lastAssistantMessage.content.includes("I'm sorry, I had an error when generating response")){
         fetch(`/api/chat/${companion.id}/save-response`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ prompt: lastAssistantMessage.content, id: lastAssistantMessage.id })
+          body: JSON.stringify({ prompt: finalContent, id: lastAssistantMessage.id, blockList: lastAssistantMessage.content })
         }); 
       }
-      router.refresh();
+      //clear messages last message and replace content with finalContent using setMessages
+      // Replace the last assistant message content with finalContent
+      /*
+      const updatedMessages = messages.map((msg, index) => {
+        if (index === messages.length - 1) {
+          // Replace content for the last message
+          return { ...msg, content: finalContent, updatedAt: new Date() };
+        }
+        return msg;
+      });
+    */
+      // Update the state
+      //setMessages(updatedMessages as PrismaMessage[]);
+      //console.log("updated messages ",updatedMessages)
+      console.log("messagesRef",messagesRef)
+      //router.refresh();
       bottomRef.current?.scrollIntoView({ behavior: "smooth" });
 
     },
@@ -149,7 +175,10 @@ export const ChatClient = ({ isPro, companion }: ChatClientProps) => {
   
   
   useEffect(() => {
-    messagesRef.current = messages.map(message =>
+    messagesRef.current = messages.map(message => ({
+      ...message,
+      createdAt: new Date(message.createdAt || Date.now()) // Ensure createdAt is a Date
+    })).map(message =>
       transformChatMessageToPrismaMessage(message, companion.id)
     );
   }, [messages, companion.id]);
@@ -270,16 +299,21 @@ export const ChatClient = ({ isPro, companion }: ChatClientProps) => {
   };
 
   // Transforming messages
-  const transformedMessages: ChatMessageProps[] = messages.map((message) => ({
+  const transformedMessages: ChatMessageProps[] = messages.map((message) => (
+    //console.log("Transformable Message: ",message),
+    {
     id: message.id,
     role: message.role,
     content: chatMessagesJsonlToBlocks([message], ""), // Ensure transformation is applied for rendering
     isLoading: false,
-    src: "",
-    blockId: message.blockId,
-    streamState: message.streamState,
+    src: ""
   }));
 
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]); // Adjust dependency array as needed
+  
+  //console.log(companion.seed)
   //console.log(transformedMessages.length)
   return (
     <div className="flex flex-col h-full">
@@ -296,6 +330,7 @@ export const ChatClient = ({ isPro, companion }: ChatClientProps) => {
               blockId={message.blockId}
               streamState={message.streamState}
               companionName={companion.name}
+              accumulatedContentRef={accumulatedContentRef}
             />
             {transformedMessages.length >= 2 && index === transformedMessages.length - 2 && !isLoading && message.role === "user" && (
               <Button onClick={() => handleDelete(transformedMessages[transformedMessages.length - 1].id, transformedMessages[transformedMessages.length - 2].id)} disabled={isDeleting} className="opacity-20 group-hover:opacity-100 transition hover:bg-red-500" size="icon" variant="ghost" title="Delete message pair">

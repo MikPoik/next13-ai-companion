@@ -1,4 +1,4 @@
-import { Steamship } from '@steamship/client';
+import { Steamship as SteamshipV2 } from 'steamship-client-v2';
 import { SteamshipApiResponse } from "@/components/SteamShipBlock";
 
 // Exporting the function
@@ -25,7 +25,7 @@ export async function indexTextSteamship(
         3; // Maximum number of retry attempts
     for (let retryCount = 0; retryCount < maxRetryCount; retryCount++) {
         try {
-            const instance = await Steamship.use(package_name, instance_handle, { llm_model: model, create_images: String(create_images) }, undefined, true, workspace_handle);
+            const instance = await SteamshipV2.use(package_name, instance_handle, { llm_model: model, create_images: String(create_images) }, undefined, true, workspace_handle);
             const reset_index_response = await instance.invoke("reset_index");
             //console.log(reset_index_response)
             const response = await (instance.invoke(api_func, {

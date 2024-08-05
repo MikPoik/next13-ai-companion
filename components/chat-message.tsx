@@ -13,6 +13,8 @@ import { responseToChatBlocks } from "@/components/ChatBlock";
 import { chatMessagesJsonlToBlocks } from "@/components/parse-blocks-from-message";
 import { MessageTypes, validTypes } from "@/components/block-chat-types";
 import { StreamContent } from "@/components/stream-content";
+import { Message } from "ai";
+const { v4: uuidv4 } = require('uuid');
 
 export interface ChatMessageProps {
   id: string;
@@ -22,7 +24,8 @@ export interface ChatMessageProps {
   src?: string;
   blockId?: string;
   streamState?: string;
-  companionName: string; 
+  companionName?: string; 
+  accumulatedContentRef?: React.MutableRefObject<string>;
 }
 
 export const ChatMessage = ({
@@ -34,6 +37,7 @@ export const ChatMessage = ({
   blockId,
   streamState,
   companionName,
+  accumulatedContentRef
 }: ChatMessageProps) => {
 
   const { toast } = useToast();
@@ -60,28 +64,47 @@ export const ChatMessage = ({
   };
 
   const renderContent = () => {
+    console.log("Message Content ",content)
     if (streamState === 'started' && streamedContent) {
       console.log("update stream div")
       return <div>{streamedContent}</div>;
     } 
     else if (Array.isArray(content)) {
+      console.log("Message is array")
       return content.map((block, index) => {
-        if ('text' in block && typeof block.text === 'string' && validTypes.includes(block.messageType) && block.messageType === MessageTypes.USER_MESSAGE) {
+        console.log("block ",block,"Type ",block.messageType,"Role: ",block.role)
+        
+        if ('text' in block && typeof block.text === 'string' && validTypes.includes(block.messageType!) && block.messageType === MessageTypes.TEXT && block.role === 'user') {
+          console.log("user message")
           return <p key={index}>{block.text}</p>;
         }
-
-        if (block.streamState === 'started') {
-          console.log("start streaming ",block.id);
-          return <StreamContent blockId={block.id} onContentUpdate={setStreamedContent} key={index} />;
+        if ('text' in block && typeof block.text === 'string' && validTypes.includes(block.messageType!) && block.messageType === MessageTypes.TEXT && (block.role === 'assistant' || block.role === 'system')) {
+          console.log("assistant/system message")
+          return <p key={index}>{block.text}</p>;
         }
-
+        if (block.streamState === 'started' && block.messageType !== MessageTypes.IMAGE) {
+          console.log("start streaming ",block.id);
+          return <StreamContent blockId={block.id} onContentUpdate={setStreamedContent} accumulatedContentRef={accumulatedContentRef} key={index} />;
+        }
+        if (block.messageType === MessageTypes.IMAGE) {
+          console.log("image message")
+          return <img key={index} src={block.streamingUrl} alt={block.src} />;
+        }
+        console.log("could not determine message type")
         return null;
       }).filter(Boolean);
     } else if (typeof content === 'string') {
+      //Obsolete?
+      /*
       try {
         console.log("Trying to parse string")
-        console.log(content)
+        console.log("String content: ",content)
         const parsedContent = JSON.parse(content);
+        const message: Message = {
+          id: uuidv4(), // Generate a unique id
+          role: "user", // Set an appropriate role, or determine it dynamically if needed
+          content: parsedContent
+        };
         if (Array.isArray(parsedContent)) {
           console.log("Is array")
           // It's a JSON array
@@ -95,9 +118,9 @@ export const ChatMessage = ({
         } else {
           // Single JSON object
           console.log("Is object")
-          const blocks = chatMessagesJsonlToBlocks([{ content: parsedContent }], null);
+          const blocks = chatMessagesJsonlToBlocks([message], null);
           return blocks
-            .filter(block => validTypes.includes(block.messageType))
+            .filter(block => validTypes.includes(block.messageType!))
             .map((block, index) => (
               <React.Fragment key={index}>
                 {responseToChatBlocks({
@@ -108,7 +131,9 @@ export const ChatMessage = ({
                 })}
               </React.Fragment>
             ));
-        }
+        
+      
+        
       } catch {
         console.log("Couldn't parse")
         if (typeof content === 'string') {
@@ -120,8 +145,10 @@ export const ChatMessage = ({
           ? <p>{JSON.stringify(content, null, 2)}</p>
           : <p>{String(content)}</p>;
       }
+      */
     }
-    return content;
+    console.log("Message content string, omitting",content)
+    return null;
   };
 
   return (
