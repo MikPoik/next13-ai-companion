@@ -195,14 +195,13 @@ export const CompanionForm = ({
             behaviour: "",
             selfiePre: "",
             selfiePost: "",
-            model: "NousResearch/Nous-Hermes-2-Mixtral-8x7B-DPO",
+            model: "teknium/OpenHermes-2-Mistral-7B",
             createImages: false,
             imageModel: "realistic",
             voiceId: 'none',
             backstory: "",
             regenerateImage: false,
-
-            phoneVoiceId: '94880846-c333-433a-ae5c-ca1cb2776387',
+            phoneVoiceId: '101',
             tags: [],
             nsfw: false
 
@@ -264,7 +263,12 @@ export const CompanionForm = ({
             });
 
             router.refresh();
-            router.push("/");
+            if(initialData){
+                router.push(`/chat/${initialData.id}`);
+            }
+            else {
+                router.push("/")
+            }
         } catch (error) {
             //console.log(error);
             toast({
@@ -583,8 +587,7 @@ export const CompanionForm = ({
                                             <SelectItem key="NousResearch/Nous-Hermes-2-Mixtral-8x7B-DPO" value="NousResearch/Nous-Hermes-2-Mixtral-8x7B-DPO">Mixtral 8x7B DPO</SelectItem>
                                             <SelectItem key="NousResearch/Nous-Hermes-2-Mixtral-8x7B-SFT" value="NousResearch/Nous-Hermes-2-Mixtral-8x7B-SFT">Mixtral 8x7B SFT</SelectItem>
                                             <SelectItem key="teknium/OpenHermes-2-Mistral-7B" value="teknium/OpenHermes-2-Mistral-7B">Mistral 7b</SelectItem>
-                                            <SelectItem key="Gryphe/MythoMax-L2-13b" value="Gryphe/MythoMax-L2-13b">MythoMax 13b</SelectItem>
-                                            <SelectItem key="zephyr-chat" value="zephyr-chat">Zephyr 7b</SelectItem>
+                                  <SelectItem key="Gryphe/MythoMax-L2-13b" value="Gryphe/MythoMax-L2-13b">MythoMax 13b</SelectItem>                                            
 
                                             <SelectItem key="gpt-3.5-turbo-0613" value="gpt-3.5-turbo-0613">GPT-3.5</SelectItem>
                                         </SelectContent>

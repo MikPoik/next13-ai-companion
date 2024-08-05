@@ -4,36 +4,51 @@ import prismadb from "@/lib/prismadb"
 import { UserButton } from "@clerk/nextjs"
 import { appendHistorySteamship, } from "@/components/SteamshipAppendHistory";
 import { Steamship } from '@steamship/client';
+import {Role } from "@prisma/client";
 export const maxDuration = 60;
 
 export async function POST(req: Request) {
     try {
-        // Read the request body as text
         const body = await req.text();
-        //console.log(body);
-        // Convert the text to a JavaScript object
+        //console.log("CALL HOOK");
+        //console.log("jsonbody", body);
         const data = JSON.parse(body);
-        // Access properties from the parsed object
-        const callId = data.call_id;
-        const status = data.status;
-        const correctedDuration = data.corrected_duration;
-        const transcripts = data.transcripts;
-
-
-        console.log('Call ID:', callId);
-        console.log('Status:', status);
-        console.log('Corrected Duration:', correctedDuration);
-
-        //retrieve callID from DB
+        //console.log("data", data);
+        const callId = data.id;
+        const agentId = data.agent_id;
+        //console.log('Call ID:', callId);
+        //console.log('Agent ID:', agentId);
+        const correctedDuration = data.telephony_data.duration;
+        //console.log('Corrected Duration:', correctedDuration);
+        const transcriptsText = data.transcript;
+        //console.log('Transcripts:', transcriptsText);
+        // Declare transcriptUser outside of the nested try block
+        let transcriptUser: Array<{ user: string, text: string }> = [];
+        try {
+            transcriptUser = transcriptsText.split('\n').map((line: string) => {
+                try {
+                    const [user, text] = line.split(':  ');
+                    return { user: user.trim().toLowerCase(), text: text.trim() };
+                } catch (error: any) {
+                    console.error(`Error processing line: "${line}"`, error);
+                    return null;
+                }
+            }).filter(Boolean);
+            //console.log('Transcript User:', transcriptUser);
+        } catch (transcriptError: any) {
+            console.error('Error processing transcripts:', transcriptError);
+            return new NextResponse(`Transcript Processing Error: ${transcriptError.message}`, { status: 400 });
+        }
+        //console.log("find callLog");
         const call_sender = await prismadb.callLog.findUnique({
             where: {
                 id: callId
             }
         });
+        //console.log("call_sender", call_sender);
         if (!call_sender) {
-            return new NextResponse(`No call log found}`, { status: 400 })
+            return new NextResponse(`No call log found}`, { status: 400 });
         }
-
         const update_call_log = await prismadb.callLog.update({
             where: {
                 id: callId
@@ -43,28 +58,41 @@ export async function POST(req: Request) {
                 duration: correctedDuration,
             }
         });
-        //console.log(update_call_log);
-
         const companionId = call_sender.companionId;
         const userId = call_sender.userId;
-
-        // Prepare an array of message objects to insert
-        const messagesToCreate = transcripts.map((transcript: any) => ({
-            companionId: companionId,
-            userId: userId,
-            content: transcript.user === "assistant" ? `[{"text":"${transcript.text.replace(/\n+/g, ". ")}"}]` :transcript.text.replace(/\n+/g, ". "),
-            role: transcript.user === "assistant" ? "system" : "user", // Changed from transcript.user to "user"
-            createdAt: new Date(transcript.created_at).toISOString(), //example 2024-01-15T09:00:35.64345+00:00 convert to ISO string
-        }));
-
-        // Use createMany to insert all at once
-        const update_history = await prismadb.message.createMany({
-            data: messagesToCreate
+        // Prepare an array of message objects to insert based on the new response
+        const messagesToCreate = transcriptUser.map((transcript: any, index: number) => {
+            // Debugging each transcript
+            const role: Role = transcript.user === "assistant" ? Role.system : Role.user;
+            //console.log('Processing transcript:', transcript);
+            const createdAt = new Date(data.createdAt).getTime() + index * 1000;
+            //console.log(createdAt)
+            const message = {
+                companionId: companionId,
+                userId: userId,
+                content: transcript.user === "assistant" ? `[{"text":"${transcript.text.replace(/\n+/g, ". ")}"}]` : transcript.text.replace(/\n+/g, ". "),
+                role,
+                createdAt: new Date(createdAt).toISOString(),
+            };
+            // Debugging the constructed message
+            //console.log('Created message:', message);
+            return message;
         });
-        //console.log(messagesToCreate)
-
-        //update userBalance
-
+        //console.log('messagesToCreate:', messagesToCreate);
+        // Use createMany to insert all at once
+        //console.log("update_history")
+        let update_history;
+        try {
+            update_history = await prismadb.message.createMany({
+                data: messagesToCreate
+            });
+            //console.log('update_history successful', update_history);
+        } catch (error: any) {
+            console.error('Error with update_history:', error);
+            throw new Error(`Error creating messages: ${error.message}`);
+        }
+        //console.log('update_history', update_history);
+        // Update user balance
         const userBalance = await prismadb.userBalance.update({
             where: {
                 userId: userId
@@ -75,15 +103,10 @@ export async function POST(req: Request) {
                 }
             }
         });
-        //console.log(userBalance);
+        //console.log("userBalance",userBalance)
         // Check if the new userBalance's callTime is below 0 after decrementing
         if (userBalance.callTime < 0) {
-            // Handle the situation when balance is below 0
-            // For example, you might want to set it to 0 or throw an error
-            // Here we will log it and potentially you could also send a warning to the user
             console.warn(`User balance for userId ${userId} got negative after decrement.`);
-
-            // Reset the balance to 0 if it's negative (optional step)
             await prismadb.userBalance.update({
                 where: {
                     userId: userId
@@ -93,22 +116,20 @@ export async function POST(req: Request) {
                 }
             });
         }
-
         const companion = await prismadb.companion.findUnique({
             where: {
                 id: companionId
             }
         });
-
-        //format to json string to be parsed in steamship
-        const json_messages = JSON.stringify(transcripts.map((transcript: any) => ({
+        const json_messages = JSON.stringify(transcriptUser.map((transcript: any) => ({
             role: transcript.user === "assistant" ? "assistant" : "user",
             content: transcript.text.replace(/\\n/g, ". ")
         })));
-        //console.log(json_messages);
+        //console.log("json_messages",json_messages);
         if (!companion) {
-            return new NextResponse(`No companion found}`, { status: 400 })
+            return new NextResponse(`No companion found}`, { status: 400 });
         }
+        //console.log("apped history to steamship")
         const client = await Steamship.use(companion.packageName, companion.instanceHandle, { llm_model: companion.model, create_images: String(companion.createImages) }, undefined, true, companion.workspaceName);
         const appendHistoryResponse = await appendHistorySteamship(
             'append_history',
@@ -119,16 +140,10 @@ export async function POST(req: Request) {
             companion.workspaceName,
             companion.model,
             companion.createImages,);
-        const appendHistorytResponseBlocks = JSON.parse(appendHistoryResponse);
-        //console.log(appendHistorytResponseBlocks);
-
-
-
-
+        const appendHistoryResponseBlocks = JSON.parse(appendHistoryResponse);
     } catch (error: any) {
         console.error('Error while processing webhook:');
-        return new NextResponse(`Webhook Error: ${error.message}`, { status: 400 })
+        return new NextResponse(`Webhook Error: ${error.message}\n\n`, { status: 400 });
     }
-
-    return new NextResponse(null, { status: 200 })
+    return new NextResponse(null, { status: 200 });
 }

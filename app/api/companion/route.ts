@@ -6,7 +6,7 @@ import { checkSubscription } from "@/lib/subscription";
 import dotenv from "dotenv";
 //import { generateAvatarSteamship } from "@/components/SteamshipGenerateAvatar";
 import { indexTextSteamship, } from "@/components/SteamshipIndexText";
-dotenv.config({ path: `.env` });
+import {getBolnaAgentJson} from "@/lib/bolna";
 
 export const maxDuration = 120; //2 minute timeout
 
@@ -114,6 +114,29 @@ export async function POST(req: Request) {
             console.log(indexTextResponseBlocks);
         }
 
+
+
+        //create Bolna client
+
+        const apiKey = process.env["BOLNA_API_KEY"];
+        if (!apiKey) {
+            throw new Error('BOLNA_API_KEY is not defined in environment variables');
+        }
+        const headers = {
+            'Authorization': `Bearer ${apiKey}`,
+            'Content-Type': 'application/json'
+        };
+        const data = getBolnaAgentJson(name)
+
+        const response = await fetch('https://api.bolna.dev/agent', {
+            method: 'POST',
+            headers: headers,
+            body: JSON.stringify(data),
+        });
+        const result = await response.json();
+        const voice_agent_id = result.agent_id;
+        const status = result.status;
+        
         //update database
         const companion = await prismadb.companion.create({
             data: {
@@ -144,11 +167,14 @@ export async function POST(req: Request) {
                         create: { id: tag.id, name: tag.name },
                     })),
                 },
-                nsfw: nsfw
+                nsfw: nsfw,
+                voiceAgentId: voice_agent_id,
             }
         });
+        
 
 
+        
         return NextResponse.json(companion);
     } catch (error) {
         console.log("[COMPANION_POST] ERROR",error);

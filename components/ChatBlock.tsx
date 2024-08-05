@@ -2,6 +2,7 @@
 
 import React from "react";
 
+
 export function ChatBlock({ text, mimeType, url, id }: {
     text?: string,
     mimeType?: string,
@@ -10,6 +11,16 @@ export function ChatBlock({ text, mimeType, url, id }: {
 }) {
     let internalComponent = <></>
     if (text && text.length > 1) {
+        if (text.startsWith("[")) {
+            //malformed JSON try had parsing text from JSON
+            try {
+                const splitText = text.slice(1, -1).split(':');
+                text = splitText[1].trim().slice(1, -2);
+
+            } catch (error) {
+                console.error('Error parsing JSON array:', error);
+            }
+        }
         // Check if the text contains markdown italics and apply corresponding style
         const parts = text.split(/(\*.*?\*)/).map((part, index) => 
             part.startsWith('*') && part.endsWith('*') ? <i key={index} style={{ color: "rgba(255,255,255,0.6)" }}>{part.slice(1, -1)}</i> : part

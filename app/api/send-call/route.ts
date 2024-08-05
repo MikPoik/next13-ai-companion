@@ -7,6 +7,7 @@ import { checkSubscription } from "@/lib/subscription";
 import { appendHistorySteamship, } from "@/components/SteamshipAppendHistory";
 import { Steamship } from '@steamship/client';
 import { format } from "path";
+import {getBolnaAgentJson} from "@/lib/bolna";
 
 export const maxDuration = 60;
 
@@ -60,7 +61,7 @@ export async function POST(req: Request) {
         const phoneNumber = body.phoneNumber; // Access the phone number from the request body
         const companionId = body.companionId;
         //console.log('Phone Number:', phoneNumber);
-        console.log('Companion ID:', companionId);
+        //console.log('Companion ID:', companionId);
         const user = await currentUser();
         if (!user || !user.id) {
             return new NextResponse("Unauthorized", { status: 401 });
@@ -80,7 +81,7 @@ export async function POST(req: Request) {
                 return new NextResponse(JSON.stringify({ message: 'Not enough balance' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
             }
         }
-        console.log(balance)
+        //console.log("user balance: ",balance)
         const companion = await prismadb.companion.findUnique({
             where: {
                 id: companionId
@@ -106,40 +107,43 @@ export async function POST(req: Request) {
                 id: companion.phoneVoiceId
             }
         });
-
+        //console.log("phoneVoice: ",phoneVoice)
         if (!phoneVoice) {
             return new NextResponse("No phone voice found", { status: 404 });
         }
-        console.log(phoneVoice)
+
         //retrieve chat history from db, last 10 messages    
-        let formattedMessages = '';
+        let formattedMessages = ''
+
+        //console.log(formattedMessages)
+        const EMOJI_PATTERN = /([\u{1F1E0}-\u{1F1FF}|\u{1F300}-\u{1F5FF}|\u{1F600}-\u{1F64F}|\u{1F680}-\u{1F6FF}|\u{1F700}-\u{1F77F}|\u{1F780}-\u{1F7FF}|\u{1F800}-\u{1F8FF}|\u{1F900}-\u{1F9FF}|\u{1FA00}-\u{1FA6F}|\u{1FA70}-\u{1FAFF}|\u{2702}-\u{27B0}])/gu;
+        
         companion.messages.forEach((message) => {
+            console.log(message);
             const role = message.role;
             let text;
-            if (role === 'system') {
-                // Parse the JSON string to get the text for system messages
+            try {
+                // Parse the content JSON string
                 const contentArray = JSON.parse(message.content);
                 const firstContentObject = contentArray[0];
-                text = firstContentObject.text;
-            } else {
-                // Directly use the content for user messages
-                text = message.content;
+                // Remove most emojis from the text content
+
+                text = firstContentObject.text.replace(EMOJI_PATTERN, '');
+            } catch (parseError) {
+                // Directly use the content if not parsed correctly
+                text = message.content.replace(EMOJI_PATTERN, '');
+                text = message.content.replace(/\*[^\*]+\*/g, '');
+                console.error('Error parsing message content: ', parseError);
             }
-            let role_text = "";
-            if (role === 'system') {
-                role_text = `You`;
-            }
-            else {
-                role_text = "person";
-            }
-            formattedMessages += `${role_text}: ${text}\n`; // Append to the string with a newline character for separation
+            let roleText = role === 'system' || role === 'assistant' ? 'assistant' : 'user';
+            formattedMessages += `${roleText}:  ${text}\n`; // Append to the string with a newline character for separation
         });
 
-        if (!formattedMessages.includes("You:")) {
-            formattedMessages = `You: ${companion.seed}\n` + formattedMessages;
+        if (!formattedMessages.includes("assistant:")) {
+            formattedMessages += `assistant:  ${companion.seed.replace(EMOJI_PATTERN, '')}\n` + formattedMessages;
         }
 
-
+        //console.log(formattedMessages);
 
         // Create dynamic environment variables
         const now = new Date();
@@ -148,27 +152,22 @@ export async function POST(req: Request) {
         const date = now.toLocaleDateString("en-US"); // Get the current date in MM/DD/YYYY format
 
 
-        const call_prompt = `Embody a character, your name is ${companion.name} and you are ${companion.description}. You're calling a person. If you haven't had previous conversation with the person before, introduce yourself and ask the person's name so you get to know each other. Begin the call with a tone and mood based on your personality, be creative when conversation proceeds. Keep the conversation fresh while avoiding repetition. If it fits the flow of conversation you can be explicit and sexually charged.
-
-Your personality: ${companion.personality}
-Your physical appearance: ${companion.selfiePre}
-
-Date: ${date}, Time: ${time}, Day: ${day}.
-
-Here's dialogue from a previous conversation between person and You:
-${formattedMessages}`;
-
-
 
         //console.log(call_prompt);
         // Your call initiation logic goes here
         // Headers  
+        /*
         const apiKey = process.env["BLAND_API_KEY"];
         if (!apiKey) {
             throw new Error('BLAND_API_KEY is not defined in environment variables');
         }
+        */
+        const apiKey = process.env["BOLNA_API_KEY"];
+        if (!apiKey) {
+            throw new Error('BOLNA_API_KEY is not defined in environment variables');
+        }
         const headers = {
-            'Authorization': `${apiKey}`,
+            'Authorization': `Bearer ${apiKey}`,
             'Content-Type': 'application/json'
         };
         let maxDuration = 0;
@@ -186,7 +185,7 @@ ${formattedMessages}`;
 
         voice_preset = phoneVoice.voice_preset;
 
-
+        /*
         const data = {
             'phone_number': phoneNumber,
             'task': call_prompt,
@@ -199,25 +198,95 @@ ${formattedMessages}`;
             'model': 'turbo'
 
         }
-        console.log(data);
+
+        */
+        let voice_agent_id = companion.voiceAgentId;
+
+        
+        const create_bolna_agent_json = getBolnaAgentJson(companion.name,phoneVoice.bolnaVoice,phoneVoice.bolnaProvider,phoneVoice.bolnaVoiceId,phoneVoice.bolnaModel,phoneVoice.bolnaElevenlabTurbo,phoneVoice.bolnaPollyEngine,phoneVoice.bolnaPollyLanguage)
+        //console.log("json body: ", JSON.stringify(create_bolna_agent_json, null, 2));
+
+        
+        //console.log("check agent id")
+        //console.log(voice_agent_id)
+        if (!companion.voiceAgentId) {
+            //if companion does not exist
+            console.log("companion voice agent id not set")
+
+            
+            const response = await fetch('https://api.bolna.dev/agent', {
+                method: 'POST',
+                headers: headers,
+                body: JSON.stringify(create_bolna_agent_json),
+            });
+            const result = await response.json();
+            //console.log(result);
+            
+            voice_agent_id = result.agent_id;  
+            //console.log(companionId,user.id,result.agent_id)
+            const updateCompanion = await prismadb.companion.update({
+                where: {
+                    id: companionId,
+                },
+                data: {
+                    voiceAgentId: voice_agent_id,
+                }
+                });
+            //console.log(updateCompanion)
+            
+        }
+        //update voice agent template
+       //console.log("update voice agent template")
+        const update_voice_agent = await fetch(`https://api.bolna.dev/agent/${voice_agent_id}`, {
+            method: 'PUT',
+            headers: headers,
+            body: JSON.stringify(create_bolna_agent_json),
+        });
+        
+        //console.log("Update agent: ",await update_voice_agent.json())
+        
+
+        const data = {
+                "agent_id": voice_agent_id, 
+                "recipient_phone_number": phoneNumber,
+                "user_data": {
+                    "character_name": companion.name,
+                    "character_type": companion.description,
+                    "character_personality": companion.personality,
+                    "character_appearance": companion.selfiePre,
+                    "previous_messages": formattedMessages,
+                }
+            }
+        //console.log(data);
         //call api post 'https://api.bland.ai/call', data, {headers};
         // Make the API call to bland.ai
+        //console.log("making api call")
+        /*
 
         const response = await fetch('https://api.bland.ai/v1/calls', {
             method: 'POST',
             headers: headers,
             body: JSON.stringify(data),
         });
-
+        */
+        //console.log("Make Bolna API call")
+        const response = await fetch('https://api.bolna.dev/call', {
+            method: 'POST',
+            headers: headers,
+            body: JSON.stringify(data),
+        });
+        
         const responseJson = await response.json(); // This converts the response to a JSON object
+
 
         const callId = responseJson.call_id; // This extracts the call_id value from the response JSON
         const status = responseJson.status; // This extracts the status value from the response JSON
         //console.log(callId, status); // This logs the call_id value
-        if (status === 'success') {
+        //if (status === 'success') {
+        if (status === 'queued') {
             const callLog = await prismadb.callLog.create({
                 data: {
-                    id: callId,
+                    id: callId.split('#')[1],
                     userId: user.id,
                     companionId: companion.id,
                     status: 'call-requested',
