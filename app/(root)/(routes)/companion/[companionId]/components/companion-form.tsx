@@ -201,7 +201,7 @@ export const CompanionForm = ({
             voiceId: 'none',
             backstory: "",
             regenerateImage: false,
-            phoneVoiceId: '94880846-c333-433a-ae5c-ca1cb2776387',
+            phoneVoiceId: '101',
             tags: [],
             nsfw: false
 

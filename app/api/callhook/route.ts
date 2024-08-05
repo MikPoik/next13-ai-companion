@@ -10,18 +10,18 @@ export const maxDuration = 60;
 export async function POST(req: Request) {
     try {
         const body = await req.text();
-        console.log("CALL HOOK");
-        console.log("jsonbody", body);
+        //console.log("CALL HOOK");
+        //console.log("jsonbody", body);
         const data = JSON.parse(body);
-        console.log("data", data);
+        //console.log("data", data);
         const callId = data.id;
         const agentId = data.agent_id;
-        console.log('Call ID:', callId);
-        console.log('Agent ID:', agentId);
+        //console.log('Call ID:', callId);
+        //console.log('Agent ID:', agentId);
         const correctedDuration = data.telephony_data.duration;
-        console.log('Corrected Duration:', correctedDuration);
+        //console.log('Corrected Duration:', correctedDuration);
         const transcriptsText = data.transcript;
-        console.log('Transcripts:', transcriptsText);
+        //console.log('Transcripts:', transcriptsText);
         // Declare transcriptUser outside of the nested try block
         let transcriptUser: Array<{ user: string, text: string }> = [];
         try {
@@ -34,18 +34,18 @@ export async function POST(req: Request) {
                     return null;
                 }
             }).filter(Boolean);
-            console.log('Transcript User:', transcriptUser);
+            //console.log('Transcript User:', transcriptUser);
         } catch (transcriptError: any) {
             console.error('Error processing transcripts:', transcriptError);
             return new NextResponse(`Transcript Processing Error: ${transcriptError.message}`, { status: 400 });
         }
-        console.log("find callLog");
+        //console.log("find callLog");
         const call_sender = await prismadb.callLog.findUnique({
             where: {
                 id: callId
             }
         });
-        console.log("call_sender", call_sender);
+        //console.log("call_sender", call_sender);
         if (!call_sender) {
             return new NextResponse(`No call log found}`, { status: 400 });
         }
@@ -64,9 +64,9 @@ export async function POST(req: Request) {
         const messagesToCreate = transcriptUser.map((transcript: any, index: number) => {
             // Debugging each transcript
             const role: Role = transcript.user === "assistant" ? Role.system : Role.user;
-            console.log('Processing transcript:', transcript);
+            //console.log('Processing transcript:', transcript);
             const createdAt = new Date(data.createdAt).getTime() + index * 1000;
-            console.log(createdAt)
+            //console.log(createdAt)
             const message = {
                 companionId: companionId,
                 userId: userId,
@@ -75,23 +75,23 @@ export async function POST(req: Request) {
                 createdAt: new Date(createdAt).toISOString(),
             };
             // Debugging the constructed message
-            console.log('Created message:', message);
+            //console.log('Created message:', message);
             return message;
         });
-        console.log('messagesToCreate:', messagesToCreate);
+        //console.log('messagesToCreate:', messagesToCreate);
         // Use createMany to insert all at once
-        console.log("update_history")
+        //console.log("update_history")
         let update_history;
         try {
             update_history = await prismadb.message.createMany({
                 data: messagesToCreate
             });
-            console.log('update_history successful', update_history);
+            //console.log('update_history successful', update_history);
         } catch (error: any) {
             console.error('Error with update_history:', error);
             throw new Error(`Error creating messages: ${error.message}`);
         }
-        console.log('update_history', update_history);
+        //console.log('update_history', update_history);
         // Update user balance
         const userBalance = await prismadb.userBalance.update({
             where: {
@@ -103,7 +103,7 @@ export async function POST(req: Request) {
                 }
             }
         });
-        console.log("userBalance",userBalance)
+        //console.log("userBalance",userBalance)
         // Check if the new userBalance's callTime is below 0 after decrementing
         if (userBalance.callTime < 0) {
             console.warn(`User balance for userId ${userId} got negative after decrement.`);
@@ -125,11 +125,11 @@ export async function POST(req: Request) {
             role: transcript.user === "assistant" ? "assistant" : "user",
             content: transcript.text.replace(/\\n/g, ". ")
         })));
-        console.log("json_messages",json_messages);
+        //console.log("json_messages",json_messages);
         if (!companion) {
             return new NextResponse(`No companion found}`, { status: 400 });
         }
-        console.log("apped history to steamship")
+        //console.log("apped history to steamship")
         const client = await Steamship.use(companion.packageName, companion.instanceHandle, { llm_model: companion.model, create_images: String(companion.createImages) }, undefined, true, companion.workspaceName);
         const appendHistoryResponse = await appendHistorySteamship(
             'append_history',
