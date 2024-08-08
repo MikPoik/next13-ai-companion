@@ -15,12 +15,12 @@ export function chatMessageJsonlToBlock(
 ): ExtendedBlock[] {
   const applySkipIfInput =
     skipIfInputEquals != null && skipIfInputEquals.trim().length > 0;
-  console.log("Process message ",message)
-  console.log("Process message content",message.content)
+  //console.log("Process message ",message)
+  //console.log("Process message content",message.content)
   
   if (typeof message === 'object' && message.content !== null && !message.content.toString().includes("workspaceId")) {
-    console.log("Processing JSON object message.content");
-    console.log(message.role)
+    //console.log("Processing JSON object message.content");
+    //console.log(message.role)
     // Check if message content is a JSON array and parse the "text" field to message.content for previous message format
     try {
       if (message.content.startsWith("[")){

@@ -16,8 +16,9 @@ export async function POST(
 
 
         const { prompt,id,blockList } = await request.json();
-        //console.log("Save-Response, prompt received:", prompt);
-        //console.log("Message id ",id)
+        console.log("Save-Response, prompt received:", prompt);
+        console.log("Message id ",id)
+        console.log("Block List ",blockList)
         const user = await currentUser();
         if (!user || !user.id) {
             return new NextResponse("Unauthorized", { status: 401 });
@@ -52,6 +53,7 @@ export async function POST(
         var hasAudio = 0;
         responseText = prompt;
         
+        /*
         for (const block of blockList) {
             console.log(block);
             if (block.mimeType.startsWith("image")) {
@@ -60,18 +62,20 @@ export async function POST(
                 hasAudio = 1;
             }
         }
+        */
         const balance = await prismadb.userBalance.findUnique({
             where: {
                 userId: user.id
             },
         });
-        //console.log(balance);
+        console.log(balance);
         if (balance) {
             if (balance.tokenCount > balance.tokenLimit+balance.proTokens) {
                 return NextResponse.json("No balance");
             }
         }
         const tokenCost = roughTokenCount(responseText) + imageTokens + voiceTokens;
+        console.log("Token Cost: ", tokenCost);
         const currentDateTime = new Date().toISOString();
 
             if (!balance) {

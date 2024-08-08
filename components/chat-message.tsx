@@ -72,7 +72,7 @@ export const ChatMessage = ({
     else if (Array.isArray(content)) {
       console.log("Message is array")
       return content.map((block, index) => {
-        console.log("block ",block,"Type ",block.messageType,"Role: ",block.role)
+        //console.log("block ",block,"Type ",block.messageType,"Role: ",block.role)
         
         if ('text' in block && typeof block.text === 'string' && validTypes.includes(block.messageType!) && block.messageType === MessageTypes.TEXT && block.role === 'user') {
           console.log("user message")
@@ -153,7 +153,7 @@ export const ChatMessage = ({
 
   return (
     <div className={cn(
-      "group flex items-start gap-x-3 py-4 w-full",
+      "group flex items-start gap-x-3 py-2 w-full",
       role === "user" && "justify-end"
     )}>
       <div className="flex-1 mr-4">

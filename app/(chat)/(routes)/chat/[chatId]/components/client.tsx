@@ -134,6 +134,7 @@ export const ChatClient = ({ isPro, companion }: ChatClientProps) => {
       console.log("OnFinish Message: ",message)
       //console.log("Messages length in onFinish:", messagesRef.current.length);
       const finalContent = accumulatedContentRef.current; // Access the final accumulated content
+
       console.log("Final streamed content: ", finalContent);
       const lastUserMessage = messagesRef.current[messagesRef.current.length - 2];
       const lastAssistantMessage = messagesRef.current[messagesRef.current.length - 1];
@@ -318,7 +319,7 @@ export const ChatClient = ({ isPro, companion }: ChatClientProps) => {
   return (
     <div className="flex flex-col h-full">
       <ChatHeader isPro={isPro} companion={companion} />
-      <div style={scrollContainerStyle} className="flex-1 overflow-y-auto p-4">
+      <div style={scrollContainerStyle} className="flex-1 overflow-y-auto py-2 pb-0">
         {transformedMessages.map((message, index) => (
           <div key={message.id} className="flex items-center">
             <ChatMessageComponent
@@ -343,7 +344,7 @@ export const ChatClient = ({ isPro, companion }: ChatClientProps) => {
         {isLoading ? <div style={{ display: 'flex', alignItems: 'center' }}><BeatLoader color={theme === "light" ? "black" : "white"} size={5} /><Button onClick={stop} disabled={!isLoading} variant="ghost"><X className="w-4 h-4" /></Button></div> : null}
         {error ? <p>{error.message}</p> : null}
       </div>
-      <form onSubmit={onSubmit} className="border-t border-primary/10 py-4 flex items-center gap-x-0 pr-0 sticky bottom-0">
+      <form onSubmit={onSubmit} className="border-t border-primary/10 py-1 pb-0 flex items-center gap-x-0 pr-0 sticky bottom-0">
         <Input disabled={isLoading} value={input} onChange={handleInputChange} placeholder="Type a message" className="rounded-lg bg-primary/10" />
         <Button type="submit" disabled={isLoading} variant="ghost">
           <SendHorizonal className="w-4 h-4" />

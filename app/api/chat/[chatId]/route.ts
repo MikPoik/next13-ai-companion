@@ -24,7 +24,42 @@ function roughTokenCount(text: string): number {
     return tokens ? tokens.length : 0;
 }
 
-
+async function getCompanionRecord(chatId: string, userId: string) {
+    const DATABASE_URL = process.env['DATABASE_URL'] ||""
+    const sql = neon(DATABASE_URL);
+    try {
+        const companions = await sql`
+            WITH SteamshipAgents AS (
+              SELECT 
+                "id" AS "steamshipAgent_id",
+                "userId" AS "steamshipAgent_userId",
+                "companionId" AS "steamshipAgent_companionId",
+                "agentUrl" AS "steamshipAgent_agentUrl",
+                "instanceHandle" AS "steamshipAgent_instanceHandle",
+                "workspaceHandle" AS "steamshipAgent_workspaceHandle",
+                "version" AS "steamshipAgent_version",
+                "createdAt" AS "steamshipAgent_createdAt"
+              FROM "SteamshipAgent"
+              WHERE "userId" = ${userId}
+              ORDER BY "createdAt" DESC
+              LIMIT 1
+            )
+            SELECT 
+              c.*, 
+              sa.*
+            FROM 
+              "Companion" c
+            LEFT JOIN 
+              SteamshipAgents sa ON c."id" = sa."steamshipAgent_companionId"
+            WHERE 
+              c."id" = ${chatId};
+        `;
+        return companions;
+    } catch (err) {
+        console.error('Query error:', err);
+        throw err;
+    }
+}
 
 export async function POST(
     request: Request,
@@ -32,6 +67,8 @@ export async function POST(
 ) {
 
     try {
+
+        
         const DATABASE_URL = process.env['DATABASE_URL'] ||""
         const sql = neon(DATABASE_URL);
         
@@ -50,14 +87,33 @@ export async function POST(
         if (!user || !user.id) {
             return new NextResponse("Unauthorized", { status: 401 });
         }
-        const [companion] = await sql`SELECT * from "Companion" WHERE "id" = ${chatId}`;
-        console.log("\n\n\n\nSQL RESULT\n\n\n\n\n", companion);
-        console.log(companion.workspaceName);
-        console.log(companion.instanceHandle);
+        
+ 
+        // Sample usage
+        let agentUrl = ""
+        let agentWorkspace = ""
+        let agentInstanceHandle = ""
+        const result = await getCompanionRecord(chatId, user.id)
+        .then(records => {
+            if (records.length > 0) {
+                const record = records[0]; // Assuming you're interested in the first record
+                agentUrl = record.steamshipAgent_agentUrl; // Access the steamshipAgent_agentUrl column
+                agentWorkspace = record.steamshipAgent_workspaceHandle;
+                agentInstanceHandle = record.steamshipAgent_instanceHandle;
+
+            } else {
+                console.log('No records found.');
+            }
+        })
+        .catch(err => console.error(err));
+
+        console.log(agentUrl);
+        console.log(agentWorkspace);
+        console.log(agentInstanceHandle)
         const steamship = new Steamship({ apiKey: process.env.STEAMSHIP_API_KEY })
-        const base_url=process.env.STEAMSHIP_BASE_URL + companion.workspaceName+"/"+companion.instanceHandle+"/";
-        const response = await steamship.agent.respondAsync({
-            //url: "https://mpoikkilehto.steamship.run/98c5c215-8862-4260-9713-ce6d0141071d/98c5c215-8862-4260-9713-ce6d0141071d/",
+        const base_url=process.env.STEAMSHIP_BASE_URL + agentWorkspace+"/"+agentInstanceHandle+"/";
+        console.log(base_url);
+        const response = await steamship.agent.respondAsync({            
             url: base_url,
             input: {
                 prompt,
