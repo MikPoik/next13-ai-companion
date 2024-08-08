@@ -1,7 +1,7 @@
 import prismadb from "@/lib/prismadb";
 import { auth, currentUser } from "@clerk/nextjs";
 import { NextResponse } from "next/server";
-import { Steamship } from '@steamship/client';
+import { Steamship as SteamshipV2 } from 'steamship-client-v2';
 export async function POST(
   request: Request,
   { params }: { params: { chatId: string } }
@@ -32,7 +32,7 @@ export async function POST(
     if (!companion) {
       return new NextResponse("Chat history not found or could not be deleted.", { status: 404 });
     }
-    const instance = await Steamship.use(companion.packageName, companion.instanceHandle, { llm_model: companion.model, create_images: String(companion.createImages) }, undefined, true, companion.workspaceName);
+    const instance = await SteamshipV2.use(companion.packageName, companion.instanceHandle, { llm_model: companion.model, create_images: String(companion.createImages) }, undefined, true, companion.workspaceName);
     const context_id = user.id;
     const response = await (instance.invoke('delete_messages', {
       context_id

@@ -9,9 +9,11 @@ export function ChatBlock({ text, mimeType, url, id }: {
     url?: string
     id?: string
 }) {
+    console.log(text, mimeType, url, id)
     let internalComponent = <></>
     if (text && text.length > 1) {
         if (text.startsWith("[")) {
+            console.log(text)
             //malformed JSON try had parsing text from JSON
             try {
                 const splitText = text.slice(1, -1).split(':');
@@ -71,22 +73,23 @@ function uuidv4() {
 
 export function responseToChatBlocks(completion: any) {
     // First we try to parse completion as JSON in case we're dealing with an object.
-    //console.log("got completoin", completion, typeof completion)
+    console.log("got completoin", completion, typeof completion)
     if (typeof completion == "string") {
         try {
             completion = JSON.parse(completion)
         } catch {
             // Do nothing; we'll just treat it as a string.
-            //console.log("Couldn't parse")
+            console.log("Couldn't parse")
         }
     }
     let blocks = []
     if (typeof completion == "string") {
-        //console.log("still string")
+        console.log("still string")
         blocks.push(<ChatBlock key={uuidv4()} text={completion} />)
     } else if (Array.isArray(completion)) {
-        //console.log("Is array")
+        console.log("Is array")
         for (let block of completion) {
+            console.log(block)
             blocks.push(<ChatBlock key={uuidv4()} {...block} />)
         }
     } else {

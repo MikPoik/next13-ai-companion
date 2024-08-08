@@ -2,19 +2,13 @@
 
 import { ElementRef, useEffect, useRef, useState } from "react";
 import { Companion } from "@prisma/client";
-
+const { v4: uuidv4 } = require('uuid');
 import { ChatMessage, ChatMessageProps } from "@/components/chat-message";
 
 interface ChatMessagesProps {
   messages: ChatMessageProps[];
   isLoading: boolean;
   companion: Companion
-}
-function uuidv4() {
-  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-      var r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
-      return v.toString(16);
-  });
 }
 
 export const ChatMessages = ({
@@ -52,6 +46,7 @@ export const ChatMessages = ({
   return (
     <div className="flex-1 overflow-y-auto pr-4">
       <ChatMessage
+        id= {uuidv4()}
         isLoading={fakeLoading}
         src={companion.src}
         role="system"
@@ -60,6 +55,7 @@ export const ChatMessages = ({
       />
       {messages.map((message, index) => (
         <ChatMessage
+          id={uuidv4()}
           key={index} // Assign the pre-generated key
           src={companion.src}
           content={message.content}
@@ -68,6 +64,7 @@ export const ChatMessages = ({
       ))}
       {isLoading && (
         <ChatMessage
+          id= {uuidv4()}
           src={companion.src}
           role="system"
           isLoading

@@ -1,6 +1,6 @@
 import { auth, currentUser } from "@clerk/nextjs";
 import { NextResponse } from "next/server";
-import { Steamship } from '@steamship/client';
+import { Steamship as SteamshipV2 } from 'steamship-client-v2';
 import prismadb from "@/lib/prismadb";
 import { checkSubscription } from "@/lib/subscription";
 //import { generateAvatarSteamship } from "@/components/SteamshipGenerateAvatar";
@@ -103,7 +103,7 @@ export async function PATCH(
         if (body['model'] != companion.model || body[createImages] != companion.createImages) {
             llm_model = body['model'];
             instance_handle = user.id.replace("user_", "").toLowerCase() + "-" + uuidv4().replace(/-/g, "").toLowerCase();
-            const client = await Steamship.use(env_packageName, instance_handle, { llm_model: llm_model, create_images: String(createImages) }, undefined, true, companion.workspaceName);
+            const client = await SteamshipV2.use(env_packageName, instance_handle, { llm_model: llm_model, create_images: String(createImages) }, undefined, true, companion.workspaceName);
         }
 
         //console.log(llm_model);
@@ -241,7 +241,7 @@ export async function DELETE(
                 id: params.companionId
             }
         });
-        const instance = await Steamship.use(companion.packageName, companion.instanceHandle, { llm_model: companion.model, create_images: String(companion.createImages) }, undefined, true, companion.workspaceName);
+        const instance = await SteamshipV2.use(companion.packageName, companion.instanceHandle, { llm_model: companion.model, create_images: String(companion.createImages) }, undefined, true, companion.workspaceName);
         instance.delete();
 
         return NextResponse.json(companion);

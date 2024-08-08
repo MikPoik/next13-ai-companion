@@ -1,107 +1,65 @@
+
 import { auth, currentUser } from "@clerk/nextjs";
 import { NextResponse } from "next/server";
-import { MimeTypes, Steamship } from '@steamship/client';
-import prismadb from "@/lib/prismadb";
+import { Steamship, SteamshipStream, } from '@steamship/client';
 import { UndoIcon } from "lucide-react";
 import axios, { AxiosError } from 'axios';
-import { checkSubscription } from "@/lib/subscription";
-import { StreamingTextResponse} from "ai";
+import { neon } from '@neondatabase/serverless';
+
+import { StreamingTextResponse } from "ai";
+
 export const maxDuration = 120; //2 minute timeout
+export const runtime = 'edge';
 
 
-
-interface SteamshipApiResponse {
-    data: SteamshipBlock[];
+interface Message {
+  role: string;
+  content: string;
+  // add other relevant fields if needed
 }
 
-interface SteamshipBlock {
-    contentURL: string | null;
-    index: number | null;
-    text: string;
-    id: string | null;
-    uploadBytes: number | null;
-    publicData: boolean;
-    uploadType: string | null;
-    tags: string[];
-    fileId: string | null;
-    mimeType: string | null;
-    url: string | null;
-}
 function roughTokenCount(text: string): number {
     // Use regular expression to split text based on whitespace and punctuation
     const tokens = text.match(/\b\w+\b|[.,!?;]/g);
     return tokens ? tokens.length : 0;
 }
 
-interface Message {
-    role: string;
-    content: string;
-    id: string;
-    // Add other properties if there are any
-}
-
-
-async function getSteamshipResponse(
-    prompt: string,
-    context_id: string,
-    package_name: string,
-    instance_handle: string,
-    workspace_handle: string,
-    personality: string,
-    name: string,
-    description: string,
-    behaviour: string,
-    selfie_pre: string,
-    selfie_post: string,
-    seed: string,
-    model: string,
-    image_model: string,
-    create_images: boolean,
-    voice_id: string,
-    is_pro:string
-
-): Promise<string> {
-    const maxRetryCount = 3; // Maximum number of retry attempts
-
-    for (let retryCount = 0; retryCount < maxRetryCount; retryCount++) {
-        try {
-            const instance = await Steamship.use(package_name, instance_handle, { llm_model: model, create_images: String(create_images) }, undefined, true, workspace_handle);
-            //console.log(instance);
-            const response = await (instance.invoke('prompt', {
-                prompt,
-                context_id,
-                personality,
-                name,
-                description,
-                behaviour,
-                selfie_pre,
-                selfie_post,
-                seed,
-                model,
-                image_model,
-                voice_id,
-                is_pro
-            }) as Promise<SteamshipApiResponse>);
-            //console.log(response.data);
-            const steamshipBlock = response.data;
-            const steamshipBlockJSONString = JSON.stringify(steamshipBlock);
-            return steamshipBlockJSONString;
-        } catch (error) {
-            console.error('Received a error');
-            //console.log(error)
-            if (retryCount < maxRetryCount - 1) {
-                // Retry the request after a delay (optional)
-                console.log('Retrying...');
-                await new Promise((resolve) => setTimeout(resolve, 5000)); // Wait for 3 second before retrying
-            } else {
-                throw new Error('Max retry attempts reached');
-            }
-        }
+async function getCompanionRecord(chatId: string, userId: string) {
+    const DATABASE_URL = process.env['DATABASE_URL'] ||""
+    const sql = neon(DATABASE_URL);
+    try {
+        const companions = await sql`
+            WITH SteamshipAgents AS (
+              SELECT 
+                "id" AS "steamshipAgent_id",
+                "userId" AS "steamshipAgent_userId",
+                "companionId" AS "steamshipAgent_companionId",
+                "agentUrl" AS "steamshipAgent_agentUrl",
+                "instanceHandle" AS "steamshipAgent_instanceHandle",
+                "workspaceHandle" AS "steamshipAgent_workspaceHandle",
+                "version" AS "steamshipAgent_version",
+                "createdAt" AS "steamshipAgent_createdAt"
+              FROM "SteamshipAgent"
+              WHERE "userId" = ${userId}
+              ORDER BY "createdAt" DESC
+              LIMIT 1
+            )
+            SELECT 
+              c.*, 
+              sa.*
+            FROM 
+              "Companion" c
+            LEFT JOIN 
+              SteamshipAgents sa ON c."id" = sa."steamshipAgent_companionId"
+            WHERE 
+              c."id" = ${chatId};
+        `;
+        return companions;
+    } catch (err) {
+        console.error('Query error:', err);
+        throw err;
     }
-
-    throw new Error('Max retry attempts reached');
 }
-
 
 export async function POST(
     request: Request,
@@ -109,165 +67,67 @@ export async function POST(
 ) {
 
     try {
+
         
-        // Parse and log the request body
-        const requestBody = await request.json();
-        //console.log("Request body:", requestBody);
-        // Extract the latest user message as the prompt
-        const messages: Message[] = requestBody.messages;
-        const lastUserMessage = messages.reverse().find((msg: Message) => msg.role === 'user');
-        if (!lastUserMessage) {
-            return new NextResponse("Invalid request body", { status: 400 });
+        const DATABASE_URL = process.env['DATABASE_URL'] ||""
+        const sql = neon(DATABASE_URL);
+        
+        const {messages, chatId} = await request.json();
+        console.log(chatId)
+        
+        // Find the most recent user message
+        const mostRecentUserMessage = messages.slice().reverse().find((msg: Message) => msg.role === "user");
+        if (!mostRecentUserMessage) {
+            return new NextResponse("No user message found", { status: 400 });
         }
-        
-        const prompt = lastUserMessage.content;
-
-
+        const prompt = mostRecentUserMessage.content;
+        //console.log(prompt);
         const user = await currentUser();
-        const isPro = await checkSubscription();
+
         if (!user || !user.id) {
             return new NextResponse("Unauthorized", { status: 401 });
         }
-    
-        const balance = await prismadb.userBalance.findUnique({
-            where: {
-                userId: user.id
-            },
-        });
-        //console.log(balance);
-        if (balance) {
-            if (balance.tokenCount > balance.tokenLimit+balance.proTokens) {
-                return NextResponse.json("Message limit exceeded, upgrade to Pro plan for increased limit.");
-            }
-        }
-        const companion = await prismadb.companion.findUnique({
-            where: {
-                id: params.chatId,
-            }
-        });
-
-        if (!companion) {
-            return new NextResponse("Companion not found", { status: 404 });
-        }
-
-        const strIsPro = String(isPro);
-        const steamshipResponse = await getSteamshipResponse(
-            prompt,
-            user.id,
-            companion.packageName,
-            companion.instanceHandle,
-            companion.workspaceName,
-            companion.personality,
-            companion.name,
-            companion.description,
-            companion.behaviour,
-            companion.selfiePre,
-            companion.selfiePost,
-            companion.seed,
-            companion.model,
-            companion.imageModel,
-            companion.createImages,
-            companion.voiceId,
-            strIsPro);
-
-        const responseBlocks = JSON.parse(steamshipResponse);
-
-        //console.log(steamshipResponse)
-        var imageTokens = 0;
-        var voiceTokens = 0;
-        var responseLength = 0;
-        var responseText = "";
-        var hasAudio = 0;
-        for (const block of responseBlocks) {
-            //console.log(block);
-            if ((block.text && block.text.length > 1)) {
-                responseLength += block.text.length;
-                responseText += block.text
-            } else if (block.mimeType.startsWith("image")) {
-                imageTokens += 500;
-            } else if (block.mimeType.startsWith("audio")) {
-                hasAudio = 1;
-            }
-        }
-        //console.log(responseLength);
-        //console.log(responseText);
-       
-        if (responseLength > 0) {
-
-        const tokenCost = roughTokenCount(responseText) + imageTokens + voiceTokens;
-        const currentDateTime = new Date().toISOString();
-            
-            if (!balance) {
-                // Create the new balance record if it does not exist
-                await prismadb.userBalance.create({
-                    data: {
-                        userId: user.id,
-                        tokenCount: tokenCost,
-                        messageCount: 1,
-                        messageLimit: 1000,
-                        tokenLimit: 10000,
-                        firstMessage: currentDateTime,
-                        // Assuming initial setting for proTokens and callTime needs to be handled here as well
-                        proTokens: 0,
-                        callTime: 300,
-                        lastMessage: currentDateTime
-                    }
-                });
-            } else {
-                // Check if proTokens cover all the cost
-                if (balance.proTokens >= tokenCost) {
-                    // Decrement from proTokens only
-                    await prismadb.userBalance.update({
-                        where: {
-                            userId: user.id
-                        },
-                        data: {
-                            proTokens: {
-                                decrement: tokenCost
-                            },
-                            messageCount: {
-                                increment: 1
-                            },
-                            lastMessage: currentDateTime
-                        }
-                    });
-                } else {
-                    // Use up all proTokens and remainder goes to tokenCount
-                    const remainder = tokenCost - balance.proTokens;
-                    await prismadb.userBalance.update({
-                        where: {
-                            userId: user.id
-                        },
-                        data: {
-                            proTokens: {
-                                decrement: balance.proTokens
-                            },
-                            tokenCount: {
-                                increment: remainder
-                            },
-                            messageCount: {
-                                increment: 1
-                            },
-                            lastMessage: currentDateTime
-                        }
-                    });
-                }
-            }
-            const Readable = require('stream').Readable;
-            // Create a stream
-            let s = new Readable({
-              read() {} // Implement the read function
-            });
-            // Stringify your responseBlocks array
-            const responseBlocksData = JSON.stringify(responseBlocks);
-            // Push the stringified data to the stream
-            s.push(responseBlocksData);
-            // Signal the end of the stream
-            s.push(null);
-            // Return a StreamingTextResponse with the stream
-            return new StreamingTextResponse(s);
         
-        }
+ 
+        // Sample usage
+        let agentUrl = ""
+        let agentWorkspace = ""
+        let agentInstanceHandle = ""
+        const result = await getCompanionRecord(chatId, user.id)
+        .then(records => {
+            if (records.length > 0) {
+                const record = records[0]; // Assuming you're interested in the first record
+                agentUrl = record.steamshipAgent_agentUrl; // Access the steamshipAgent_agentUrl column
+                agentWorkspace = record.steamshipAgent_workspaceHandle;
+                agentInstanceHandle = record.steamshipAgent_instanceHandle;
+
+            } else {
+                console.log('No records found.');
+            }
+        })
+        .catch(err => console.error(err));
+
+        console.log(agentUrl);
+        console.log(agentWorkspace);
+        console.log(agentInstanceHandle)
+        const steamship = new Steamship({ apiKey: process.env.STEAMSHIP_API_KEY })
+        const base_url=process.env.STEAMSHIP_BASE_URL + agentWorkspace+"/"+agentInstanceHandle+"/";
+        console.log(base_url);
+        const response = await steamship.agent.respondAsync({            
+            url: base_url,
+            input: {
+                prompt,
+                context_id: user.id
+            },
+        })
+        const stream = await SteamshipStream(response, steamship, {
+            streamTimeoutSeconds: 15,
+            format: "json-no-inner-stream"
+        });
+
+        return new Response(stream);
+
+
     } catch (error) {
         console.log(error)
         return NextResponse.json("I'm sorry, I had an error when generating response. \n(This message is not saved)");

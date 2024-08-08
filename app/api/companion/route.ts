@@ -1,6 +1,7 @@
 import { auth, currentUser } from "@clerk/nextjs";
 import { NextResponse } from "next/server";
-import { Steamship } from '@steamship/client';
+//import { Steamship } from '@steamship/client';
+import { Steamship as SteamshipV2 } from 'steamship-client-v2';
 import prismadb from "@/lib/prismadb";
 import { checkSubscription } from "@/lib/subscription";
 import dotenv from "dotenv";
@@ -89,7 +90,7 @@ export async function POST(req: Request) {
         // Combine existing tags with newly created tags for final update
         const finalTags = [...existingTags, ...createdTags];
 
-        const client = await Steamship.use(env_packageName, instance_handle, { llm_model: llm_model, create_images: String(createImages) }, undefined, true, workspace_name);
+        const client = await SteamshipV2.use(env_packageName, instance_handle, { llm_model: llm_model, create_images: String(createImages) }, undefined, true, workspace_name);
 
         if (backstory != null) {
             const indexTextResponse = await indexTextSteamship(

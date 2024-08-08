@@ -4,6 +4,7 @@ async function seedPhoneVoicesBolna() {
 
   const defaultFemaleVoice  = "101"
   const defaultMaleVoice  = "103"
+
   const newVoices = [
     {
       id: "100",
@@ -76,6 +77,7 @@ async function seedPhoneVoicesBolna() {
       bolnaElevenlabTurbo: false
     }
   ];
+
 
 try {
   // Fetch all existing voice IDs from the table
