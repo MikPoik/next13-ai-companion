@@ -16,6 +16,33 @@ import { StreamContent } from "@/components/stream-content";
 import { Message } from "ai";
 const { v4: uuidv4 } = require('uuid');
 
+const imageStyles = {
+  wrapper: {
+    backgroundColor: "rgb(50, 50, 50)",
+    minWidth: "100px", // or any appropriate value
+    minHeight: "100px", // ensures height is set so placeholder is visible
+    maxWidth: "512px", // or any appropriate value
+    transition: "background-color 0.5s ease-in-out"
+  },
+  img: {
+    maxWidth: "512px",
+    display: "block",
+    opacity: 0, // Hide the image initially
+    transition: "opacity 0.5s ease-in-out"
+  },
+  loadedWrapper: {
+    backgroundColor: "transparent" // Changes background color to transparent
+  },
+  loadedImg: {
+    opacity: 1 // Show the image once it has loaded
+  }
+};
+
+function applyLoadedStyles(wrapperElement: HTMLDivElement, imgElement: HTMLImageElement) {
+  Object.assign(wrapperElement.style, imageStyles.loadedWrapper);
+  Object.assign(imgElement.style, imageStyles.loadedImg);
+}
+
 export interface ChatMessageProps {
   id: string;
   role: "system" | "user" | "function" | "assistant",
@@ -43,7 +70,11 @@ export const ChatMessage = ({
   const { toast } = useToast();
   const { theme } = useTheme();
   const [streamedContent, setStreamedContent] = useState("");
-
+  const [imageLoaded, setImageLoaded] = useState(false);
+  const handleImageLoad = (wrapperElement: HTMLDivElement, imgElement: HTMLImageElement) => {
+    setImageLoaded(true);
+    applyLoadedStyles(wrapperElement, imgElement);
+  };
   useEffect(() => {
     //console.log("streamedContent updated: ", streamedContent);
   }, [streamedContent]);
@@ -89,7 +120,7 @@ export const ChatMessage = ({
         }
 
         if (block.streamState === 'started' && block.messageType !== MessageTypes.IMAGE && block.mimeType != "image/png") {
-          console.log("start streaming ",block, block.messageType, block.mimeType);
+          //console.log("start streaming ",block, block.messageType, block.mimeType);
           return <StreamContent blockId={block.id} onContentUpdate={setStreamedContent} accumulatedContentRef={accumulatedContentRef} key={block.id} />;
         }
         if (block.messageType === MessageTypes.IMAGE ||block.mimeType == "image/png") {
@@ -97,9 +128,15 @@ export const ChatMessage = ({
           if (block.text && block.text !== "") {
             message_text = block.text;
           }
-          return <div key={block.id}>
-            {block.text && block.text !== "" && <span> {formatText(block.text)}</span>}<img src={block.streamingUrl} alt={block.src} style={{ maxWidth: '768px' }} />            
-          </div>;
+          return <div key={block.id}>{block.text && block.text !== "" && <span> {formatText(block.text)}</span>}<div className={`image-placeholder-wrapper ${imageLoaded ? 'loaded' : ''}`} style={imageStyles.wrapper}>
+            <img 
+              src={block.streamingUrl} 
+              alt={block.src} 
+              style={imageStyles.img}
+              onLoad={(e) => handleImageLoad(e.currentTarget.parentElement as HTMLDivElement, e.currentTarget)}
+            />
+            
+          </div></div>;
         }
         //console.log("could not determine message type")
         return null;
