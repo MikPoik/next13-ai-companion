@@ -1,11 +1,45 @@
 import prismadb from "@/lib/prismadb";
 import { auth, currentUser } from "@clerk/nextjs";
 import { NextResponse } from "next/server";
-
+import {Role} from "@prisma/client"
 function roughTokenCount(text: string): number {
     // Use regular expression to split text based on whitespace and punctuation
     const tokens = text.match(/\b\w+\b|[.,!?;]/g);
     return tokens ? tokens.length : 0;
+}
+
+interface Block {
+  text?: string;
+  publicData?: boolean;
+  streamState?: string;
+  requestId?: string;
+  index?: number;
+  tags?: Array<any>;
+  mimeType?: string;
+  createdAt?: string;
+  id?: string;
+  fileId?: string;
+  workspaceId?: string;
+}
+
+async function parseAndSaveImages(blockListStr: string, userId: string, chatId: string, id: string): Promise<string | null> {
+  try {
+    // Fix the input blockList string into JSON
+    const blockList: Block[] = JSON.parse(`[${blockListStr.split('\n').join(',')}]`.replace(/,(\s*[\]}])/g, '$1'));
+    for (const block of blockList) {
+      if (block.mimeType && block.mimeType.startsWith("image")) {
+        const imageId = block.id || null;
+        console.log(`Found image block: ${imageId}`);
+        // Return Image Id
+        return imageId;
+      }
+    }
+    return null; // No image block found
+  } catch (error) {
+    console.error("Error parsing or saving image block ids:", error);
+    console.error("Block list string causing error:", blockListStr);
+    return null; // In case of error, return null
+  }
 }
 
 export async function POST(
@@ -18,19 +52,34 @@ export async function POST(
         const { prompt,id,blockList } = await request.json();
         console.log("Save-Response, prompt received:", prompt);
         console.log("Message id ",id)
-        console.log("Block List ",blockList)
+        //console.log("Block List ",blockList)
+        //Parse blockList for possible image block and save to db also.
+        
         const user = await currentUser();
         if (!user || !user.id) {
             return new NextResponse("Unauthorized", { status: 401 });
         }
-
+        
+        var imageTokens = 0;
+        var voiceTokens = 0;
+        var responseLength = 0;
+        var responseText = "";
+        var hasAudio = 0;
+        responseText = prompt;
+        
+        const image_url = await parseAndSaveImages(blockList,user.id,params.chatId,id);
+        let finalContent = prompt
+        if (image_url) {
+            finalContent = `[{"requestId":null,"text":"${prompt}","mimeType":"image/png","streamState":null,"url":null,"contentURL":null,"fileId":null,"id":"${image_url}","index":null,"publicData":true,"tags":[],"uploadBytes":null,"uploadType":null}]`;
+            imageTokens = 500
+        }
          await prismadb.message.upsert({
              where: {
                  id: id,
              },
              create: {
                  id: id,
-                 content: prompt,
+                 content: finalContent,
                  role: "assistant",
                  userId: user.id,
                  companionId: params.chatId,
@@ -38,20 +87,18 @@ export async function POST(
              },
              update: {
                  id: id,
-                 content: prompt,
+                 content: finalContent,
                  role: "assistant",
                  userId: user.id,
                  companionId: params.chatId,
                  createdAt: new Date(Date.now() + 1000),
              }
          });
+        
+        
+        
+        
 
-        var imageTokens = 0;
-        var voiceTokens = 0;
-        var responseLength = 0;
-        var responseText = "";
-        var hasAudio = 0;
-        responseText = prompt;
         
         /*
         for (const block of blockList) {

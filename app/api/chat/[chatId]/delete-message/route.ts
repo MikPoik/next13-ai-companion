@@ -24,15 +24,27 @@ export async function POST(
         }
       }
     });
-    const companion = await prismadb.companion.findUnique({
-      where: {
-        id: params.chatId
-      },
-    });
+
+      const companion = await prismadb.companion.findUnique({
+        where: { id: params.chatId },
+        include: { 
+          messages: { orderBy: { createdAt: "asc" }, where: { userId: user.id } },
+          _count: { select: { messages: true } },
+          steamshipAgent: {
+            take: 1, // Limit the number of records to 1
+            orderBy: {
+              createdAt: "desc" // Order by creation date in ascending order
+            },
+            where: {
+              userId: user.id // Replace with the actual user ID
+            }
+          }
+      }});
     if (!companion) {
       return new NextResponse("Chat history not found or could not be deleted.", { status: 404 });
     }
-    const instance = await SteamshipV2.use(companion.packageName, companion.instanceHandle, { llm_model: companion.model, create_images: String(companion.createImages) }, undefined, true, companion.workspaceName);
+    const packageName = process.env.STEAMSHIP_PACKAGE || "ai-adventure-test";
+    const instance = await SteamshipV2.use(packageName, companion.steamshipAgent[0].instanceHandle, { llm_model: companion.model, create_images: String(companion.createImages) }, companion.steamshipAgent[0].version, true, companion.steamshipAgent[0].workspaceHandle);
     const context_id = user.id;
     const response = await (instance.invoke('delete_messages', {
       context_id

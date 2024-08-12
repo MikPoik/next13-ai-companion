@@ -117,10 +117,10 @@ export const ChatClient = ({ isPro, companion }: ChatClientProps) => {
       content: chatMessagesJsonlToBlocks([message], "")
     */
     onResponse(response) {
-      console.log("OnResponse: ",response)
+      //console.log("OnResponse: ",response)
       //console.log("Messages length in onResponse:", messagesRef.current.length);
       const lastUserMessage = messagesRef.current[messagesRef.current.length - 1];
-      console.log("Last user Message ", lastUserMessage)
+      //console.log("Last user Message ", lastUserMessage)
 
       fetch(`/api/chat/${companion.id}/save-prompt`, {
         method: 'POST',
@@ -131,14 +131,15 @@ export const ChatClient = ({ isPro, companion }: ChatClientProps) => {
     },
     
     onFinish(message){
-      console.log("OnFinish Message: ",message)
+      //console.log("OnFinish Message: ",message)
       //console.log("Messages length in onFinish:", messagesRef.current.length);
       const finalContent = accumulatedContentRef.current; // Access the final accumulated content
 
-      console.log("Final streamed content: ", finalContent);
+      //console.log("Final streamed content: ", finalContent);
       const lastUserMessage = messagesRef.current[messagesRef.current.length - 2];
       const lastAssistantMessage = messagesRef.current[messagesRef.current.length - 1];
-      console.log("On Finish call ",lastAssistantMessage.content)
+      //console.log("On Finish call ",lastAssistantMessage.content)
+      //Parse lastAssistantMessage.content for image Block and save it to the database
       setInput("");
       if (!lastAssistantMessage.content.includes("I'm sorry, I had an error when generating response")){
         fetch(`/api/chat/${companion.id}/save-response`, {
@@ -161,7 +162,7 @@ export const ChatClient = ({ isPro, companion }: ChatClientProps) => {
       // Update the state
       //setMessages(updatedMessages as PrismaMessage[]);
       //console.log("updated messages ",updatedMessages)
-      console.log("messagesRef",messagesRef)
+      //console.log("messagesRef",messagesRef)
       //router.refresh();
       bottomRef.current?.scrollIntoView({ behavior: "smooth" });
 

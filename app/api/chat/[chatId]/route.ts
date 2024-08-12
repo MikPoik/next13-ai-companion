@@ -73,7 +73,7 @@ export async function POST(
         const sql = neon(DATABASE_URL);
         
         const {messages, chatId} = await request.json();
-        console.log(chatId)
+        console.log("chatId ",chatId)
         
         // Find the most recent user message
         const mostRecentUserMessage = messages.slice().reverse().find((msg: Message) => msg.role === "user");
@@ -130,7 +130,7 @@ export async function POST(
 
     } catch (error) {
         console.log(error)
-        return NextResponse.json("I'm sorry, I had an error when generating response. \n(This message is not saved)");
+        return NextResponse.json("I'm sorry, I had an error when generating response.(This message is not saved)");
         //return new NextResponse("Internal Error", { status: 500 });
     }
 };

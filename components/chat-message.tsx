@@ -51,7 +51,17 @@ export const ChatMessage = ({
   if (isLoading || (streamState === 'started' && !streamedContent)) {
     return <BeatLoader color={theme === "light" ? "black" : "white"} size={5} />;
   }
-
+  const formatText = (text: string) => {
+    return text.split(/([*"].*?[*"])/).map((part, index) => {
+      if (part.startsWith('*') && part.endsWith('*')) {
+        return <i key={index} style={{ color: "rgba(255,255,255,0.6)" }}>{part.slice(1, -1)}</i>;
+      }
+      if (part.startsWith('"') && part.endsWith('"')) {
+        return <i key={index} style={{ color: "rgba(255,255,255,0.9)" }}>{part.slice(1, -1)}</i>;
+      }
+      return part;
+    });
+  };
   // Function to copy message content to clipboard
   const onCopy = () => {
     if (content) {
@@ -64,88 +74,38 @@ export const ChatMessage = ({
   };
 
   const renderContent = () => {
-    console.log("Message Content ",content)
+    //console.log("Message Content ",content)
     if (streamState === 'started' && streamedContent) {
-      console.log("update stream div")
+      //console.log("update stream div")
       return <div>{streamedContent}</div>;
     } 
     else if (Array.isArray(content)) {
-      console.log("Message is array")
+      //console.log("Message is array")
       return content.map((block, index) => {
-        //console.log("block ",block,"Type ",block.messageType,"Role: ",block.role)
+        //console.log("block ",block,"Type ",block.messageType,"Role: ",block.role, "MimeType",block.mimeType)
         
-        if ('text' in block && typeof block.text === 'string' && validTypes.includes(block.messageType!) && block.messageType === MessageTypes.TEXT && block.role === 'user') {
-          console.log("user message")
-          return <p key={index}>{block.text}</p>;
+        if ('text' in block && typeof block.text === 'string' && validTypes.includes(block.messageType!) && block.messageType === MessageTypes.TEXT && (block.role === 'user' || block.role === 'assistant' || block.role === 'system')) {
+          return <p key={block.id}>{formatText(block.text)}</p>;
         }
-        if ('text' in block && typeof block.text === 'string' && validTypes.includes(block.messageType!) && block.messageType === MessageTypes.TEXT && (block.role === 'assistant' || block.role === 'system')) {
-          console.log("assistant/system message")
-          return <p key={index}>{block.text}</p>;
+
+        if (block.streamState === 'started' && block.messageType !== MessageTypes.IMAGE && block.mimeType != "image/png") {
+          console.log("start streaming ",block, block.messageType, block.mimeType);
+          return <StreamContent blockId={block.id} onContentUpdate={setStreamedContent} accumulatedContentRef={accumulatedContentRef} key={block.id} />;
         }
-        if (block.streamState === 'started' && block.messageType !== MessageTypes.IMAGE) {
-          console.log("start streaming ",block.id);
-          return <StreamContent blockId={block.id} onContentUpdate={setStreamedContent} accumulatedContentRef={accumulatedContentRef} key={index} />;
+        if (block.messageType === MessageTypes.IMAGE ||block.mimeType == "image/png") {
+          let message_text = "";
+          if (block.text && block.text !== "") {
+            message_text = block.text;
+          }
+          return <div key={block.id}>
+            {block.text && block.text !== "" && <span> {formatText(block.text)}</span>}<img src={block.streamingUrl} alt={block.src} style={{ maxWidth: '768px' }} />            
+          </div>;
         }
-        if (block.messageType === MessageTypes.IMAGE) {
-          console.log("image message")
-          return <img key={index} src={block.streamingUrl} alt={block.src} />;
-        }
-        console.log("could not determine message type")
+        //console.log("could not determine message type")
         return null;
       }).filter(Boolean);
     } else if (typeof content === 'string') {
-      //Obsolete?
-      /*
-      try {
-        console.log("Trying to parse string")
-        console.log("String content: ",content)
-        const parsedContent = JSON.parse(content);
-        const message: Message = {
-          id: uuidv4(), // Generate a unique id
-          role: "user", // Set an appropriate role, or determine it dynamically if needed
-          content: parsedContent
-        };
-        if (Array.isArray(parsedContent)) {
-          console.log("Is array")
-          // It's a JSON array
-          return parsedContent.map((block, index) => {
-            return (
-              <React.Fragment key={index}>
-                {responseToChatBlocks(block)}
-              </React.Fragment>
-            );
-          });
-        } else {
-          // Single JSON object
-          console.log("Is object")
-          const blocks = chatMessagesJsonlToBlocks([message], null);
-          return blocks
-            .filter(block => validTypes.includes(block.messageType!))
-            .map((block, index) => (
-              <React.Fragment key={index}>
-                {responseToChatBlocks({
-                  text: block.text,
-                  mimeType: block.mimeType,
-                  url: block.streamingUrl,
-                  id: block.id,
-                })}
-              </React.Fragment>
-            ));
-        
-      
-        
-      } catch {
-        console.log("Couldn't parse")
-        if (typeof content === 'string') {
-          console.log("Plain string")
-          return <p>{content}</p>;
-        }
-        console.log("Json")
-        return typeof content === 'object' && content !== null
-          ? <p>{JSON.stringify(content, null, 2)}</p>
-          : <p>{String(content)}</p>;
-      }
-      */
+      console.log("string content")
     }
     console.log("Message content string, omitting",content)
     return null;

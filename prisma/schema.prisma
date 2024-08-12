@@ -76,6 +76,7 @@ model Companion {
   nsfw           Boolean @default(false)
   voiceAgentId   String?
   steamshipAgent SteamshipAgent[]
+  revision       Int  @default(1)
 
   @@index([categoryId])
 }
@@ -103,6 +104,7 @@ model SteamshipAgent {
   createdAt        DateTime  @default(now())
   companionId      String
   companion        Companion @relation(fields: [companionId], references: [id], onDelete: Cascade)
+  revision         Int @default(1)
 }
 
 model UserSubscription {

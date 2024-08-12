@@ -47,12 +47,20 @@ export async function PATCH(
 
         //find companion from db
         const companion = await prismadb.companion.findUnique({
-            where: {
-                id: params.companionId,
-                userId: user.id,
+          where: { id: params.companionId },
+          include: { 
+            messages: { orderBy: { createdAt: "asc" }, where: { userId: user.id } },
+            _count: { select: { messages: true } },
+            steamshipAgent: {
+              take: 1, // Limit the number of records to 1
+              orderBy: {
+                createdAt: "desc" // Order by creation date in ascending order
+              },
+              where: {
+                userId: user.id // Replace with the actual user ID
+              }
             }
-
-        });
+        }});
 
         // Check if the companion was not found and return an error if so
         if (!companion) {
@@ -100,58 +108,6 @@ export async function PATCH(
         let llm_model = companion.model;
         let instance_handle = companion.instanceHandle;
 
-        if (body['model'] != companion.model || body[createImages] != companion.createImages) {
-            llm_model = body['model'];
-            instance_handle = user.id.replace("user_", "").toLowerCase() + "-" + uuidv4().replace(/-/g, "").toLowerCase();
-            const client = await SteamshipV2.use(env_packageName, instance_handle, { llm_model: llm_model, create_images: String(createImages) }, undefined, true, companion.workspaceName);
-        }
-
-        //console.log(llm_model);
-        //console.log(instance_handle);
-
-        //console.log("backstory"+backstory)
-        if (backstory.length != companion.backstory.length) {
-            //console.log("index text"+backstory)
-                
-                if (companion) {
-                    const indexTextResponse = await indexTextSteamship(
-                        'index_text',
-                        backstory,
-                        user.id,
-                        companion.packageName,
-                        instance_handle,
-                        companion.workspaceName,
-                        personality,
-                        name,
-                        description,
-                        behaviour,
-                        selfiePre,
-                        selfiePost,
-                        seed,
-                        llm_model,
-                        imageModel,
-                        createImages,
-                        voiceId);
-                    //console.log(indexTextResponse);
-                    const indexTextResponseBlocks = JSON.parse(indexTextResponse);
-                    //console.log(indexTextResponseBlocks);
-                }
-            }
-
-        
-        else {
-            console.log("no change in backstory")
-        }
-          //update bolna agent, add bolna agent id to companion db table
-            const apiKey = process.env["BOLNA_API_KEY"];
-            if (!apiKey) {
-                throw new Error('BOLNA_API_KEY is not defined in environment variables');
-            }
-            const headers = {
-                'Authorization': `Bearer ${apiKey}`,
-                'Content-Type': 'application/json'
-            };
-
         const updateCompanion = await prismadb.companion.update({
             where: {
                 id: params.companionId,
@@ -180,9 +136,68 @@ export async function PATCH(
                 tags: {
                     set: finalTags.map(tag => ({ id: tag.id })),
                 },
-                nsfw: nsfw
+                nsfw: nsfw,
+                revision: companion.revision + 1,
             }
         });
+        
+        if (body['model'] != companion.model || body[createImages] != companion.createImages) {
+            llm_model = body['model'];
+            //instance_handle = user.id.replace("user_", "").toLowerCase() + "-" + uuidv4().replace(/-/g, "").toLowerCase();
+            /* 
+            const client = await SteamshipV2.use(env_packageName, companion.steamshipAgent[0].instanceHandle, { }, companion.steamshipAgent[0].version, true, companion.steamshipAgent[0].workspaceName);
+            */
+        }
+
+        //console.log(llm_model);
+        //console.log(instance_handle);
+
+        //console.log("backstory"+backstory)
+        /*
+        if (backstory.length != companion.backstory.length) {
+            //console.log("index text"+backstory)
+                
+                if (companion) {
+                    const indexTextResponse = await indexTextSteamship(
+                        'index_text',
+                        backstory,
+                        user.id,
+                        companion.packageName,
+                        instance_handle,
+                        companion.workspaceName,
+                        personality,
+                        name,
+                        description,
+                        behaviour,
+                        selfiePre,
+                        selfiePost,
+                        seed,
+                        llm_model,
+                        imageModel,
+                        createImages,
+                        voiceId);
+                    //console.log(indexTextResponse);
+                    const indexTextResponseBlocks = JSON.parse(indexTextResponse);
+                    //console.log(indexTextResponseBlocks);
+                }
+            }
+        
+        
+        else {
+            console.log("no change in backstory")
+        }
+        */
+          //update bolna agent, add bolna agent id to companion db table
+            const apiKey = process.env["BOLNA_API_KEY"];
+            if (!apiKey) {
+                throw new Error('BOLNA_API_KEY is not defined in environment variables');
+            }
+            const headers = {
+                'Authorization': `Bearer ${apiKey}`,
+                'Content-Type': 'application/json'
+            };
+
+
         let voiceAgentId = companion.voiceAgentId;
         let bolna_json = getBolnaAgentJson(name);
         
@@ -241,10 +256,15 @@ export async function DELETE(
                 id: params.companionId
             }
         });
-        const instance = await SteamshipV2.use(companion.packageName, companion.instanceHandle, { llm_model: companion.model, create_images: String(companion.createImages) }, undefined, true, companion.workspaceName);
+        const steamshipPackage = process.env.STEAMSHIP_PACKAGE;
+        if (!steamshipPackage) {
+          throw new Error("STEAMSHIP_PACKAGE environment variable is not set");
+        }
+        /*
+        const instance = await SteamshipV2.use(process.env.STEAMSHIP_PACKAGE, companion.instanceHandle, {}, undefined, true, companion.workspaceName);
         instance.delete();
-
-        return NextResponse.json(companion);
+        */
+        return NextResponse.json("OK",{status: 200});
     } catch (error) {
         console.log("[COMPANION_DELETE]", error);
         return new NextResponse("Internal Error", { status: 500 });

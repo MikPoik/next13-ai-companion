@@ -20,16 +20,40 @@ export function chatMessageJsonlToBlock(
   
   if (typeof message === 'object' && message.content !== null && !message.content.toString().includes("workspaceId")) {
     //console.log("Processing JSON object message.content");
-    //console.log(message.role)
+    //console.log(message.content)
     // Check if message content is a JSON array and parse the "text" field to message.content for previous message format
     try {
-      if (message.content.startsWith("[")){
+      if (message.content.startsWith("[") && message.content.endsWith("]")){
+        //console.log("JSON array detected")
         const content = JSON.parse(message.content.toString());
-        if (Array.isArray(content) && content.length > 0 && content[0].text) {
+        if (Array.isArray(content) && content.length > 0 && content[0].text && content[0].mimeType != "image/png") {
+          //console.log("JSON array detected and text field exists");
           message.content = content.map(block => block.text).join("\n");
-        } else {
-          console.log("Message content is not a JSON array or does not have a 'text' field.");
-          message.content = content;
+        } else if (Array.isArray(content) && content.length > 0 && content[0].mimeType == "image/png")  {
+          //console.log("Message content is not a JSON array or does not have a 'text' field. It is an image");
+          const block: ExtendedBlock = {
+            id: message.id,
+            text: content[0].text || '', // Use the content if available
+            historical: false,
+            streamingUrl: `https://api.steamship.com/api/v1/block/${content[0].id}/raw`,
+            messageType: MessageTypes.IMAGE,
+            isVisibleInChat: validTypes.includes("IMAGE"),
+            isInputElement: false,
+            role: message.role,
+            createdAt: typeof message.createdAt === 'string' 
+              ? message.createdAt 
+              : (new Date().toString()),
+            workspaceId: uuidv4(),
+            userId: "default",
+            fileId: "default",
+            index: 0,
+            publicData: true,
+          };
+
+          //console.log(block);
+          return [block];
+          
+          //How to create an ExtendBlock object from a JSON object?
         }
       }
     } catch (error) {
@@ -55,7 +79,7 @@ export function chatMessageJsonlToBlock(
       index: 0,
       publicData: true,
     };
-    console.log(block)
+    //console.log(block)
     return [block];
   }
 
@@ -75,13 +99,13 @@ export function chatMessageJsonlToBlock(
           }
           block.historical = false; // Set historical flag to false for new blocks
           block.messageType = getMessageType(block); // Determine the message type
-          console.log(block.messageType)
-          if (block.messageType === MessageTypes.STREAMING_BLOCK) {
-              console.log("Streaming block", block)
-          }
+          //console.log(block.messageType)
+          //if (block.messageType === MessageTypes.STREAMING_BLOCK) {
+              //console.log("Streaming block", block)
+          //}
           // Use validTypes to determine if the block is visible in chat
           block.isVisibleInChat = validTypes.includes(block.messageType);
-          console.log("Visible block: ",block.isVisibleInChat)
+          //console.log("Visible block: ",block.isVisibleInChat)
           // TODO: Update logic for isInputElement based on your application's needs
           block.isInputElement = false; // Example static assignment
 
@@ -114,7 +138,7 @@ export function chatMessagesJsonlToBlocks(
   messages: Message[],
   skipIfInputEquals: string | null
 ): ExtendedBlock[] {
-  console.log("Parse messages ",messages)
+  //console.log("Parse messages ",messages)
   let ret: ExtendedBlock[] = [];
   for (let msg of messages || []) {
     ret = [...ret, ...chatMessageJsonlToBlock(msg, skipIfInputEquals)];
