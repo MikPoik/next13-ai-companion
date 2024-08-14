@@ -19,10 +19,11 @@ const { v4: uuidv4 } = require('uuid');
 const imageStyles = {
   wrapper: {
     backgroundColor: "rgb(50, 50, 50)",
-    minWidth: "100px", // or any appropriate value
-    minHeight: "100px", // ensures height is set so placeholder is visible
+    minWidth: "512px", // or any appropriate value
+    minHeight: "768px", // ensures height is set so placeholder is visible
     maxWidth: "512px", // or any appropriate value
-    transition: "background-color 0.5s ease-in-out"
+    transition: "background-color 0.5s ease-in-out",
+    animation: "fadeInOut 2s infinite"
   },
   img: {
     maxWidth: "512px",
@@ -31,7 +32,8 @@ const imageStyles = {
     transition: "opacity 0.5s ease-in-out"
   },
   loadedWrapper: {
-    backgroundColor: "transparent" // Changes background color to transparent
+    backgroundColor: "transparent", // Changes background color to transparent
+    animation: "none"
   },
   loadedImg: {
     opacity: 1 // Show the image once it has loaded
@@ -149,6 +151,16 @@ export const ChatMessage = ({
   };
 
   return (
+    <>
+      <style jsx>{`
+        @keyframes fadeInOut {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0.5; }
+        }
+        .image-placeholder-wrapper {
+          animation: fadeInOut 2s infinite;
+        }
+      `}</style>
     <div className={cn(
       "group flex items-start gap-x-3 py-2 w-full",
       role === "user" && "justify-end"
@@ -164,5 +176,6 @@ export const ChatMessage = ({
       </div>
 
     </div>
+    </>
   );
 }

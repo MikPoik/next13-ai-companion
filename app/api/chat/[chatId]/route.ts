@@ -8,7 +8,7 @@ import { neon } from '@neondatabase/serverless';
 
 import { StreamingTextResponse } from "ai";
 
-export const maxDuration = 120; //2 minute timeout
+export const maxDuration = 60; //2 minute timeout
 export const runtime = 'edge';
 
 
@@ -73,7 +73,7 @@ export async function POST(
         const sql = neon(DATABASE_URL);
         
         const {messages, chatId} = await request.json();
-        console.log("chatId ",chatId)
+        //console.log("chatId ",chatId)
         
         // Find the most recent user message
         const mostRecentUserMessage = messages.slice().reverse().find((msg: Message) => msg.role === "user");
@@ -107,9 +107,9 @@ export async function POST(
         })
         .catch(err => console.error(err));
 
-        console.log(agentUrl);
-        console.log(agentWorkspace);
-        console.log(agentInstanceHandle)
+        //console.log(agentUrl);
+        //console.log(agentWorkspace);
+        //console.log(agentInstanceHandle)
         const steamship = new Steamship({ apiKey: process.env.STEAMSHIP_API_KEY })
         const base_url=process.env.STEAMSHIP_BASE_URL + agentWorkspace+"/"+agentInstanceHandle+"/";
         console.log(base_url);

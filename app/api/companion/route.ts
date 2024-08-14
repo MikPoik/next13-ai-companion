@@ -9,7 +9,7 @@ import dotenv from "dotenv";
 import { indexTextSteamship, } from "@/components/SteamshipIndexText";
 import {getBolnaAgentJson} from "@/lib/bolna";
 
-export const maxDuration = 120; //2 minute timeout
+export const maxDuration = 60; //2 minute timeout
 
 function uuidv4() {
     return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {

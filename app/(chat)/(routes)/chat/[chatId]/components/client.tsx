@@ -342,7 +342,7 @@ export const ChatClient = ({ isPro, companion }: ChatClientProps) => {
           </div>
         ))}
         <div ref={bottomRef} />
-        {isLoading ? <div style={{ display: 'flex', alignItems: 'center' }}><BeatLoader color={theme === "light" ? "black" : "white"} size={5} /><Button onClick={stop} disabled={!isLoading} variant="ghost"><X className="w-4 h-4" /></Button></div> : null}
+        {isLoading ? <div style={{ display: 'flex', alignItems: 'center' }} ref={bottomRef}><BeatLoader color={theme === "light" ? "black" : "white"} size={5} /><Button onClick={stop} disabled={!isLoading} variant="ghost"><X className="w-4 h-4" /></Button></div> : null}
         {error ? <p>{error.message}</p> : null}
       </div>
       <form onSubmit={onSubmit} className="border-t border-primary/10 py-1 pb-0 flex items-center gap-x-0 pr-0 sticky bottom-0">

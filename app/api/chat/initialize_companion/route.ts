@@ -6,7 +6,7 @@ import { checkSubscription } from "@/lib/subscription";
 const { v4: uuidv4 } = require('uuid');
 
 
-async function updateAgent(name:string,description:string,personality:string,appearance:string,background:string,seed:string, workspace_name: string, instance_handle: string, agent_version: string,create_images:boolean,llm_model:string) {
+async function updateAgent(name:string,description:string,personality:string,appearance:string,background:string,seed:string, workspace_name: string, instance_handle: string, agent_version: string,create_images:boolean,llm_model:string,image_model:string) {
   let retryCount = 0;
   const maxRetries = 3;
   console.log(instance_handle)
@@ -26,9 +26,10 @@ async function updateAgent(name:string,description:string,personality:string,app
       const settings = await client.invoke("patch_server_settings", {
         enable_images_in_chat: create_images,
         default_story_model: llm_model,
+        image_theme_by_model: image_model,
       });
 
-      //console.log(settings)
+      console.log(settings)
 
       const init_chat = await client.invoke("init_companion_chat", {
         name: name,
@@ -38,7 +39,7 @@ async function updateAgent(name:string,description:string,personality:string,app
         background: background,
         seed:seed
       });
-      //console.log(init_chat)
+      console.log(init_chat)
       console.log("Agent initialized successfully");
       break; // Exit the loop if the request is successful
     } catch (innerError) {
@@ -97,7 +98,7 @@ export async function POST(req: NextRequest) {
     let workspace_name = companion.workspaceName;
     let instance_handle = companion.instanceHandle;
     let agent_version = process.env.AGENT_VERSION || "";
-    console.log("Env agent version ",process.env.AGENT_VERSION)
+    //console.log("Env agent version ",process.env.AGENT_VERSION)
 
     //console.log("init steamship companion")
 
@@ -107,16 +108,16 @@ export async function POST(req: NextRequest) {
     
       workspace_name = userId.replace("user_", "").toLowerCase() + "-" + ws_uuid;
       instance_handle = userId.replace("user_", "").toLowerCase() + "-" + bot_uuid;
-      await updateAgent(companion.name,companion.description,companion.personality,companion.selfiePre,companion.backstory, companion.seed,workspace_name, instance_handle, agent_version,companion.createImages,companion.model);
+      await updateAgent(companion.name,companion.description,companion.personality,companion.selfiePre,companion.backstory, companion.seed,workspace_name, instance_handle, agent_version,companion.createImages,companion.model,companion.imageModel);
       
       
     } else if (agent_version !== companion.steamshipAgent[0].version || companion.steamshipAgent[0].revision !== companion.revision) {
       console.log("newer version found update agent version ",companion.steamshipAgent[0].version)
       instance_handle = userId.replace("user_", "").toLowerCase() + "-" + bot_uuid;
       workspace_name = companion.steamshipAgent[0].workspaceHandle
-      console.log("New instance handle ",instance_handle)
+      //console.log("New instance handle ",instance_handle)
       //console.log("New workspace name ",workspace_name)
-      await updateAgent(companion.name,companion.description,companion.personality,companion.selfiePre,companion.backstory,companion.seed, workspace_name, instance_handle, agent_version,companion.createImages,companion.model);
+      await updateAgent(companion.name,companion.description,companion.personality,companion.selfiePre,companion.backstory,companion.seed, workspace_name, instance_handle, agent_version,companion.createImages,companion.model,companion.imageModel);
 
     } else {
       workspace_name =companion.steamshipAgent[0].workspaceHandle
