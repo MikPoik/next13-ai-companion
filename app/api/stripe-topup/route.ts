@@ -1,4 +1,4 @@
-import { auth, currentUser } from "@clerk/nextjs";
+import { auth, currentUser } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import { NextRequest } from "next/server";
 import prismadb from "@/lib/prismadb";
@@ -8,6 +8,7 @@ import dotenv from "dotenv";
 import { metadata } from "@/app/layout";
 dotenv.config({ path: `.env` });
 
+export const dynamic = 'force-dynamic'
 const maxDuration = 60;
 
 

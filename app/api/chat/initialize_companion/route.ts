@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { Steamship as SteamshipV2 } from 'steamship-client-v2';
 import prismadb from "@/lib/prismadb";
-import { auth } from "@clerk/nextjs";
+import { auth } from "@clerk/nextjs/server";
 import { checkSubscription } from "@/lib/subscription";
 const { v4: uuidv4 } = require('uuid');
 
@@ -62,6 +62,7 @@ export async function POST(req: NextRequest) {
   const authData = await auth();
   const userId = authData?.userId;
   //console.log(authData)
+  
   if (!userId) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }

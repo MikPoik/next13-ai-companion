@@ -1,4 +1,4 @@
-import { auth, currentUser } from "@clerk/nextjs";
+import { auth, currentUser } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 //import { Steamship } from '@steamship/client';
 import { Steamship as SteamshipV2 } from 'steamship-client-v2';

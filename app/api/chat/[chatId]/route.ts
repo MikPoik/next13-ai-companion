@@ -1,5 +1,5 @@
 
-import { auth, currentUser } from "@clerk/nextjs";
+import { auth, currentUser } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import { Steamship, SteamshipStream, } from '@steamship/client';
 import { UndoIcon } from "lucide-react";
@@ -83,8 +83,9 @@ export async function POST(
         const prompt = mostRecentUserMessage.content;
         //console.log(prompt);
         const user = await currentUser();
-
+    
         if (!user || !user.id) {
+            
             return new NextResponse("Unauthorized", { status: 401 });
         }
         

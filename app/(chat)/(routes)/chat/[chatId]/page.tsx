@@ -13,10 +13,9 @@ const ChatIdPage = ({ params }: { params: { chatId: string } }) => {
   const router = useRouter();
   const { theme } = useTheme();
   useEffect(() => {
-    console.log("create chat")
     const initializeCompanion = async () => {
       try {
-        console.log("init companion route call")
+        //console.log("init companion route call")
         const response = await axios.post('/api/chat/initialize_companion', { chatId: params.chatId });
         if (response.status === 200) {
           const { companion, isPro } = response.data;
@@ -33,7 +32,7 @@ const ChatIdPage = ({ params }: { params: { chatId: string } }) => {
         setIsLoading(false);
       }
     };
-    console.log("initialize companion")
+    //console.log("initialize companion")
     initializeCompanion();
   }, [params.chatId, router]);
 

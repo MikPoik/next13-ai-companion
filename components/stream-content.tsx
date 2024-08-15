@@ -1,76 +1,84 @@
-import React, { useEffect, useState,useRef } from 'react';
-
+import React, { useEffect, useState, useCallback } from 'react';
+import { debounce } from 'lodash';
 
 interface StreamContentProps {
-    blockId: string;
-    onContentUpdate?: (newContent: string) => void;
-    accumulatedContentRef?: React.MutableRefObject<string>;
-    onStreamFinish?: () => void;
-}
+  blockId: string;
+  onContentUpdate?: (newContent: string) => void;
+  accumulatedContentRef?: React.MutableRefObject<string>;
+};
 
-export const StreamContent: React.FC<StreamContentProps> = ({ blockId, onContentUpdate,accumulatedContentRef  }) => {
-    const [content, setContent] = useState<string>('');
-    const [isLoading, setIsLoading] = useState<boolean>(true);
-    const [error, setError] = useState<string | null>(null);
+export const StreamContent: React.FC<StreamContentProps> = ({ blockId, onContentUpdate, accumulatedContentRef }) => {
+  const [content, setContent] = useState<string>('');
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
 
+  const debouncedOnContentUpdate = useCallback(
+    debounce((updatedContent) => {
+      if (onContentUpdate) {
+        onContentUpdate(updatedContent);
+      }
+    }, 300),
+    [onContentUpdate]
+  );
 
-    useEffect(() => {
-        setIsLoading(false);
-        setError(null);
-        const controller = new AbortController();
-        const streamData = async () => {
-            try {
-                console.log("start fetch");
-                const response = await fetch(`/api/block/${blockId}`, {
-                    signal: controller.signal
-                });
-                if (!response.body) throw new Error('No response body');
+  useEffect(() => {
+    setIsLoading(true);
+    setError(null);
+    const controller = new AbortController();
+    const { signal } = controller;
 
-                const reader = response.body.getReader();
-                const decoder = new TextDecoder();
-                let accumulatedContent = ''; // Local variable to accumulate content
-                console.log("start read");
-                while (true) {
-                    const { done, value } = await reader.read();
-                    if (done) break;
-                   //console.log(decoder.decode(value))
-                    accumulatedContent += decoder.decode(value, { stream: true });
-                     if (accumulatedContentRef) accumulatedContentRef.current = accumulatedContent;
-                    // Update to set content in chunks as received without waiting for the entire message.
-                    // For each chunk received, concatenate with existing content and update state.
-                    
-                    setContent((prevContent) => {
-                        const updatedContent = prevContent + decoder.decode(value, { stream: true });
-                        // Call onContentUpdate with the updated content
-                        
-                        if (onContentUpdate) onContentUpdate(updatedContent);
-                        return updatedContent;
-                    });
-                }
-                console.log("Stream content finished, final content: ", accumulatedContent);
-            } catch (err) {
-                if (err instanceof Error) setError(err.message);
-                else setError('An unknown error occurred');
-            } finally {
-                console.log("Stream content finished, result: ", content)
-                setIsLoading(false);
-            }
-        };
+    const streamData = async () => {
+      try {
+        const response = await fetch(`/api/block/${blockId}`, { signal });
+        if (!response.body) throw new Error('No response body');
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let accumulatedContent = '';
 
-        if (blockId) {
-            streamData();
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          accumulatedContent += decoder.decode(value, { stream: true });
+          if (accumulatedContentRef) accumulatedContentRef.current = accumulatedContent;
+
+          // Update to set content in chunks as received without waiting for the entire message.
+          setContent((prevContent) => {
+            const updatedContent = prevContent + decoder.decode(value, { stream: true });
+            debouncedOnContentUpdate(updatedContent); // Notify parent component of new content
+            return updatedContent;
+          });
         }
+        console.log("Stream content finished, final content: ", accumulatedContent);
+      } catch (err) {
+        if (signal.aborted) {
+          console.log("Fetch aborted due to unmount or navigation");
+        } else {
+          console.error("Error during fetching:", err);
+          setError(err instanceof Error ? err.message : 'An unknown error occurred');
+        }
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
-        return () => controller.abort(); // Clean up by aborting fetch if component unmounts
-    }, [blockId]);
-
-    if (isLoading) {
-        return <div></div>;
+    if (signal.aborted) {
+      // If the signal is already aborted, just log and return
+      console.log("Fetch aborted, not initiating due to signal already aborted");
+      return;
     }
 
-    if (error) {
-        return <div>Error: {error}</div>;
+    if (blockId) {
+      streamData();
     }
 
-    return <div>{content}</div>;
+    return () => controller.abort();
+  }, [blockId, onContentUpdate, accumulatedContentRef, debouncedOnContentUpdate]);
+
+  if (isLoading) {
+    return <div></div>;
+  }
+  if (error) {
+    return <div>Error: {error}</div>;
+  }
+  return <div>{content}</div>;
 };

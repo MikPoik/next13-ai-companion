@@ -1,22 +1,18 @@
 "use client";
-import { useChat, Message as ChatMessageType } from "ai/react";
-import { FormEvent, useEffect, useRef, ElementRef, useState } from "react";
+import React, { FormEvent, useEffect, useRef, ElementRef, useState, ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { useTheme } from "next-themes";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import { ChatMessage as ChatMessageComponent, ChatMessageProps } from "@/components/chat-message";
 import { Companion, Message as PrismaMessage, Role } from "@prisma/client";
-import { ChatForm } from "@/components/chat-form";
 import { ChatHeader } from "@/components/chat-header";
-import { responseToChatBlocks } from "@/components/ChatBlock";
-import { BeatLoader } from "react-spinners";
-import { SendHorizonal, X, RotateCcw, Trash2,MoveDown } from "lucide-react";
-import { useProModal } from "@/hooks/use-pro-modal";
-import { userAgent } from "next/server";
-import { useToast } from "@/components/ui/use-toast";
 import { chatMessagesJsonlToBlocks } from "@/components/parse-blocks-from-message";
-
+import { BeatLoader } from "react-spinners";
+import { SendHorizonal, X, RotateCcw, Trash2, MoveDown } from "lucide-react";
+import { useProModal } from "@/hooks/use-pro-modal";
+import { useToast } from "@/components/ui/use-toast";
+import { useChat, Message as ChatMessageType } from "ai/react";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 
 interface ChatClientProps {
   isPro: boolean;
@@ -27,20 +23,20 @@ interface ChatClientProps {
     };
   };
 }
+
 interface LocalChatMessageType {
   id: string;
   role: Role;
-  content: string; // Update based on your actual structure
-  //blockId: string; // Add blockId here
-  createdAt:Date,
-  // Include any other fields that are necessary
+  content: string;
+  createdAt: Date;
 }
 
 interface ChatClientDisplayMessage {
   id: string;
   role: Role;
-  content: JSX.Element[];
+  content: ReactNode;
 }
+
 const scrollContainerStyle: React.CSSProperties = {
   msOverflowStyle: "none",
   scrollbarWidth: "none",
@@ -55,9 +51,9 @@ const transformChatMessageToPrismaMessage = (
     role: message.role as Role,
     content: message.content,
     createdAt: message.createdAt ?? new Date(),
-    updatedAt: new Date(), // Always use current date for updatedAt
+    updatedAt: new Date(),
     companionId: companionId,
-    userId: "", // Check if userId exists
+    userId: "", // Add validation and checks as necessary here
   };
 };
 
@@ -71,8 +67,8 @@ export const ChatClient = ({ isPro, companion }: ChatClientProps) => {
   const scrollRef = useRef<ElementRef<"div">>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isReloading, setIsReloading] = useState(false);
-   const accumulatedContentRef = useRef<string | "">("");
-  
+  const accumulatedContentRef = useRef<string | "">("");
+
   const initialMessages: PrismaMessage[] = [
     {
       id: "seed",
@@ -91,11 +87,13 @@ export const ChatClient = ({ isPro, companion }: ChatClientProps) => {
       userId: message.userId ?? "",
     })),
   ];
-
-  
-  //console.log("Initial Messages", initialMessages)
+  useEffect(() => {
+    // Adding console to ensure it will log as expected when triggered.
+    console.log('Scrolling to bottom on page load');
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, []);
   const {
-    messages, // This will be ChatMessage[]
+    messages, 
     setMessages,
     input,
     handleInputChange,
@@ -108,20 +106,12 @@ export const ChatClient = ({ isPro, companion }: ChatClientProps) => {
     reload,
   } = useChat({
     api: `/api/chat/${companion.id}`,
-    initialMessages: initialMessages as unknown as ChatMessageType[], // Type cast // Transform content here,
+    initialMessages: initialMessages as unknown as ChatMessageType[], 
     body: {
       chatId: `${companion.id}`,
     },
-    /*initialMessages: initialMessages.map((message) => ({
-      ...message,
-      content: chatMessagesJsonlToBlocks([message], "")
-    */
     onResponse(response) {
-      //console.log("OnResponse: ",response)
-      //console.log("Messages length in onResponse:", messagesRef.current.length);
       const lastUserMessage = messagesRef.current[messagesRef.current.length - 1];
-      //console.log("Last user Message ", lastUserMessage)
-
       fetch(`/api/chat/${companion.id}/save-prompt`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -129,17 +119,10 @@ export const ChatClient = ({ isPro, companion }: ChatClientProps) => {
       }); 
       bottomRef.current?.scrollIntoView({ behavior: "smooth" });
     },
-    
     onFinish(message){
-      //console.log("OnFinish Message: ",message)
-      //console.log("Messages length in onFinish:", messagesRef.current.length);
-      const finalContent = accumulatedContentRef.current; // Access the final accumulated content
-
-      //console.log("Final streamed content: ", finalContent);
+      const finalContent = accumulatedContentRef.current;
       const lastUserMessage = messagesRef.current[messagesRef.current.length - 2];
       const lastAssistantMessage = messagesRef.current[messagesRef.current.length - 1];
-      //console.log("On Finish call ",lastAssistantMessage.content)
-      //Parse lastAssistantMessage.content for image Block and save it to the database
       setInput("");
       if (!lastAssistantMessage.content.includes("I'm sorry, I had an error when generating response")){
         fetch(`/api/chat/${companion.id}/save-response`, {
@@ -148,24 +131,7 @@ export const ChatClient = ({ isPro, companion }: ChatClientProps) => {
           body: JSON.stringify({ prompt: finalContent, id: lastAssistantMessage.id, blockList: lastAssistantMessage.content })
         }); 
       }
-      //clear messages last message and replace content with finalContent using setMessages
-      // Replace the last assistant message content with finalContent
-      /*
-      const updatedMessages = messages.map((msg, index) => {
-        if (index === messages.length - 1) {
-          // Replace content for the last message
-          return { ...msg, content: finalContent, updatedAt: new Date() };
-        }
-        return msg;
-      });
-    */
-      // Update the state
-      //setMessages(updatedMessages as PrismaMessage[]);
-      //console.log("updated messages ",updatedMessages)
-      //console.log("messagesRef",messagesRef)
-      //router.refresh();
       bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-
     },
     onError(error) {
       console.error(error);
@@ -174,32 +140,22 @@ export const ChatClient = ({ isPro, companion }: ChatClientProps) => {
   });
 
   const messagesRef = useRef<PrismaMessage[]>(initialMessages);
-  
-  
+
   useEffect(() => {
     messagesRef.current = messages.map(message => ({
       ...message,
-      createdAt: new Date(message.createdAt || Date.now()) // Ensure createdAt is a Date
+      createdAt: new Date(message.createdAt || Date.now())
     })).map(message =>
       transformChatMessageToPrismaMessage(message, companion.id)
     );
   }, [messages, companion.id]);
-
-  /*
-  //for debug
-  useEffect(() => {
-    if (messages.length > initialMessages.length) {
-      console.log("Messages updated in transformedMessages useEffect:", transformedMessages.length);
-    }
-  }, [messages]);
-  */
 
   useEffect(() => {
     if (error) {
       console.error(error.message);
     }
   }, [error]);
-  
+
   const checkBalance = async (companionId: string) => {
     try {
       const response = await fetch(`/api/chat/${companionId}/check-balance`, {
@@ -207,7 +163,8 @@ export const ChatClient = ({ isPro, companion }: ChatClientProps) => {
         headers: { 'Content-Type': 'application/json' },
       });
       if (!response.ok) {
-        console.error('Failed to check balance:', await response.text());
+        const errorMsg = await response.text();
+        console.error('Failed to check balance:', errorMsg);
         return { status: 'error', message: 'Failed to check balance.' };
       }
       const { status } = await response.json();
@@ -217,7 +174,7 @@ export const ChatClient = ({ isPro, companion }: ChatClientProps) => {
       return { status: 'error', message: 'An unexpected error occurred.' };
     }
   };
-  
+
   const handleReload = async (event: React.MouseEvent<HTMLButtonElement>) => {
     setIsReloading(true);
     const { status, message } = await checkBalance(companion.id);
@@ -250,7 +207,13 @@ export const ChatClient = ({ isPro, companion }: ChatClientProps) => {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({id: lastAssistantMessage.id,chatId: companion.id })
-    }); 
+    }).catch(error => {
+      console.error('Failed to reload chat:', error);
+      toast({
+        description: 'Failed to reload chat.',
+        variant: 'destructive',
+      });
+    });
     reload();
     setIsReloading(false);
   };
@@ -264,19 +227,34 @@ export const ChatClient = ({ isPro, companion }: ChatClientProps) => {
       });
       return;
     }
-    
+
     await fetch(`/api/chat/${companion.id}/delete-message`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id: id, id2: id2, chatId: companion.id })
-    }); 
-    
+    }).catch(error => {
+      console.error('Failed to delete message:', error);
+      toast({
+        description: 'Failed to delete message.',
+        variant: 'destructive',
+      });
+      setIsDeleting(false);
+    });
+
     setMessages((messages as PrismaMessage[]).filter(message => message.id !== id && message.id !== id2));
     setIsDeleting(false);
   };
 
   const onSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (!input) {
+      toast({
+        description: "Input cannot be empty.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     const { status, message } = await checkBalance(companion.id);
     if (status === 'error' && message) {
       toast({
@@ -292,31 +270,18 @@ export const ChatClient = ({ isPro, companion }: ChatClientProps) => {
       });
       return;
     }
-    
-    if (!input) {
-      console.error("Prompt input is empty");
-      return;
-    }
+
     append({ role: 'user', content: input });
   };
 
-  // Transforming messages
-  const transformedMessages: ChatMessageProps[] = messages.map((message) => (
-    //console.log("Transformable Message: ",message),
-    {
+  const transformedMessages: ChatMessageProps[] = messages.map((message) => ({
     id: message.id,
     role: message.role,
-    content: chatMessagesJsonlToBlocks([message], ""), // Ensure transformation is applied for rendering
+    content: chatMessagesJsonlToBlocks([message], ""), 
     isLoading: false,
     src: ""
   }));
 
-  useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]); // Adjust dependency array as needed
-  
-  //console.log(companion.seed)
-  //console.log(transformedMessages.length)
   return (
     <div className="flex flex-col h-full">
       <ChatHeader isPro={isPro} companion={companion} />
@@ -357,5 +322,5 @@ export const ChatClient = ({ isPro, companion }: ChatClientProps) => {
         )}
       </form>
     </div>
-    );
+  );
 };

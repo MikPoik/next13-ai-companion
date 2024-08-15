@@ -9,6 +9,13 @@ const { v4: uuidv4 } = require('uuid');
  * @param skipIfInputEquals Optional string to skip if input matches.
  * @returns Array of ExtendedBlock objects.
  */
+function sanitizeJSONString(content: string): string {
+  return content.replace(/\n/g, "\\n");
+}
+function parseMessageContent(messageContent: string): any {
+  const sanitizedContent = sanitizeJSONString(messageContent);
+  return JSON.parse(sanitizedContent);
+}
 export function chatMessageJsonlToBlock(
   message: Message,
   skipIfInputEquals: string | null
@@ -24,13 +31,15 @@ export function chatMessageJsonlToBlock(
     // Check if message content is a JSON array and parse the "text" field to message.content for previous message format
     try {
       if (message.content.startsWith("[") && message.content.endsWith("]")){
-        //console.log("JSON array detected")
-        const content = JSON.parse(message.content.toString());
+        console.log("JSON array detected")
+       // const content = JSON.parse(message.content.toString());
+        console.log("CONTENT")
+        const content = parseMessageContent(message.content.toString());
         if (Array.isArray(content) && content.length > 0 && content[0].text && content[0].mimeType != "image/png") {
-          //console.log("JSON array detected and text field exists");
+          console.log("JSON array detected and text field exists");
           message.content = content.map(block => block.text).join("\n");
         } else if (Array.isArray(content) && content.length > 0 && content[0].mimeType == "image/png")  {
-          //console.log("Message content is not a JSON array or does not have a 'text' field. It is an image");
+          console.log("Message content is not a JSON array or does not have a 'text' field. It is an image", content);
           const block: ExtendedBlock = {
             id: message.id,
             text: content[0].text || '', // Use the content if available
@@ -57,7 +66,7 @@ export function chatMessageJsonlToBlock(
         }
       }
     } catch (error) {
-      console.error('Error parsing JSON content', error);
+      console.error('Error parsing JSON content', error,message.content);
       // Handle error case
       //message.content = '';
     }
@@ -99,7 +108,7 @@ export function chatMessageJsonlToBlock(
           }
           block.historical = false; // Set historical flag to false for new blocks
           block.messageType = getMessageType(block); // Determine the message type
-          //console.log(block.messageType)
+          console.log(block.messageType)
           //if (block.messageType === MessageTypes.STREAMING_BLOCK) {
               //console.log("Streaming block", block)
           //}

@@ -3,14 +3,14 @@ import { TopUpButton } from "@/components/topup-button";
 import { CallTopUpButton } from "@/components/call-topup-button";
 import { checkSubscription } from "@/lib/subscription";
 import prismadb from "@/lib/prismadb";
-import { auth, currentUser, redirectToSignIn } from "@clerk/nextjs";
+import { auth, currentUser, } from "@clerk/nextjs/server";
 
 const SettingsPage = async () => {
     const isPro = await checkSubscription();
     const user = await currentUser();
 
     if (!user) {
-        return redirectToSignIn();
+        return auth().redirectToSignIn();
     }
     var tokens = 0;
     var token_limit = 10000;

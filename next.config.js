@@ -1,12 +1,17 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-    experimental: {
-        serverActions: true
-    },
     images: {
-        domains: [
-            "res.cloudinary.com",
-            "api.steamship.com"
+        remotePatterns: [
+            {
+                protocol: 'https',
+                hostname: "res.cloudinary.com",
+                port: ''
+            },
+            {
+                protocol: 'https',
+                hostname: "api.steamship.com",
+                port: ''
+            },
         ],
     },
 };

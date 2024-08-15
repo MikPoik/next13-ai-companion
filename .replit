@@ -9,7 +9,7 @@ language = "nodejs"
   guessImports = true
 
 [nix]
-channel = "stable-23_11"
+channel = "stable-24_05"
 
 [env]
 XDG_CONFIG_HOME = "$REPL_HOME/.config"
