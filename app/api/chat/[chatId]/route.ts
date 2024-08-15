@@ -10,7 +10,7 @@ import { StreamingTextResponse } from "ai";
 
 export const maxDuration = 60; //2 minute timeout
 export const runtime = 'edge';
-
+export const dynamic = 'force-dynamic';
 
 interface Message {
   role: string;

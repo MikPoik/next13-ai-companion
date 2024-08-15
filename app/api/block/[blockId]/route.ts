@@ -1,6 +1,7 @@
 import { Steamship,SteamshipStream, } from '@steamship/client';
 import { StreamingTextResponse } from "ai";
-
+export const runtime = 'edge';
+export const dynamic = 'force-dynamic';
 // Post to conform to useCompletion API
 const POST = async (req: Request, context: { params: any }) => {
  console.log("[ROUTE] POST /api/block/[blockId]/route")
