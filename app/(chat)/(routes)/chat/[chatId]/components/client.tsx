@@ -2,7 +2,7 @@
 import React, { FormEvent, useEffect, useRef, ElementRef, useState, ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { useTheme } from "next-themes";
-import { ChatMessage as ChatMessageComponent, ChatMessageProps } from "@/components/chat-message";
+import { ChatMessage as ChatMessageComponent } from "@/components/chat-message";
 import { Companion, Message as PrismaMessage, Role } from "@prisma/client";
 import { ChatHeader } from "@/components/chat-header";
 import { chatMessagesJsonlToBlocks } from "@/components/parse-blocks-from-message";
@@ -13,6 +13,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { useChat, Message as ChatMessageType } from "ai/react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import useStreamStore from '@/lib/useStreamStore';
 
 interface ChatClientProps {
   isPro: boolean;
@@ -29,12 +30,6 @@ interface LocalChatMessageType {
   role: Role;
   content: string;
   createdAt: Date;
-}
-
-interface ChatClientDisplayMessage {
-  id: string;
-  role: Role;
-  content: ReactNode;
 }
 
 const scrollContainerStyle: React.CSSProperties = {
@@ -68,6 +63,7 @@ export const ChatClient = ({ isPro, companion }: ChatClientProps) => {
   const [isDeleting, setIsDeleting] = useState(false);
   const [isReloading, setIsReloading] = useState(false);
   const accumulatedContentRef = useRef<string | "">("");
+  const { content: streamedContent, setContent: setStreamedContent } = useStreamStore();
 
   const initialMessages: PrismaMessage[] = [
     {
@@ -87,11 +83,12 @@ export const ChatClient = ({ isPro, companion }: ChatClientProps) => {
       userId: message.userId ?? "",
     })),
   ];
+
   useEffect(() => {
-    // Adding console to ensure it will log as expected when triggered.
-    console.log('Scrolling to bottom on page load');
+    // Scroll to bottom on initial load
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, []);
+
   const {
     messages, 
     setMessages,
@@ -131,6 +128,7 @@ export const ChatClient = ({ isPro, companion }: ChatClientProps) => {
           body: JSON.stringify({ prompt: finalContent, id: lastAssistantMessage.id, blockList: lastAssistantMessage.content })
         }); 
       }
+      setStreamedContent(""); // Reset streamedContent
       bottomRef.current?.scrollIntoView({ behavior: "smooth" });
     },
     onError(error) {
@@ -274,14 +272,14 @@ export const ChatClient = ({ isPro, companion }: ChatClientProps) => {
     append({ role: 'user', content: input });
   };
 
-  const transformedMessages: ChatMessageProps[] = messages.map((message) => ({
+  const transformedMessages = messages.map((message) => ({
     id: message.id,
     role: message.role,
     content: chatMessagesJsonlToBlocks([message], ""), 
     isLoading: false,
     src: ""
   }));
-
+  console.log(transformedMessages)
   return (
     <div className="flex flex-col h-full">
       <ChatHeader isPro={isPro} companion={companion} />
@@ -294,8 +292,8 @@ export const ChatClient = ({ isPro, companion }: ChatClientProps) => {
               content={message.content}
               isLoading={message.isLoading}
               src={message.src}
-              blockId={message.blockId}
-              streamState={message.streamState}
+              blockId={message.id}
+              
               companionName={companion.name}
               accumulatedContentRef={accumulatedContentRef}
             />
@@ -306,6 +304,7 @@ export const ChatClient = ({ isPro, companion }: ChatClientProps) => {
             )}
           </div>
         ))}
+        {streamedContent && <div>{streamedContent}</div>}
         <div ref={bottomRef} />
         {isLoading ? <div style={{ display: 'flex', alignItems: 'center' }} ref={bottomRef}><BeatLoader color={theme === "light" ? "black" : "white"} size={5} /><Button onClick={stop} disabled={!isLoading} variant="ghost"><X className="w-4 h-4" /></Button></div> : null}
         {error ? <p>{error.message}</p> : null}

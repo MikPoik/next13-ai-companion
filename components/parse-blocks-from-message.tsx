@@ -22,8 +22,8 @@ export function chatMessageJsonlToBlock(
 ): ExtendedBlock[] {
   const applySkipIfInput =
     skipIfInputEquals != null && skipIfInputEquals.trim().length > 0;
-  //console.log("Process message ",message)
-  //console.log("Process message content",message.content)
+  console.log("Process message ",message)
+  console.log("Process message content",message.content)
   
   if (typeof message === 'object' && message.content !== null && !message.content.toString().includes("workspaceId")) {
     //console.log("Processing JSON object message.content");
@@ -88,7 +88,7 @@ export function chatMessageJsonlToBlock(
       index: 0,
       publicData: true,
     };
-    //console.log(block)
+    console.log(block)
     return [block];
   }
 
@@ -109,9 +109,9 @@ export function chatMessageJsonlToBlock(
           block.historical = false; // Set historical flag to false for new blocks
           block.messageType = getMessageType(block); // Determine the message type
           console.log(block.messageType)
-          //if (block.messageType === MessageTypes.STREAMING_BLOCK) {
-              //console.log("Streaming block", block)
-          //}
+          if (block.messageType === MessageTypes.STREAMING_BLOCK) {
+              console.log("Streaming block", block)
+          }
           // Use validTypes to determine if the block is visible in chat
           block.isVisibleInChat = validTypes.includes(block.messageType);
           //console.log("Visible block: ",block.isVisibleInChat)
@@ -147,7 +147,7 @@ export function chatMessagesJsonlToBlocks(
   messages: Message[],
   skipIfInputEquals: string | null
 ): ExtendedBlock[] {
-  //console.log("Parse messages ",messages)
+  console.log("Parse messages ",messages)
   let ret: ExtendedBlock[] = [];
   for (let msg of messages || []) {
     ret = [...ret, ...chatMessageJsonlToBlock(msg, skipIfInputEquals)];

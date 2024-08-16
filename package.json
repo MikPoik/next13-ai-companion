@@ -27,10 +27,11 @@
         "@radix-ui/react-tooltip": "^1.0.6",
         "@steamship/client": "^3.3.3",
         "@steamship/react": "^0.13.0",
+        "@types/lodash": "4.17.7",
         "@types/node": "20.4.2",
         "@types/react": "18.2.15",
         "@types/react-dom": "18.2.7",
-        "@types/lodash": "4.17.7",
+        "zustand": "4.5.5",
         "ai": "^2.1.22",
         "autoprefixer": "10.4.14",
         "axios": "^1.4.0",
@@ -60,7 +61,7 @@
         "typescript": "5.1.6",
         "uuid": "^9.0.1",
         "zod": "^3.21.4",
-        "zustand": "^4.3.9"
+        "zustand": "^4.5.5"
     },
     "devDependencies": {
         "@flydotio/dockerfile": "^0.4.8",

@@ -19,7 +19,7 @@ const POST = async (req: Request, context: { params: any }) => {
 
 // GET raw data from block
 const GET = async (req: Request, context: { params: any }) => {
-    console.log("[ROUTE] GET /api/block/[blockId]/route")
+  console.log("[ROUTE] GET /api/block/[blockId]/route")
   const blockId = context.params.blockId;
   console.log(`/api/block/${blockId}`);
   const steamship =  new Steamship({apiKey: process.env.STEAMSHIP_API_KEY})
