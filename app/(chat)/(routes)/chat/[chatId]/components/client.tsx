@@ -107,7 +107,7 @@ export const ChatClient = ({ isPro, companion }: ChatClientProps) => {
     body: {
       chatId: `${companion.id}`,
     },
-    /*onResponse(response) {
+    onResponse(response) {
       const lastUserMessage = messagesRef.current[messagesRef.current.length - 1];
       fetch(`/api/chat/${companion.id}/save-prompt`, {
         method: 'POST',
@@ -120,6 +120,9 @@ export const ChatClient = ({ isPro, companion }: ChatClientProps) => {
       const finalContent = accumulatedContentRef.current;
       const lastUserMessage = messagesRef.current[messagesRef.current.length - 2];
       const lastAssistantMessage = messagesRef.current[messagesRef.current.length - 1];
+      console.log("Final content:", finalContent);
+      console.log("Last assistant message:", lastAssistantMessage);
+      console.log("streamedContent: ",streamedContent)
       setInput("");
       if (!lastAssistantMessage.content.includes("I'm sorry, I had an error when generating response")){
         fetch(`/api/chat/${companion.id}/save-response`, {
@@ -130,7 +133,7 @@ export const ChatClient = ({ isPro, companion }: ChatClientProps) => {
       }
       setStreamedContent(""); // Reset streamedContent
       bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-    },*/
+    },
     onError(error) {
       console.error(error);
     },
@@ -275,11 +278,11 @@ export const ChatClient = ({ isPro, companion }: ChatClientProps) => {
   const transformedMessages = messages.map((message) => ({
     id: message.id,
     role: message.role,
-    content: message.content,//chatMessagesJsonlToBlocks([message], ""), 
+    content: chatMessagesJsonlToBlocks([message], ""), 
     isLoading: false,
     src: ""
   }));
-  console.log(transformedMessages)
+  //console.log(transformedMessages)
   return (
     <div className="flex flex-col h-full">
       <ChatHeader isPro={isPro} companion={companion} />

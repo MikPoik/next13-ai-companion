@@ -22,8 +22,8 @@ export function chatMessageJsonlToBlock(
 ): ExtendedBlock[] {
   const applySkipIfInput =
     skipIfInputEquals != null && skipIfInputEquals.trim().length > 0;
-  console.log("Process message ",message)
-  console.log("Process message content",message.content)
+  //console.log("Process message ",message)
+  //console.log("Process message content",message.content)
   
   if (typeof message === 'object' && message.content !== null && !message.content.toString().includes("workspaceId")) {
     //console.log("Processing JSON object message.content");
@@ -88,7 +88,7 @@ export function chatMessageJsonlToBlock(
       index: 0,
       publicData: true,
     };
-    console.log(block)
+    //console.log(block)
     return [block];
   }
 
@@ -147,7 +147,7 @@ export function chatMessagesJsonlToBlocks(
   messages: Message[],
   skipIfInputEquals: string | null
 ): ExtendedBlock[] {
-  console.log("Parse messages ",messages)
+  //console.log("Parse messages ",messages)
   let ret: ExtendedBlock[] = [];
   for (let msg of messages || []) {
     ret = [...ret, ...chatMessageJsonlToBlock(msg, skipIfInputEquals)];

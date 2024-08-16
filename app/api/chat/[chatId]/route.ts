@@ -9,7 +9,7 @@ import { neon } from '@neondatabase/serverless';
 import { StreamingTextResponse } from "ai";
 
 export const maxDuration = 60; //2 minute timeout
-export const runtime = 'edge';
+export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 interface Message {

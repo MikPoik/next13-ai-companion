@@ -2,6 +2,8 @@ import prismadb from "@/lib/prismadb";
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import {Role} from "@prisma/client"
+
+
 function roughTokenCount(text: string): number {
     // Use regular expression to split text based on whitespace and punctuation
     const tokens = text.match(/\b\w+\b|[.,!?;]/g);

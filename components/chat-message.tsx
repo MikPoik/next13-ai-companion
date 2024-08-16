@@ -82,7 +82,7 @@ export const ChatMessage = ({
     }
     if (Array.isArray(content)) {
       return content.map((block, index) => {
-        console.log("Map block ", block)
+        //console.log("Map block ", block)
         // Render different types of blocks here
         if ('text' in block && typeof block.text === 'string' && validTypes.includes(block.messageType!) && block.messageType === MessageTypes.TEXT &&
             (block.role === 'user' || block.role === 'assistant' || block.role === 'system')) {
