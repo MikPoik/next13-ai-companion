@@ -9,6 +9,7 @@ const { v4: uuidv4 } = require('uuid');
 async function updateAgent(name:string,description:string,personality:string,appearance:string,background:string,seed:string, workspace_name: string, instance_handle: string, agent_version: string,create_images:boolean,llm_model:string,image_model:string) {
   let retryCount = 0;
   const maxRetries = 3;
+  
   console.log(instance_handle)
   console.log(workspace_name)
   const packageName = process.env.STEAMSHIP_PACKAGE || "ai-adventure-test";

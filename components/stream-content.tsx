@@ -1,14 +1,14 @@
-import React, { useEffect, useCallback, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { debounce } from 'lodash';
-import useStreamStore from '@/lib/useStreamStore'; // Adjust the import path as necessary
 
 interface StreamContentProps {
   blockId: string;
   onContentUpdate?: (newContent: string) => void;
+  accumulatedContentRef?: React.MutableRefObject<string>;
 };
 
-export const StreamContent: React.FC<StreamContentProps> = ({ blockId, onContentUpdate }) => {
-  const { content, setContent } = useStreamStore((state) => state);
+export const StreamContent: React.FC<StreamContentProps> = ({ blockId, onContentUpdate, accumulatedContentRef }) => {
+  const [content, setContent] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -39,8 +39,14 @@ export const StreamContent: React.FC<StreamContentProps> = ({ blockId, onContent
           const { done, value } = await reader.read();
           if (done) break;
           accumulatedContent += decoder.decode(value, { stream: true });
-          setContent(accumulatedContent);
-          debouncedOnContentUpdate(accumulatedContent);
+          if (accumulatedContentRef) accumulatedContentRef.current = accumulatedContent;
+
+          // Update to set content in chunks as received without waiting for the entire message.
+          setContent((prevContent) => {
+            const updatedContent = prevContent + decoder.decode(value, { stream: true });
+            debouncedOnContentUpdate(updatedContent); // Notify parent component of new content
+            return updatedContent;
+          });
         }
         console.log("Stream content finished, final content: ", accumulatedContent);
       } catch (err) {
@@ -55,20 +61,24 @@ export const StreamContent: React.FC<StreamContentProps> = ({ blockId, onContent
       }
     };
 
-    if (!signal.aborted) {
+    if (signal.aborted) {
+      // If the signal is already aborted, just log and return
+      console.log("Fetch aborted, not initiating due to signal already aborted");
+      return;
+    }
+
+    if (blockId) {
       streamData();
     }
 
     return () => controller.abort();
-  }, [blockId, setContent, debouncedOnContentUpdate]);
+  }, [blockId, onContentUpdate, accumulatedContentRef, debouncedOnContentUpdate]);
 
   if (isLoading) {
     return <div></div>;
   }
-
   if (error) {
     return <div>Error: {error}</div>;
   }
-
   return <div>{content}</div>;
 };

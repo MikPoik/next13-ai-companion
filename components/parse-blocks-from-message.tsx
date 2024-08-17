@@ -24,7 +24,7 @@ export function chatMessageJsonlToBlock(
     skipIfInputEquals != null && skipIfInputEquals.trim().length > 0;
   //console.log("Process message ",message)
   //console.log("Process message content",message.content)
-  
+
   if (typeof message === 'object' && message.content !== null && !message.content.toString().includes("workspaceId")) {
     //console.log("Processing JSON object message.content");
     //console.log(message.content)
@@ -61,7 +61,7 @@ export function chatMessageJsonlToBlock(
 
           //console.log(block);
           return [block];
-          
+
           //How to create an ExtendBlock object from a JSON object?
         }
       }
@@ -92,7 +92,7 @@ export function chatMessageJsonlToBlock(
     return [block];
   }
 
-    
+
     if (typeof message.content !== 'string') {
       console.error('Expected message.content to be a string', message.content,message);
       return []; // Return an empty array or fallback logic here
@@ -109,9 +109,9 @@ export function chatMessageJsonlToBlock(
           block.historical = false; // Set historical flag to false for new blocks
           block.messageType = getMessageType(block); // Determine the message type
           console.log(block.messageType)
-          if (block.messageType === MessageTypes.STREAMING_BLOCK) {
-              console.log("Streaming block", block)
-          }
+          //if (block.messageType === MessageTypes.STREAMING_BLOCK) {
+              //console.log("Streaming block", block)
+          //}
           // Use validTypes to determine if the block is visible in chat
           block.isVisibleInChat = validTypes.includes(block.messageType);
           //console.log("Visible block: ",block.isVisibleInChat)
@@ -132,8 +132,8 @@ export function chatMessageJsonlToBlock(
     .filter((block): block is ExtendedBlock => block !== null && (!applySkipIfInput || block.text !== skipIfInputEquals));
   // Fallback check to attempt parsing as JSON if blocks array is empty or initial parsing failed
 
- 
-    
+
+
   return blocks;
 }
 

@@ -14,7 +14,7 @@ const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
     title: 'truluv.me',
-    description: 'Your customized companions.',
+    description: 'AI companions, chat with your dream companion, create unique characters',
 }
 
 export default function RootLayout({

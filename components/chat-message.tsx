@@ -1,10 +1,19 @@
-import React, { useState } from "react";
+import { useState, useEffect, useRef } from "react";
+import React from "react";
 import { BeatLoader } from "react-spinners";
+import { Copy } from "lucide-react";
 import { useTheme } from "next-themes";
+import { cn } from "@/lib/utils";
+import { BotAvatar } from "@/components/bot-avatar";
+import { UserAvatar } from "@/components/user-avatar";
+import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
-import { validTypes, MessageTypes } from "@/components/block-chat-types";
-import { StreamContent } from "@/components/stream-content";
-import useStreamStore from "@/lib/useStreamStore"; // Import Zustand store
+import { responseToChatBlocks } from "@/components/ChatBlock";
+import { chatMessagesJsonlToBlocks } from "@/components/parse-blocks-from-message";
+import { MessageTypes, validTypes } from "@/components/block-chat-types";
+import { StreamContent } from "@/components/stream-content"; 
+const { v4: uuidv4 } = require('uuid');
+
 export interface ChatMessageProps {
   id: string;
   role: "system" | "user" | "function" | "assistant";
@@ -16,6 +25,7 @@ export interface ChatMessageProps {
   companionName?: string;
   accumulatedContentRef?: React.MutableRefObject<string>;
 }
+
 const imageStyles = {
   wrapper: {
     backgroundColor: "rgb(50, 50, 50)",
@@ -39,10 +49,12 @@ const imageStyles = {
     opacity: 1,
   },
 };
+
 function applyLoadedStyles(wrapperElement: HTMLDivElement, imgElement: HTMLImageElement) {
   Object.assign(wrapperElement.style, imageStyles.loadedWrapper);
   Object.assign(imgElement.style, imageStyles.loadedImg);
 }
+
 export const ChatMessage = ({
   id,
   role,
@@ -56,15 +68,22 @@ export const ChatMessage = ({
 }: ChatMessageProps) => {
   const { toast } = useToast();
   const { theme } = useTheme();
-  const { content: streamedContent } = useStreamStore(); // Access streamed content from Zustand
+  const [streamedContent, setStreamedContent] = useState("");
   const [imageLoaded, setImageLoaded] = useState(false);
+
+  useEffect(() => {
+    // Logging purpose or other side effects
+  }, [streamedContent]);
+
   const handleImageLoad = (wrapperElement: HTMLDivElement, imgElement: HTMLImageElement) => {
     setImageLoaded(true);
     applyLoadedStyles(wrapperElement, imgElement);
   };
-  if (isLoading || (streamState === "started" && !streamedContent)) {
+
+  if (isLoading || (streamState === 'started' && !streamedContent)) {
     return <BeatLoader color={theme === "light" ? "black" : "white"} size={5} />;
   }
+
   const formatText = (text: string) => {
     return text.split(/([*"].*?[*"])/).map((part, index) => {
       if (part.startsWith('*') && part.endsWith('*')) {
@@ -76,27 +95,35 @@ export const ChatMessage = ({
       return part;
     });
   };
+
+  const onCopy = () => {
+    if (content) {
+      navigator.clipboard.writeText(typeof content === "string" ? content : "");
+      toast({
+        description: "Message copied to clipboard.",
+        duration: 3000,
+      });
+    }
+  };
+
   const renderContent = () => {
-    if (streamState === "started" && streamedContent) {
+    if (streamState === 'started' && streamedContent) {
       return <div>{streamedContent}</div>;
     }
     if (Array.isArray(content)) {
       return content.map((block, index) => {
-        //console.log("Map block ", block)
-        // Render different types of blocks here
-        if ('text' in block && typeof block.text === 'string' && validTypes.includes(block.messageType!) && block.messageType === MessageTypes.TEXT &&
-            (block.role === 'user' || block.role === 'assistant' || block.role === 'system')) {
+        if ('text' in block && typeof block.text === 'string' && validTypes.includes(block.messageType!) && block.messageType === MessageTypes.TEXT && (block.role === 'user' || block.role === 'assistant' || block.role === 'system')) {
           return <p key={block.id}>{formatText(block.text)}</p>;
         }
         if (block.streamState === 'started' && block.messageType !== MessageTypes.IMAGE && block.mimeType != "image/png") {
-          return <StreamContent blockId={block.id} onContentUpdate={accumulatedContentRef?.current ? (newContent: string) => accumulatedContentRef.current = newContent : undefined} key={block.id} />;
+          return <StreamContent blockId={block.id} onContentUpdate={setStreamedContent} accumulatedContentRef={accumulatedContentRef} key={block.id} />;
         }
         if (block.messageType === MessageTypes.IMAGE || block.mimeType == "image/png") {
-          return <div key={block.id}>
+          return <div key={block.id}>            
             <div className={`image-placeholder-wrapper ${imageLoaded ? 'loaded' : ''}`} style={imageStyles.wrapper}>
-              <img
-                src={block.streamingUrl}
-                alt={block.src}
+              <img 
+                src={block.streamingUrl} 
+                alt={block.src} 
                 style={imageStyles.img}
                 onLoad={(e) => handleImageLoad(e.currentTarget.parentElement as HTMLDivElement, e.currentTarget)}
               />
@@ -106,11 +133,13 @@ export const ChatMessage = ({
         }
         return null;
       }).filter(Boolean);
-    } else if (typeof content === "string") {
-      return <p>{formatText(content)}</p>;
+    } else if (typeof content === 'string') {
+      console.log("string content")
     }
+    console.log("Message content string, omitting", content)
     return null;
   };
+
   return (
     <>
       <style jsx>{`
@@ -122,7 +151,10 @@ export const ChatMessage = ({
           animation: fadeInOut 2s infinite;
         }
       `}</style>
-      <div className={`group flex items-start gap-x-3 py-2 w-full ${role === "user" ? "justify-end" : ""}`}>
+      <div className={cn(
+        "group flex items-start gap-x-3 py-2 w-full",
+        role === "user" && "justify-end"
+      )}>
         <div className="flex-1 mr-4">
           <span className="text-sm text-gray-500">
             {role === "user" ? "You" : companionName}:
@@ -135,4 +167,4 @@ export const ChatMessage = ({
       </div>
     </>
   );
-};
+}
