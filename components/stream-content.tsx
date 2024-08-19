@@ -5,15 +5,27 @@ interface StreamContentProps {
   blockId: string;
   onContentUpdate?: (newContent: string) => void;
   accumulatedContentRef?: React.MutableRefObject<string>;
+}
+
+const formatText = (text: string): (string | JSX.Element)[] => {
+  return text.split(/([*"].*?[*"])/).map((part, index) => {
+    if (part.startsWith('*') && part.endsWith('*')) {
+      return <i key={index} style={{ color: 'rgba(255,255,255,0.6)' }}>{part.slice(1, -1)}</i>;
+    }
+    if (part.startsWith('"') && part.endsWith('"')) {
+      return <i key={index} style={{ color: 'rgba(255,255,255,0.9)' }}>{part.slice(1, -1)}</i>;
+    }
+    return part;
+  });
 };
 
 export const StreamContent: React.FC<StreamContentProps> = ({ blockId, onContentUpdate, accumulatedContentRef }) => {
-  const [content, setContent] = useState<string>('');
+  const [content, setContent] = useState<(string | JSX.Element)[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
   const debouncedOnContentUpdate = useCallback(
-    debounce((updatedContent) => {
+    debounce((updatedContent: string) => {
       if (onContentUpdate) {
         onContentUpdate(updatedContent);
       }
@@ -42,18 +54,17 @@ export const StreamContent: React.FC<StreamContentProps> = ({ blockId, onContent
           if (accumulatedContentRef) accumulatedContentRef.current = accumulatedContent;
 
           // Update to set content in chunks as received without waiting for the entire message.
-          setContent((prevContent) => {
-            const updatedContent = prevContent + decoder.decode(value, { stream: true });
-            debouncedOnContentUpdate(updatedContent); // Notify parent component of new content
-            return updatedContent;
-          });
+          const plainTextUpdate = accumulatedContent;
+          const formattedContent = formatText(plainTextUpdate);
+          setContent(formattedContent);
+          debouncedOnContentUpdate(plainTextUpdate); // Notify parent component of new content
         }
-        console.log("Stream content finished, final content: ", accumulatedContent);
+        //console.log('Stream content finished, final content: ', accumulatedContent);
       } catch (err) {
         if (signal.aborted) {
-          console.log("Fetch aborted due to unmount or navigation");
+          console.log('Fetch aborted due to unmount or navigation');
         } else {
-          console.error("Error during fetching:", err);
+          console.error('Error during fetching:', err);
           setError(err instanceof Error ? err.message : 'An unknown error occurred');
         }
       } finally {
@@ -63,7 +74,7 @@ export const StreamContent: React.FC<StreamContentProps> = ({ blockId, onContent
 
     if (signal.aborted) {
       // If the signal is already aborted, just log and return
-      console.log("Fetch aborted, not initiating due to signal already aborted");
+      console.log('Fetch aborted, not initiating due to signal already aborted');
       return;
     }
 
@@ -75,7 +86,7 @@ export const StreamContent: React.FC<StreamContentProps> = ({ blockId, onContent
   }, [blockId, onContentUpdate, accumulatedContentRef, debouncedOnContentUpdate]);
 
   if (isLoading) {
-    return <div></div>;
+    return <div>Loading...</div>;
   }
   if (error) {
     return <div>Error: {error}</div>;

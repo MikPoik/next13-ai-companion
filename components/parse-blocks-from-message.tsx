@@ -9,10 +9,24 @@ const { v4: uuidv4 } = require('uuid');
  * @param skipIfInputEquals Optional string to skip if input matches.
  * @returns Array of ExtendedBlock objects.
  */
+function replaceQuotesInText(text: string): string {
+  const regex = /"text":\s*"(.*?)",\s*"mimeType"/;
+  const match = text.match(regex);
+
+  if (match) {
+    const originalText = match[1];
+    const escapedText = originalText.replace(/"/g, '\\"');
+    return text.replace(originalText, escapedText);
+  } else {
+    return text;
+  }
+}
+
 function sanitizeJSONString(content: string): string {
   return content.replace(/\n/g, "\\n");
 }
 function parseMessageContent(messageContent: string): any {
+  messageContent = replaceQuotesInText(messageContent);
   const sanitizedContent = sanitizeJSONString(messageContent);
   return JSON.parse(sanitizedContent);
 }
@@ -24,22 +38,22 @@ export function chatMessageJsonlToBlock(
     skipIfInputEquals != null && skipIfInputEquals.trim().length > 0;
   //console.log("Process message ",message)
   //console.log("Process message content",message.content)
-
+  
   if (typeof message === 'object' && message.content !== null && !message.content.toString().includes("workspaceId")) {
     //console.log("Processing JSON object message.content");
     //console.log(message.content)
     // Check if message content is a JSON array and parse the "text" field to message.content for previous message format
     try {
       if (message.content.startsWith("[") && message.content.endsWith("]")){
-        console.log("JSON array detected")
-       // const content = JSON.parse(message.content.toString());
-        console.log("CONTENT")
+        //console.log("JSON array detected")
+       
+        
         const content = parseMessageContent(message.content.toString());
         if (Array.isArray(content) && content.length > 0 && content[0].text && content[0].mimeType != "image/png") {
-          console.log("JSON array detected and text field exists");
+          //console.log("JSON array detected and text field exists");
           message.content = content.map(block => block.text).join("\n");
         } else if (Array.isArray(content) && content.length > 0 && content[0].mimeType == "image/png")  {
-          console.log("Message content is not a JSON array or does not have a 'text' field. It is an image", content);
+          //console.log("Message content is not a JSON array or does not have a 'text' field. It is an image", content);
           const block: ExtendedBlock = {
             id: message.id,
             text: content[0].text || '', // Use the content if available
@@ -61,7 +75,7 @@ export function chatMessageJsonlToBlock(
 
           //console.log(block);
           return [block];
-
+          
           //How to create an ExtendBlock object from a JSON object?
         }
       }
@@ -92,7 +106,7 @@ export function chatMessageJsonlToBlock(
     return [block];
   }
 
-
+    
     if (typeof message.content !== 'string') {
       console.error('Expected message.content to be a string', message.content,message);
       return []; // Return an empty array or fallback logic here
@@ -108,9 +122,9 @@ export function chatMessageJsonlToBlock(
           }
           block.historical = false; // Set historical flag to false for new blocks
           block.messageType = getMessageType(block); // Determine the message type
-          console.log(block.messageType)
+          //console.log(block.messageType)
           //if (block.messageType === MessageTypes.STREAMING_BLOCK) {
-              //console.log("Streaming block", block)
+          //    console.log("Streaming block", block)
           //}
           // Use validTypes to determine if the block is visible in chat
           block.isVisibleInChat = validTypes.includes(block.messageType);
@@ -132,8 +146,8 @@ export function chatMessageJsonlToBlock(
     .filter((block): block is ExtendedBlock => block !== null && (!applySkipIfInput || block.text !== skipIfInputEquals));
   // Fallback check to attempt parsing as JSON if blocks array is empty or initial parsing failed
 
-
-
+ 
+    
   return blocks;
 }
 

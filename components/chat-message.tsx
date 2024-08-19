@@ -121,6 +121,7 @@ export const ChatMessage = ({
         if (block.messageType === MessageTypes.IMAGE || block.mimeType == "image/png") {
           return <div key={block.id}>            
             <div className={`image-placeholder-wrapper ${imageLoaded ? 'loaded' : ''}`} style={imageStyles.wrapper}>
+              {block.text && block.text !== "" && <span> {formatText(block.text)}</span>}
               <img 
                 src={block.streamingUrl} 
                 alt={block.src} 
@@ -128,7 +129,7 @@ export const ChatMessage = ({
                 onLoad={(e) => handleImageLoad(e.currentTarget.parentElement as HTMLDivElement, e.currentTarget)}
               />
             </div>
-            {block.text && block.text !== "" && <span> {formatText(block.text)}</span>}
+            
           </div>;
         }
         return null;

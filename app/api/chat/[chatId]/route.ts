@@ -113,7 +113,7 @@ export async function POST(
         //console.log(agentInstanceHandle)
         const steamship = new Steamship({ apiKey: process.env.STEAMSHIP_API_KEY })
         const base_url=process.env.STEAMSHIP_BASE_URL + agentWorkspace+"/"+agentInstanceHandle+"/";
-        console.log(base_url);
+        //console.log(base_url);
         const response = await steamship.agent.respondAsync({            
             url: base_url,
             input: {

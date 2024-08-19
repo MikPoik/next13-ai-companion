@@ -130,7 +130,7 @@ export async function POST(req: Request) {
             return new NextResponse(`No companion found}`, { status: 400 });
         }
 
-        console.log("apped history to steamship")
+        //console.log("apped history to steamship")
         const client = await SteamshipV2.use(companion.packageName, companion.instanceHandle, { llm_model: companion.model, create_images: String(companion.createImages) }, undefined, true, companion.workspaceName);
 
         const appendHistoryResponse = await appendHistorySteamship(

@@ -50,7 +50,7 @@ const formSchema = z.object({
     isPublic: z.boolean().optional(),
     createImages: z.boolean().optional(),
     behaviour: z.string().optional(),
-    backstory: z.string().optional(),
+    backstory: z.string().max(2000).optional(),
     selfiePre: z.string().optional(),
     selfiePost: z.string().optional(),
     model: z.string().min(1, {
@@ -197,7 +197,7 @@ export const CompanionForm = ({
             selfiePost: "",
             model: "teknium/OpenHermes-2-Mistral-7B",
             createImages: false,
-            imageModel: "realistic",
+            imageModel: "https://civitai.com/api/download/models/281176?type=Model&format=SafeTensor&size=pruned&fp=fp16",
             voiceId: 'none',
             backstory: "",
             regenerateImage: false,
@@ -391,13 +391,13 @@ export const CompanionForm = ({
                                                 <SelectItem key="mo-di-diffusion" value="mo-di-diffusion">Modern Disney Diffusion</SelectItem>
                                                 <SelectItem key="synthwave-punk-v2" value="synthwave-punk-v2">Synthwave Punk V2</SelectItem>
                                                 <SelectItem key="dream-shaper-v8" value="dream-shaper-v8">Dream Shaper V8</SelectItem>
-                                                <SelectItem key="https://civitai.com/api/download/models/294706" value="https://civitai.com/api/download/models/294706">iNiverseMix (SDXL)</SelectItem>
-                                                <SelectItem key="https://civitai.com/api/download/models/228559?type=Model&format=SafeTensor&size=pruned&fp=fp16" value="https://civitai.com/api/download/models/228559?type=Model&format=SafeTensor&size=pruned&fp=fp16">Omnigen XL (SDXL)</SelectItem>
-                                                <SelectItem key="https://civitai.com/api/download/models/281176?type=Model&format=SafeTensor&size=pruned&fp=fp16" value="https://civitai.com/api/download/models/281176?type=Model&format=SafeTensor&size=pruned&fp=fp16">Albedo (SDXL)</SelectItem>
-                                                <SelectItem key="https://civitai.com/api/download/models/384264?type=Model&format=SafeTensor&size=full&fp=fp16" value="https://civitai.com/api/download/models/384264?type=Model&format=SafeTensor&size=full&fp=fp16">AnythingXL (SDXL)</SelectItem>
-                                                <SelectItem key="https://civitai.com/api/download/models/293564?type=Model&format=SafeTensor&size=full&fp=fp32" value="https://civitai.com/api/download/models/293564?type=Model&format=SafeTensor&size=full&fp=fp32">Animagine (SDXL)</SelectItem>
+                                                <SelectItem key="https://civitai.com/api/download/models/294706" value="https://civitai.com/api/download/models/294706">iNiverseMix (SDXL) Realistic</SelectItem>
+                                                <SelectItem key="https://civitai.com/api/download/models/228559?type=Model&format=SafeTensor&size=pruned&fp=fp16" value="https://civitai.com/api/download/models/228559?type=Model&format=SafeTensor&size=pruned&fp=fp16">Omnigen XL (SDXL) Realistic/Anime</SelectItem>
+                                                <SelectItem key="https://civitai.com/api/download/models/281176?type=Model&format=SafeTensor&size=pruned&fp=fp16" value="https://civitai.com/api/download/models/281176?type=Model&format=SafeTensor&size=pruned&fp=fp16">Albedo (SDXL) Realistic</SelectItem>
+                                                <SelectItem key="https://civitai.com/api/download/models/384264?type=Model&format=SafeTensor&size=full&fp=fp16" value="https://civitai.com/api/download/models/384264?type=Model&format=SafeTensor&size=full&fp=fp16">AnythingXL (SDXL) Anime/Realistic</SelectItem>
+                                                <SelectItem key="https://civitai.com/api/download/models/293564?type=Model&format=SafeTensor&size=full&fp=fp32" value="https://civitai.com/api/download/models/293564?type=Model&format=SafeTensor&size=full&fp=fp32">Animagine (SDXL) Anime</SelectItem>
                                                 <SelectItem key="https://civitai.com/api/download/models/156375" value="https://civitai.com/api/download/models/156375">Clearhung Anime (SDXL)</SelectItem>
-                                                <SelectItem key="https://civitai.com/api/download/models/378499" value="https://civitai.com/api/download/models/378499">Hassaku (SDXL)</SelectItem>
+                                                <SelectItem key="https://civitai.com/api/download/models/378499" value="https://civitai.com/api/download/models/378499">Hassaku (SDXL) Anime</SelectItem>
                                                 <SelectItem key="https://civitai.com/api/download/models/303526?type=Model&format=SafeTensor&size=full&fp=fp16" value="https://civitai.com/api/download/models/303526?type=Model&format=SafeTensor&size=full&fp=fp16">Animemix (SDXL)</SelectItem>
                                                 <SelectItem key="https://civitai.com/api/download/models/286821" value="https://civitai.com/api/download/models/286821">Deephentai (SDXL)</SelectItem>
 
@@ -658,7 +658,7 @@ export const CompanionForm = ({
                                     <Textarea disabled={isLoading} rows={6} className="bg-background resize-none" placeholder={PREAMBLE_BACKSTORY} {...field} />
                                 </FormControl>
                                 <FormDescription>
-                                    Describe all relevant facts and details, companion will dynamically use indexed data when responding.
+                                    Describe all relevant facts and details about companion.
                                 </FormDescription>
                                 <FormMessage />
                             </FormItem>

@@ -5,14 +5,11 @@ import { auth } from "@clerk/nextjs/server";
 import { checkSubscription } from "@/lib/subscription";
 const { v4: uuidv4 } = require('uuid');
 
-
-async function updateAgent(name:string,description:string,personality:string,appearance:string,background:string,seed:string, workspace_name: string, instance_handle: string, agent_version: string,create_images:boolean,llm_model:string,image_model:string) {
+async function updateAgent(name: string, description: string, personality: string, appearance: string, background: string, seed: string, workspace_name: string, instance_handle: string, agent_version: string, create_images: boolean, llm_model: string, image_model: string, update_version: boolean = false) {
   let retryCount = 0;
   const maxRetries = 3;
-  
-  console.log(instance_handle)
-  console.log(workspace_name)
   const packageName = process.env.STEAMSHIP_PACKAGE || "ai-adventure-test";
+
   while (retryCount < maxRetries) {
     try {
       const client = await SteamshipV2.use(
@@ -23,24 +20,47 @@ async function updateAgent(name:string,description:string,personality:string,app
         true,
         workspace_name
       );
-      //console.log(client)
+      console.log("Patc server settings")
       const settings = await client.invoke("patch_server_settings", {
         enable_images_in_chat: create_images,
         default_story_model: llm_model,
         image_theme_by_model: image_model,
       });
+      const typedSettings = settings as { data: any };
+      console.log(typedSettings.data)
 
-      console.log(settings)
-
-      const init_chat = await client.invoke("init_companion_chat", {
+      if (!update_version) {
+        console.log("Init companion chat")
+        await client.invoke("init_companion_chat", {
+          name: name,
+          description: description,
+          personality: personality,
+          appearance: appearance,
+          background: background,
+          seed: seed
+        });
+      } else {
+        console.log("Update companion chat")
+        await client.invoke("update_companion_chat", {
+          name: name,
+          description: description,
+          personality: personality,
+          appearance: appearance,
+          background: background,
+          seed: seed
+        });
+      }
+      const game_state = await client.invoke("game_state", {
         name: name,
         description: description,
         personality: personality,
         appearance: appearance,
         background: background,
-        seed:seed
+        seed: seed
       });
-      console.log(init_chat)
+      const typedGameState = game_state as { data: any };
+      console.log(typedGameState.data)
+      
       console.log("Agent initialized successfully");
       break; // Exit the loop if the request is successful
     } catch (innerError) {
@@ -49,21 +69,17 @@ async function updateAgent(name:string,description:string,personality:string,app
       if (retryCount < maxRetries) { // Ensure there's another retry
         await new Promise(res => setTimeout(res, 2000)); // Add delay before next retry
       } else {
-        return NextResponse.json({ error: 'Initialization failed' }, { status: 500 });
+        throw new Error('Initialization failed');
       }
     }
   }
 }
 
 export async function POST(req: NextRequest) {
-  //console.log("INIT COMPANION ROUTE");
-
   const { chatId } = await req.json();
-  //console.log(chatId)
   const authData = await auth();
   const userId = authData?.userId;
-  //console.log(authData)
-  
+
   if (!userId) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
@@ -73,7 +89,6 @@ export async function POST(req: NextRequest) {
   }
 
   const isPro = await checkSubscription();
-  //console.log("isPro", isPro)
   try {
     const companion = await prismadb.companion.findUnique({
       where: { id: chatId },
@@ -82,85 +97,103 @@ export async function POST(req: NextRequest) {
         _count: { select: { messages: true } },
         steamshipAgent: {
           take: 1, // Limit the number of records to 1
-          orderBy: {
-            createdAt: "desc" // Order by creation date in ascending order
-          },
-          where: {
-            userId: userId // Replace with the actual user ID
-          }
+          orderBy: { createdAt: "desc" },
+          where: { userId: userId }
         }
-    }});
+      }
+    });
 
     if (!companion) {
       return NextResponse.json({ error: 'Companion not found' }, { status: 404 });
     }
-    //fix, fetch ids from steamShipAgent table if exists
+
+    // Assign handle here so it is consistent within retries
     let bot_uuid = uuidv4().replace(/-/g, "").toLowerCase();
     let ws_uuid = uuidv4().replace(/-/g, "").toLowerCase();
-    let workspace_name = companion.workspaceName;
-    let instance_handle = companion.instanceHandle;
+
+    let workspace_name;
+    let instance_handle;
     let agent_version = process.env.AGENT_VERSION || "";
-    //console.log("Env agent version ",process.env.AGENT_VERSION)
-
-    //console.log("init steamship companion")
 
 
-    if (companion.steamshipAgent.length === 0) {
+    if (!companion.steamshipAgent.length) {
       console.log("No existing agents in db, create new agent");
-    
       workspace_name = userId.replace("user_", "").toLowerCase() + "-" + ws_uuid;
       instance_handle = userId.replace("user_", "").toLowerCase() + "-" + bot_uuid;
-      await updateAgent(companion.name,companion.description,companion.personality,companion.selfiePre,companion.backstory, companion.seed,workspace_name, instance_handle, agent_version,companion.createImages,companion.model,companion.imageModel);
-      
-      
-    } else if (agent_version !== companion.steamshipAgent[0].version || companion.steamshipAgent[0].revision !== companion.revision) {
-      console.log("newer version found update agent version ",companion.steamshipAgent[0].version)
-      instance_handle = userId.replace("user_", "").toLowerCase() + "-" + bot_uuid;
-      workspace_name = companion.steamshipAgent[0].workspaceHandle
-      //console.log("New instance handle ",instance_handle)
-      //console.log("New workspace name ",workspace_name)
-      await updateAgent(companion.name,companion.description,companion.personality,companion.selfiePre,companion.backstory,companion.seed, workspace_name, instance_handle, agent_version,companion.createImages,companion.model,companion.imageModel);
+      await updateAgent(
+        companion.name,
+        companion.description,
+        companion.personality,
+        companion.selfiePre,
+        companion.backstory,
+        companion.seed,
+        workspace_name,
+        instance_handle,
+        agent_version,
+        companion.createImages,
+        companion.model,
+        companion.imageModel
+      );
 
+    } else if (agent_version !== companion.steamshipAgent[0].version || companion.steamshipAgent[0].revision !== companion.revision) {
+      console.log("Newer version found, update agent version");
+
+      workspace_name = companion.steamshipAgent[0].workspaceHandle;
+      instance_handle = agent_version !== companion.steamshipAgent[0].version 
+        ? userId.replace("user_", "").toLowerCase() + "-" + bot_uuid 
+        : companion.steamshipAgent[0].instanceHandle;
+
+      await updateAgent(
+        companion.name,
+        companion.description,
+        companion.personality,
+        companion.selfiePre,
+        companion.backstory,
+        companion.seed,
+        workspace_name,
+        instance_handle,
+        agent_version,
+        companion.createImages,
+        companion.model,
+        companion.imageModel,
+        true
+      );
     } else {
-      workspace_name =companion.steamshipAgent[0].workspaceHandle
-      instance_handle = companion.steamshipAgent[0].instanceHandle
+      workspace_name = companion.steamshipAgent[0].workspaceHandle;
+      instance_handle = companion.steamshipAgent[0].instanceHandle;
     }
 
-    //console.log("instance_handle ",instance_handle)
-    //console.log("workspace_name ", workspace_name)
     const agentSettings = await prismadb.steamshipAgent.upsert({
-       where: {
-           id: chatId,
-           companionId: chatId
-       },
-       create: {
-           id: chatId,
-           userId: userId,
-           agentUrl: `https://${process.env.STEAMSHIP_BASE_URL}.steamship.run/${workspace_name}/${instance_handle}/`,
-           instanceHandle: instance_handle,
-           workspaceHandle: workspace_name,
-           companionId: chatId,
-           createdAt: new Date(Date.now() + 1000),
-           version: agent_version
-       },
-       update: {
-           id: chatId,
-           userId: userId,
-           agentUrl: `https://${process.env.STEAMSHIP_BASE_URL}.steamship.run/${workspace_name}/${instance_handle}/`,
-           createdAt: new Date(Date.now() + 1000),
-           version: agent_version,
-           instanceHandle: instance_handle,
-           workspaceHandle: workspace_name           
-       }
-    
-}); 
-    
-    //console.log("companion", companion)
+      where: {
+        id: chatId,
+        companionId: chatId
+      },
+      create: {
+        id: chatId,
+        userId: userId,
+        agentUrl: `https://${process.env.STEAMSHIP_BASE_URL}.steamship.run/${workspace_name}/${instance_handle}/`,
+        instanceHandle: instance_handle,
+        workspaceHandle: workspace_name,
+        companionId: chatId,
+        createdAt: new Date(Date.now() + 1000),
+        version: agent_version,
+        revision: companion.revision,
+      },
+      update: {
+        id: chatId,
+        userId: userId,
+        agentUrl: `https://${process.env.STEAMSHIP_BASE_URL}.steamship.run/${workspace_name}/${instance_handle}/`,
+        createdAt: new Date(Date.now() + 1000),
+        version: agent_version,
+        instanceHandle: instance_handle,
+        workspaceHandle: workspace_name,
+        revision: companion.revision,
+      }
+    });
 
-    //console.log("get steamship client")
-
-    //console.log("Steamship companion initialized")
+    console.log("Steamship companion initialized");
     return NextResponse.json({ companion, isPro }, { status: 200 });
+
   } catch (error) {
     console.error(error);
     return NextResponse.json({ error: 'Server error' }, { status: 500 });

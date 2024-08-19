@@ -89,7 +89,7 @@
     ];
     useEffect(() => {
       // Adding console to ensure it will log as expected when triggered.
-      console.log('Scrolling to bottom on page load');
+      //console.log('Scrolling to bottom on page load');
       bottomRef.current?.scrollIntoView({ behavior: "smooth" });
     }, []);
     const {

@@ -140,15 +140,15 @@ export async function PATCH(
                 revision: companion.revision + 1,
             }
         });
-        
-        if (body['model'] != companion.model || body[createImages] != companion.createImages) {
-            llm_model = body['model'];
-            //instance_handle = user.id.replace("user_", "").toLowerCase() + "-" + uuidv4().replace(/-/g, "").toLowerCase();
-            /* 
-            const client = await SteamshipV2.use(env_packageName, companion.steamshipAgent[0].instanceHandle, { }, companion.steamshipAgent[0].version, true, companion.steamshipAgent[0].workspaceName);
-            */
-        }
-
+        /*
+            if (body['model'] != companion.model || body[createImages] != companion.createImages) {
+                llm_model = body['model'];
+                //instance_handle = user.id.replace("user_", "").toLowerCase() + "-" + uuidv4().replace(/-/g, "").toLowerCase();
+                /* 
+                const client = await SteamshipV2.use(env_packageName, companion.steamshipAgent[0].instanceHandle, { }, companion.steamshipAgent[0].version, true, companion.steamshipAgent[0].workspaceName);
+                
+            }
+        */
         //console.log(llm_model);
         //console.log(instance_handle);
 
