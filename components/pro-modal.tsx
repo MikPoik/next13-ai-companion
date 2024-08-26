@@ -45,7 +45,6 @@ export const ProModal = () => {
             <span className="text-sky-500 mx-1 font-medium">AI</span>
             companions<br/>
             * 100 000 tokens / month<br/>
-            * Better image resolution<br/>
             <br/>
 
           </DialogDescription>

@@ -256,11 +256,12 @@ export async function DELETE(
                 id: params.companionId
             }
         });
+        /*
         const steamshipPackage = process.env.STEAMSHIP_PACKAGE;
         if (!steamshipPackage) {
           throw new Error("STEAMSHIP_PACKAGE environment variable is not set");
         }
-        /*
+        
         const instance = await SteamshipV2.use(process.env.STEAMSHIP_PACKAGE, companion.instanceHandle, {}, undefined, true, companion.workspaceName);
         instance.delete();
         */

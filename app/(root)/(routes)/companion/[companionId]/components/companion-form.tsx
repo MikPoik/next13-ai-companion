@@ -62,7 +62,7 @@ const formSchema = z.object({
     voiceId: z.string().optional(),
     regenerateImage: z.boolean().optional(),
     phoneVoiceId: z.string().optional(),
-    tags: z.array(z.string()).optional(),
+    tags: z.array(z.string()).min(1,{ message: "tags are required" }),
     nsfw: z.boolean().optional()
 });
 
@@ -394,12 +394,14 @@ export const CompanionForm = ({
                                                 <SelectItem key="https://civitai.com/api/download/models/294706" value="https://civitai.com/api/download/models/294706">iNiverseMix (SDXL) Realistic</SelectItem>
                                                 <SelectItem key="https://civitai.com/api/download/models/228559?type=Model&format=SafeTensor&size=pruned&fp=fp16" value="https://civitai.com/api/download/models/228559?type=Model&format=SafeTensor&size=pruned&fp=fp16">Omnigen XL (SDXL) Realistic/Anime</SelectItem>
                                                 <SelectItem key="https://civitai.com/api/download/models/281176?type=Model&format=SafeTensor&size=pruned&fp=fp16" value="https://civitai.com/api/download/models/281176?type=Model&format=SafeTensor&size=pruned&fp=fp16">Albedo (SDXL) Realistic</SelectItem>
-                                                <SelectItem key="https://civitai.com/api/download/models/384264?type=Model&format=SafeTensor&size=full&fp=fp16" value="https://civitai.com/api/download/models/384264?type=Model&format=SafeTensor&size=full&fp=fp16">AnythingXL (SDXL) Anime/Realistic</SelectItem>
+                                                <SelectItem key="https://civitai.com/api/download/models/384264?type=Model&format=SafeTensor&size=full&fp=fp16" value="https://civitai.com/api/download/models/384264?type=Model&format=SafeTensor&size=full&fp=fp16">AnythingXL (SDXL) Anime</SelectItem>
                                                 <SelectItem key="https://civitai.com/api/download/models/293564?type=Model&format=SafeTensor&size=full&fp=fp32" value="https://civitai.com/api/download/models/293564?type=Model&format=SafeTensor&size=full&fp=fp32">Animagine (SDXL) Anime</SelectItem>
                                                 <SelectItem key="https://civitai.com/api/download/models/156375" value="https://civitai.com/api/download/models/156375">Clearhung Anime (SDXL)</SelectItem>
                                                 <SelectItem key="https://civitai.com/api/download/models/378499" value="https://civitai.com/api/download/models/378499">Hassaku (SDXL) Anime</SelectItem>
                                                 <SelectItem key="https://civitai.com/api/download/models/303526?type=Model&format=SafeTensor&size=full&fp=fp16" value="https://civitai.com/api/download/models/303526?type=Model&format=SafeTensor&size=full&fp=fp16">Animemix (SDXL)</SelectItem>
                                                 <SelectItem key="https://civitai.com/api/download/models/286821" value="https://civitai.com/api/download/models/286821">Deephentai (SDXL)</SelectItem>
+                                                <SelectItem key="flux-general-with-lora" value="flux-general-with-lora">FLUX.1 (SFW)</SelectItem>
+                                                <SelectItem key="stabilityai/stable-diffusion-xl-base-1.0" value="stabilityai/stable-diffusion-xl-base-1.0">StableDiffusion 1.0 XL (SFW)</SelectItem>
 
 
 
@@ -581,11 +583,11 @@ export const CompanionForm = ({
                                             </SelectTrigger>
                                         </FormControl>
                                         <SelectContent>
-                                            <SelectItem key="cognitivecomputations/dolphin-2.5-mixtral-8x7b" value="cognitivecomputations/dolphin-2.5-mixtral-8x7b">Dolphin 2.5 8x7B</SelectItem>
                                             <SelectItem key="NousResearch/Nous-Hermes-2-Mixtral-8x7B-DPO" value="NousResearch/Nous-Hermes-2-Mixtral-8x7B-DPO">Mixtral 8x7B DPO</SelectItem>
-                                            <SelectItem key="NousResearch/Nous-Hermes-2-Mixtral-8x7B-SFT" value="NousResearch/Nous-Hermes-2-Mixtral-8x7B-SFT">Mixtral 8x7B SFT</SelectItem>
+
                                             <SelectItem key="teknium/OpenHermes-2-Mistral-7B" value="teknium/OpenHermes-2-Mistral-7B">Mistral 7b</SelectItem>
-                                            <SelectItem key="Gryphe/MythoMax-L2-13b" value="Gryphe/MythoMax-L2-13b">MythoMax 13b</SelectItem>                                            
+                                            <SelectItem key="Gryphe/MythoMax-L2-13b" value="Gryphe/MythoMax-L2-13b">MythoMax 13b</SelectItem>                  
+                                            <SelectItem key="meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo" value="meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo">Meta Llama 3.1 8B Turbo</SelectItem>
                                             <SelectItem key="gpt-3.5-turbo-0613" value="gpt-3.5-turbo-0613">GPT-3.5</SelectItem>
                                         </SelectContent>
                                     </Select>

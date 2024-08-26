@@ -5,7 +5,7 @@ import { auth } from "@clerk/nextjs/server";
 import { checkSubscription } from "@/lib/subscription";
 const { v4: uuidv4 } = require('uuid');
 
-async function updateAgent(name: string, description: string, personality: string, appearance: string, background: string, seed: string, workspace_name: string, instance_handle: string, agent_version: string, create_images: boolean, llm_model: string, image_model: string, update_version: boolean = false) {
+async function updateAgent(name: string, description: string, personality: string, appearance: string, background: string, seed: string, workspace_name: string, instance_handle: string, agent_version: string, create_images: boolean, llm_model: string, image_model: string,tags:string, update_version: boolean = false) {
   let retryCount = 0;
   const maxRetries = 3;
   const packageName = process.env.STEAMSHIP_PACKAGE || "ai-adventure-test";
@@ -20,8 +20,9 @@ async function updateAgent(name: string, description: string, personality: strin
         true,
         workspace_name
       );
-      console.log("Patc server settings")
+      console.log("Patch server settings")
       const settings = await client.invoke("patch_server_settings", {
+        chat_mode: true,
         enable_images_in_chat: create_images,
         default_story_model: llm_model,
         image_theme_by_model: image_model,
@@ -37,7 +38,8 @@ async function updateAgent(name: string, description: string, personality: strin
           personality: personality,
           appearance: appearance,
           background: background,
-          seed: seed
+          seed: seed,
+          tags:tags
         });
       } else {
         console.log("Update companion chat")
@@ -47,7 +49,8 @@ async function updateAgent(name: string, description: string, personality: strin
           personality: personality,
           appearance: appearance,
           background: background,
-          seed: seed
+          seed: seed,
+          tags:tags
         });
       }
       const game_state = await client.invoke("game_state", {
@@ -56,7 +59,8 @@ async function updateAgent(name: string, description: string, personality: strin
         personality: personality,
         appearance: appearance,
         background: background,
-        seed: seed
+        seed: seed,
+        tags: tags
       });
       const typedGameState = game_state as { data: any };
       console.log(typedGameState.data)
@@ -99,14 +103,15 @@ export async function POST(req: NextRequest) {
           take: 1, // Limit the number of records to 1
           orderBy: { createdAt: "desc" },
           where: { userId: userId }
-        }
+        },
+        tags: true
       }
     });
-
     if (!companion) {
       return NextResponse.json({ error: 'Companion not found' }, { status: 404 });
     }
-
+    const companion_tags = companion.tags.map(tag => tag.name).join(', ');
+    //console.log(companion.tags.map(tag => tag.name).join(', '));
     // Assign handle here so it is consistent within retries
     let bot_uuid = uuidv4().replace(/-/g, "").toLowerCase();
     let ws_uuid = uuidv4().replace(/-/g, "").toLowerCase();
@@ -132,7 +137,8 @@ export async function POST(req: NextRequest) {
         agent_version,
         companion.createImages,
         companion.model,
-        companion.imageModel
+        companion.imageModel,
+        companion_tags
       );
 
     } else if (agent_version !== companion.steamshipAgent[0].version || companion.steamshipAgent[0].revision !== companion.revision) {
@@ -156,13 +162,14 @@ export async function POST(req: NextRequest) {
         companion.createImages,
         companion.model,
         companion.imageModel,
+        companion_tags,
         true
       );
     } else {
       workspace_name = companion.steamshipAgent[0].workspaceHandle;
       instance_handle = companion.steamshipAgent[0].instanceHandle;
     }
-
+    console.log(workspace_name, instance_handle)
     const agentSettings = await prismadb.steamshipAgent.upsert({
       where: {
         id: chatId,

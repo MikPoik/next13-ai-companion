@@ -2,7 +2,6 @@ import { headers } from "next/headers"
 import { NextResponse } from "next/server"
 import prismadb from "@/lib/prismadb"
 import { UserButton } from "@clerk/nextjs"
-import { appendHistorySteamship, } from "@/components/SteamshipAppendHistory";
 import { Steamship as SteamshipV2 } from 'steamship-client-v2';
 import {Role } from "@prisma/client";
 export const maxDuration = 60;
@@ -11,9 +10,9 @@ export async function POST(req: Request) {
     try {
         const body = await req.text();
         //console.log("CALL HOOK");
-        //console.log("jsonbody", body);
+        console.log("jsonbody", body);
         const data = JSON.parse(body);
-        //console.log("data", data);
+        console.log("data", data);
         const callId = data.id;
         const agentId = data.agent_id;
         //console.log('Call ID:', callId);
@@ -21,20 +20,20 @@ export async function POST(req: Request) {
         const correctedDuration = data.telephony_data.duration;
         //console.log('Corrected Duration:', correctedDuration);
         const transcriptsText = data.transcript;
-        //console.log('Transcripts:', transcriptsText);
+        console.log('Transcripts:', transcriptsText);
         // Declare transcriptUser outside of the nested try block
         let transcriptUser: Array<{ user: string, text: string }> = [];
         try {
             transcriptUser = transcriptsText.split('\n').map((line: string) => {
-                try {
-                    const [user, text] = line.split(':  ');
-                    return { user: user.trim().toLowerCase(), text: text.trim() };
-                } catch (error: any) {
-                    console.error(`Error processing line: "${line}"`, error);
-                    return null;
+                const colonIndex = line.indexOf(':');
+                if (colonIndex !== -1) {
+                    const user = line.slice(0, colonIndex).trim().toLowerCase();
+                    const text = line.slice(colonIndex + 1).trim();
+                    return { user, text };
                 }
+                return null;
             }).filter(Boolean);
-            //console.log('Transcript User:', transcriptUser);
+            console.log('Transcript User:', transcriptUser);
         } catch (transcriptError: any) {
             console.error('Error processing transcripts:', transcriptError);
             return new NextResponse(`Transcript Processing Error: ${transcriptError.message}`, { status: 400 });
@@ -55,7 +54,7 @@ export async function POST(req: Request) {
             },
             data: {
                 status: "completed",
-                duration: correctedDuration,
+                duration: correctedDuration.toString(),
             }
         });
         const companionId = call_sender.companionId;
@@ -65,8 +64,21 @@ export async function POST(req: Request) {
             // Debugging each transcript
             const role: Role = transcript.user === "assistant" ? Role.system : Role.user;
             //console.log('Processing transcript:', transcript);
-            const createdAt = new Date(data.createdAt).getTime() + index * 1000;
-            //console.log(createdAt)
+            let createdAt: Date;
+            try {
+                // Remove the last colon from the timezone offset
+                const formattedTimestamp = data.created_at.replace(/([+-]\d{2}):(\d{2})$/, '$1$2');
+                createdAt = new Date(formattedTimestamp);
+
+                if (isNaN(createdAt.getTime())) {
+                    throw new Error('Invalid date');
+                }
+            } catch (error) {
+                console.error('Error parsing timestamp:', error);
+                // Fallback to current time if parsing fails
+                createdAt = new Date();
+            }
+            console.log(createdAt)
             const message = {
                 companionId: companionId,
                 userId: userId,
@@ -117,10 +129,19 @@ export async function POST(req: Request) {
             });
         }
         const companion = await prismadb.companion.findUnique({
-            where: {
-                id: companionId
-            }
+          where: { id: companionId },
+          include: { 
+            messages: { orderBy: { createdAt: "asc" }, where: { userId } },
+            _count: { select: { messages: true } },
+            steamshipAgent: {
+              take: 1, // Limit the number of records to 1
+              orderBy: { createdAt: "desc" },
+              where: { userId: userId }
+            },
+            tags: true
+          }
         });
+
         const json_messages = JSON.stringify(transcriptUser.map((transcript: any) => ({
             role: transcript.user === "assistant" ? "assistant" : "user",
             content: transcript.text.replace(/\\n/g, ". ")
@@ -129,22 +150,22 @@ export async function POST(req: Request) {
         if (!companion) {
             return new NextResponse(`No companion found}`, { status: 400 });
         }
-
+        if (!companion.steamshipAgent.length) {
+            return new NextResponse(`No companion found}`, { status: 400 });
+        }
+        let agent_version = process.env.AGENT_VERSION || "";
+          const packageName = process.env.STEAMSHIP_PACKAGE || "ai-adventure-test";
         //console.log("apped history to steamship")
-        const client = await SteamshipV2.use(companion.packageName, companion.instanceHandle, { llm_model: companion.model, create_images: String(companion.createImages) }, undefined, true, companion.workspaceName);
+        console.log(companion.steamshipAgent[0].instanceHandle, companion.steamshipAgent[0].workspaceHandle)
+        const client = await SteamshipV2.use(packageName, companion.steamshipAgent[0].instanceHandle, {}, companion.steamshipAgent[0].version, true, companion.steamshipAgent[0].workspaceHandle);
+        
+        await client.invoke("append_history", {
+            prompt: json_messages
+        });
+          
 
-        const appendHistoryResponse = await appendHistorySteamship(
-            'append_history',
-            json_messages,
-            userId,
-            companion.packageName,
-            companion.instanceHandle,
-            companion.workspaceName,
-            companion.model,
-            companion.createImages,);
-        const appendHistoryResponseBlocks = JSON.parse(appendHistoryResponse);
     } catch (error: any) {
-        console.error('Error while processing webhook:');
+        console.error('Error while processing webhook:', error);
         return new NextResponse(`Webhook Error: ${error.message}\n\n`, { status: 400 });
     }
     return new NextResponse(null, { status: 200 });

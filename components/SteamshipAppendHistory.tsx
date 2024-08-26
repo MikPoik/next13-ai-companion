@@ -16,7 +16,7 @@ export async function appendHistorySteamship(
         3; // Maximum number of retry attempts
     for (let retryCount = 0; retryCount < maxRetryCount; retryCount++) {
         try {
-            const instance = await SteamshipV2.use(package_name, instance_handle, { llm_model: model, create_images: String(create_images) }, undefined, true, workspace_handle);
+            const instance = await SteamshipV2.use(package_name, instance_handle, {}, undefined, true, workspace_handle);
             const response = await (instance.invoke(api_func, {
                 prompt: prompt,
                 context_id: context_id,
