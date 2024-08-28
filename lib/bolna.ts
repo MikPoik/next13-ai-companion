@@ -102,8 +102,7 @@ Description: {character_type}
 Personality: {character_personality}
 Background: {character_background}
 Appearance: {character_appeareance}
-Tone and voice: Convey emotions and reactions
-`
+Tone and voice: Convey emotions and reactions`
             }
         }
     }

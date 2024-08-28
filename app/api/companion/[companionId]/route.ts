@@ -27,7 +27,7 @@ export async function PATCH(
     try {
         const body = await req.json();
         const user = await currentUser();
-        const { name, src, description, personality, seed, categoryId, isPublic, behaviour, selfiePost, selfiePre, imageModel, voiceId, createImages, backstory, phoneVoiceId, tags, nsfw } = body;
+        const { name, src, description, personality, seed, categoryId, isPublic, behaviour, selfiePost, selfiePre, imageModel, voiceId, createImages, backstory, phoneVoiceId, tags, nsfw,model } = body;
 
         if (!params.companionId) {
             return new NextResponse("Companion ID required", { status: 400 });
@@ -105,7 +105,7 @@ export async function PATCH(
 
         const packageName = "backend-test-bot";
         const env_packageName = process.env.STEAMSHIP_PACKAGE || packageName;
-        let llm_model = companion.model;
+
         let instance_handle = companion.instanceHandle;
 
         const updateCompanion = await prismadb.companion.update({
@@ -128,7 +128,7 @@ export async function PATCH(
                 selfiePre: selfiePre,
                 imageModel: imageModel,
                 voiceId: voiceId,
-                model: llm_model,
+                model: model,
                 instanceHandle: instance_handle,
                 backstory: backstory,
                 createImages: createImages,

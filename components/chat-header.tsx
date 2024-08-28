@@ -6,6 +6,7 @@ import { Companion, Message } from "@prisma/client";
 import { useUser } from "@clerk/nextjs";
 import { Button } from "@/components/ui/button";
 import { BotAvatar } from "@/components/bot-avatar";
+import { useSearchParams } from 'next/navigation';
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -36,7 +37,7 @@ export const ChatHeader = ({
     const { user } = useUser();
     const { toast } = useToast();
     const [isCallModalOpen, setIsCallModalOpen] = useState(false); // State hook for CallModal visibility
-    
+    const searchParams = useSearchParams();
     const proModal = useProModal(); // Use the useProModal hook
     const onDelete = async () => {
         try {
@@ -72,11 +73,18 @@ export const ChatHeader = ({
     const handlePhoneCallClick = () => {
                 setIsCallModalOpen(true);
     };
+
+    const preserveQueryParams = (path: string) => {
+        const params = new URLSearchParams(searchParams.toString());
+        console.log(params.toString());
+        return `${path}${params.toString() ? `?${params.toString()}` : ''}`;
+    };
+    
     return (
         <div className="flex w-full justify-between items-center border-b border-primary/10 pb-4">
             
             <div className="flex gap-x-2 items-center">
-                    <Button onClick={() => router.back()} size="icon" variant="ghost">
+                    <Button onClick={() => router.push(preserveQueryParams("/"))} size="icon" variant="ghost">
                     <ChevronLeft className="h-8 w-8" />
                 </Button>
                 <BotAvatar src={companion.src} />
@@ -105,7 +113,7 @@ export const ChatHeader = ({
                         </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => router.push(`/companion/${companion.id}`)} className="mb-2">
+                        <DropdownMenuItem onClick={() => router.push((preserveQueryParams(`/companion/${companion.id}`)))} className="mb-2">
                             <Edit className="w-4 h-4 mr-2" />
                             Edit
                         </DropdownMenuItem>

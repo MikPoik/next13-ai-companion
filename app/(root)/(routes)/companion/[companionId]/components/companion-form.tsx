@@ -19,7 +19,7 @@ import { Select, SelectContent, SelectItem, SelectValue, SelectTrigger } from "@
 import dotenv from "dotenv";
 dotenv.config({ path: `.env` });
 import Image from 'next/image'
-
+import { useSearchParams } from 'next/navigation';
 //Steamship bot handle for generating avatars
 const STEAMSHIP_IMG_BOT_URL = "https://mpoikkilehto.steamship.run/avatar-gen-dev/backend-test-bot-ad1e44c62e699fda311a8365b6193913/generate_avatar";
 
@@ -92,6 +92,7 @@ export const CompanionForm = ({
     const [selectedVoiceId, setSelectedVoiceId] = useState(initialData?.voiceId || 'none');
     const [sampleUrl, setSampleUrl] = useState(""); // State variable to store the sample URL
     const [imageUrl, setImageUrl] = useState(initialData?.src || "/placeholder.svg");
+    const searchParams = useSearchParams();
     // Assuming initialData might have a tags property, but TypeScript isn't aware of it.
     // A helper function to assert the type of `initialData.tags`
     function assertHasTags(data: any): data is Companion {
@@ -107,7 +108,11 @@ export const CompanionForm = ({
     //console.log(tags)
     //console.log(selectedTags)
     //const [newImageUrl, setNewImageUrl] = useState('');
-
+    const preserveQueryParams = (path: string) => {
+        const params = new URLSearchParams(searchParams.toString());
+        console.log(params.toString());
+        return `${path}${params.toString() ? `?${params.toString()}` : ''}`;
+    };
     const onDelete = async (e: React.FormEvent) => {
         e.preventDefault(); // Prevent default form submission
         e.stopPropagation(); // Stop the event from propagating further
@@ -117,7 +122,7 @@ export const CompanionForm = ({
                description: "Success."
             });
             router.refresh();
-            router.push("/");
+            router.push(preserveQueryParams("/"));
         } catch (error) {
             toast({
                 variant: "destructive",
@@ -195,7 +200,7 @@ export const CompanionForm = ({
             behaviour: "",
             selfiePre: "",
             selfiePost: "",
-            model: "teknium/OpenHermes-2-Mistral-7B",
+            model: "Gryphe/MythoMax-L2-13b",
             createImages: false,
             imageModel: "https://civitai.com/api/download/models/281176?type=Model&format=SafeTensor&size=pruned&fp=fp16",
             voiceId: 'none',
@@ -263,10 +268,10 @@ export const CompanionForm = ({
 
             router.refresh();
             if(initialData){
-                router.push(`/chat/${initialData.id}`);
+                router.push(preserveQueryParams(`/chat/${initialData.id}`));
             }
             else {
-                router.push("/")
+                router.push(preserveQueryParams("/"))
             }
         } catch (error) {
             //console.log(error);
@@ -583,6 +588,10 @@ export const CompanionForm = ({
                                             </SelectTrigger>
                                         </FormControl>
                                         <SelectContent>
+                                            <SelectItem key="lizpreciatior/lzlv_70b_fp16_hf" value="lizpreciatior/lzlv_70b_fp16_hf">Lzlv 70B</SelectItem>
+                                            <SelectItem key="Sao10K/L3-70B-Euryale-v2.1" value="Sao10K/L3-70B-Euryale-v2.1">Euryale L3 70B</SelectItem>
+                                            <SelectItem key="cognitivecomputations/dolphin-2.9.1-llama-3-70b" value="cognitivecomputations/dolphin-2.9.1-llama-3-70b">Dolphin llama3 70b</SelectItem>
+                                            <SelectItem key="NousResearch/Nous-Hermes-2-Yi-34B" value="NousResearch/Nous-Hermes-2-Yi-34B">Nous-Hermes-2-Yi-34B</SelectItem>
                                             <SelectItem key="NousResearch/Nous-Hermes-2-Mixtral-8x7B-DPO" value="NousResearch/Nous-Hermes-2-Mixtral-8x7B-DPO">Mixtral 8x7B DPO</SelectItem>
 
                                             <SelectItem key="teknium/OpenHermes-2-Mistral-7B" value="teknium/OpenHermes-2-Mistral-7B">Mistral 7b</SelectItem>
