@@ -132,8 +132,7 @@
         console.log("Streamed content from Zustand:", finalStreamedContent);
       
 
-        const finalContent = accumulatedContentRef.current;
-        console.log("Final content:", finalContent);
+
         const lastUserMessage = messagesRef.current[messagesRef.current.length - 2];
         const lastAssistantMessage = messagesRef.current[messagesRef.current.length - 1];
         console.log(lastUserMessage)
@@ -143,7 +142,7 @@
           fetch(`/api/chat/${companion.id}/save-response`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ prompt: finalContent, id: lastAssistantMessage.id, blockList: lastAssistantMessage.content })
+            body: JSON.stringify({ prompt: finalStreamedContent, id: lastAssistantMessage.id, blockList: lastAssistantMessage.content })
           }); 
         }
         console.log(messages)
