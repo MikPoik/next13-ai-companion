@@ -90,9 +90,9 @@ export const StreamContent: React.FC<StreamContentProps> = ({ blockId, onContent
     return () => controller.abort();
   }, [blockId, setContent, debouncedOnContentUpdate]);
 
-  if (isLoading) {
-    return <div>Loading...</div>;
-  }
+  //if (isLoading) {
+  //  return <div>Loading...</div>;
+  //}
   if (error) {
     return <div>Error: {error}</div>;
   }
