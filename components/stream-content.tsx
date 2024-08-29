@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { debounce } from 'lodash';
+import useStreamStore from "@/lib/use-stream-store";
 
 interface StreamContentProps {
   blockId: string;
@@ -23,7 +24,8 @@ export const StreamContent: React.FC<StreamContentProps> = ({ blockId, onContent
   const [content, setContent] = useState<(string | JSX.Element)[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-
+  const { content: streamContent, setContent: setContentStore } = useStreamStore();
+  
   const debouncedOnContentUpdate = useCallback(
     debounce((updatedContent: string) => {
       if (onContentUpdate) {
@@ -57,6 +59,8 @@ export const StreamContent: React.FC<StreamContentProps> = ({ blockId, onContent
           const plainTextUpdate = accumulatedContent;
           const formattedContent = formatText(plainTextUpdate);
           setContent(formattedContent);
+          setContentStore(accumulatedContent);
+          //console.log("Updated store with:", plainTextUpdate); // Add this log
           debouncedOnContentUpdate(plainTextUpdate); // Notify parent component of new content
         }
         //console.log('Stream content finished, final content: ', accumulatedContent);
@@ -83,7 +87,7 @@ export const StreamContent: React.FC<StreamContentProps> = ({ blockId, onContent
     }
 
     return () => controller.abort();
-  }, [blockId, onContentUpdate, accumulatedContentRef, debouncedOnContentUpdate]);
+  }, [blockId, onContentUpdate, accumulatedContentRef, debouncedOnContentUpdate,setContentStore]);
 
   if (isLoading) {
     return <div>Loading...</div>;
@@ -91,5 +95,6 @@ export const StreamContent: React.FC<StreamContentProps> = ({ blockId, onContent
   if (error) {
     return <div>Error: {error}</div>;
   }
-  return <div>{content}</div>;
+  const formattedContent = formatText(streamContent);
+  return <div>{formattedContent}</div>;
 };

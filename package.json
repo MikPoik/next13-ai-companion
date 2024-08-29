@@ -66,5 +66,8 @@
         "@flydotio/dockerfile": "^0.4.8",
         "encoding": "^0.1.13",
         "prisma": "^5.0.0"
+    },
+      "engines": {
+        "node": "20.x"
     }
 }

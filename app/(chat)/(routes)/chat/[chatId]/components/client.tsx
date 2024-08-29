@@ -13,6 +13,8 @@
   import { useChat, Message as ChatMessageType } from "ai/react";
   import { Input } from "@/components/ui/input";
   import { Button } from "@/components/ui/button";
+  import useStreamStore from "@/lib/use-stream-store";
+  import {parseImageFromBlocks} from "@/lib/utils";
 
   interface ChatClientProps {
     isPro: boolean;
@@ -68,7 +70,7 @@
     const [isDeleting, setIsDeleting] = useState(false);
     const [isReloading, setIsReloading] = useState(false);
     const accumulatedContentRef = useRef<string | "">("");
-
+    const streamContent = useStreamStore((state) => state.content);
     const initialMessages: PrismaMessage[] = [
       {
         id: "seed",
@@ -111,18 +113,31 @@
         chatId: `${companion.id}`,
       },
       onResponse(response) {
+        console.log(response)
         const lastUserMessage = messagesRef.current[messagesRef.current.length - 1];
+        console.log(lastUserMessage)
+
         fetch(`/api/chat/${companion.id}/save-prompt`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ prompt: lastUserMessage.content, id: lastUserMessage.id })
         }); 
+        console.log(messagesRef)
+        console.log(messages)
+        
         bottomRef.current?.scrollIntoView({ behavior: "smooth" });
       },
       onFinish(message){
+        const finalStreamedContent = useStreamStore.getState().content;
+        console.log("Streamed content from Zustand:", finalStreamedContent);
+      
+
         const finalContent = accumulatedContentRef.current;
+        console.log("Final content:", finalContent);
         const lastUserMessage = messagesRef.current[messagesRef.current.length - 2];
         const lastAssistantMessage = messagesRef.current[messagesRef.current.length - 1];
+        console.log(lastUserMessage)
+        console.log(lastAssistantMessage)
         setInput("");
         if (!lastAssistantMessage.content.includes("I'm sorry, I had an error when generating response")){
           fetch(`/api/chat/${companion.id}/save-response`, {
@@ -131,7 +146,31 @@
             body: JSON.stringify({ prompt: finalContent, id: lastAssistantMessage.id, blockList: lastAssistantMessage.content })
           }); 
         }
+        console.log(messages)
+        console.log(messagesRef)
         bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+        const parsedContent = parseImageFromBlocks(lastAssistantMessage.content,finalStreamedContent)
+        //Loop messages here, check for last message and set the finalStreamedContent to the last message.content
+        const updatedMessages = (prevMessages: ChatMessageType[]): ChatMessageType[] => {
+          const updatedMessages = [...prevMessages];
+          if (updatedMessages.length > 0) {
+            const lastIndex = updatedMessages.length - 1;
+            updatedMessages[lastIndex] = {
+              ...updatedMessages[lastIndex],
+              content: parsedContent
+            };
+          }
+          return updatedMessages;
+        };
+        console.log(updatedMessages)
+        setMessages(updatedMessages as unknown as ChatMessageType[]);
+        console.log(messages)
+        console.log(messagesRef)
+        // Clear the streaming message ID when the response is finished
+
+        // Clear the content in the store
+        useStreamStore.getState().setContent("");
+        
       },
       onError(error) {
         console.error(error);
