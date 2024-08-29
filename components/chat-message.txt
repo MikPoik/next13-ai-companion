@@ -12,8 +12,6 @@ import { responseToChatBlocks } from "@/components/ChatBlock";
 import { chatMessagesJsonlToBlocks } from "@/components/parse-blocks-from-message";
 import { MessageTypes, validTypes } from "@/components/block-chat-types";
 import { StreamContent } from "@/components/stream-content"; 
-
-import useStreamStore from "@/lib/use-stream-store";
 const { v4: uuidv4 } = require('uuid');
 
 export interface ChatMessageProps {
@@ -70,7 +68,7 @@ export const ChatMessage = ({
 }: ChatMessageProps) => {
   const { toast } = useToast();
   const { theme } = useTheme();
-  const { content: streamedContent } = useStreamStore(); // Access streamed content from Zustand
+  const [streamedContent, setStreamedContent] = useState("");
   const [imageLoaded, setImageLoaded] = useState(false);
 
   useEffect(() => {
@@ -118,7 +116,7 @@ export const ChatMessage = ({
           return <p key={block.id}>{formatText(block.text)}</p>;
         }
         if (block.streamState === 'started' && block.messageType !== MessageTypes.IMAGE && block.mimeType != "image/png") {
-           return <StreamContent blockId={block.id} onContentUpdate={accumulatedContentRef?.current ? (newContent: string) => accumulatedContentRef.current = newContent : undefined} key={block.id} />;
+          return <StreamContent blockId={block.id} onContentUpdate={setStreamedContent} accumulatedContentRef={accumulatedContentRef} key={block.id} />;
         }
         if (block.messageType === MessageTypes.IMAGE || block.mimeType == "image/png") {
           return <div key={block.id}>            

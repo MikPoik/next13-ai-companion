@@ -6,7 +6,7 @@ import { cn } from '@/lib/utils';
 import { ThemeProvider } from '@/components/theme-provider'
 import { Toaster } from '@/components/ui/toaster';
 import { ProModal } from '@/components/pro-modal';
-import CookieConsent from '@/components/cookie-consent';
+
 import './globals.css'
 
 const inter = Inter({ subsets: ['latin'] })
@@ -32,8 +32,9 @@ export default function RootLayout({
                     <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
                         <ProModal />
                         <GoogleAnalytics />
+
                         {children}
-                        <CookieConsent />
+
                         <Toaster />
                     </ThemeProvider>
                 </body>

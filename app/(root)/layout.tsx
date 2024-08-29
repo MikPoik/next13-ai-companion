@@ -2,6 +2,7 @@ import { Navbar } from "@/components/navbar";
 import { Sidebar } from "@/components/sidebar";
 import { AgeVerification } from "@/components/age-verification"; // Corrected import statement
 import { checkSubscription } from "@/lib/subscription";
+import CookieConsent from '@/components/cookie-consent';
 
 const RootLayout = async ({
   children
@@ -18,6 +19,7 @@ const RootLayout = async ({
       </div>
       <main className="md:pl-20 pt-16 flex-grow">
            <AgeVerification />
+        <CookieConsent />
         {children}
       </main>
       <footer className="text-muted-foreground text-xs text-center w-full">

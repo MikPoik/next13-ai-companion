@@ -32,7 +32,7 @@ const CookieConsent: React.FC = () => {
   }
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-gray-800 text-white p-4 transition-opacity duration-300 ease-in-out opacity-100">
+    <div className="fixed bottom-0 left-0 right-0 bg-gray-800 text-white p-4 transition-opacity duration-300 ease-in-out opacity-100 z-50">
       <div className="container mx-auto flex justify-between items-center">
         <p>This website uses cookies to enhance the user experience.</p>
         <div>
