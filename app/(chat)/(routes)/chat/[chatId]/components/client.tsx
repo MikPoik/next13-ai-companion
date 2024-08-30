@@ -7,6 +7,7 @@
   import { ChatHeader } from "@/components/chat-header";
   import { chatMessagesJsonlToBlocks } from "@/components/parse-blocks-from-message";
   import { BeatLoader } from "react-spinners";
+  import { MoonLoader } from "react-spinners";
   import { SendHorizonal, X, RotateCcw, Trash2, MoveDown } from "lucide-react";
   import { useProModal } from "@/hooks/use-pro-modal";
   import { useToast } from "@/components/ui/use-toast";
@@ -329,7 +330,7 @@
     return (
       <div className="flex flex-col h-full">
         <ChatHeader isPro={isPro} companion={companion} />
-        <div style={scrollContainerStyle} className="flex-1 overflow-y-auto py-2 pb-0">
+        <div style={scrollContainerStyle} className="flex-1 overflow-y-auto py-2 pb-5">
           {transformedMessages.map((message, index) => (
             <div key={message.id} className="flex items-center">
               <ChatMessageComponent
@@ -352,13 +353,17 @@
           ))}
           
           <div ref={bottomRef} />
-          {isLoading ? <div style={{ display: 'flex', alignItems: 'center' }} ref={bottomRef}><BeatLoader color={theme === "light" ? "black" : "white"} size={5} /><Button onClick={stop} disabled={!isLoading} variant="ghost"><X className="w-4 h-4" /></Button></div> : null}
+          <div style={{ display: 'flex', alignItems: 'center',padding:0,margin:9 }} ref={bottomRef}/>
           {error ? <p>{error.message}</p> : null}
         </div>
         <form onSubmit={onSubmit} className="border-t border-primary/10 py-1 pb-0 flex items-center gap-x-0 pr-0 sticky bottom-0">
           <Input disabled={isLoading} value={input} onChange={handleInputChange} placeholder="Type a message" className="rounded-lg bg-primary/10" />
           <Button type="submit" disabled={isLoading} variant="ghost">
-            <SendHorizonal className="w-4 h-4" />
+                {isLoading ? (
+             <MoonLoader size={20} color={theme === 'light' ? 'black' : 'white'} loading={isLoading} />
+                ) : (
+                  <SendHorizonal className="w-4 h-4" />
+                )}
           </Button>
           {transformedMessages.length >= 2 && (
             <Button onClick={handleReload} disabled={isReloading} variant="ghost">
