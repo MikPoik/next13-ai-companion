@@ -58,7 +58,7 @@ export const StreamContent: React.FC<StreamContentProps> = ({ blockId, onContent
 
           // Update to set content in chunks as received without waiting for the entire message.
           const plainTextUpdate = accumulatedContent;
-          const formattedContent = formatText(plainTextUpdate);
+          
           
           setContentStore(accumulatedContent);
           //console.log("Updated store with:", plainTextUpdate); // Add this log
@@ -97,5 +97,5 @@ export const StreamContent: React.FC<StreamContentProps> = ({ blockId, onContent
     return <div>Error: {error}</div>;
   }
   const formattedContent = formatText(streamContent);
-  return <div>{content}</div>;
+  return <div>{formattedContent}</div>;
 };

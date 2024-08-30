@@ -356,7 +356,7 @@
           <div style={{ display: 'flex', alignItems: 'center',padding:0,margin:9 }} ref={bottomRef}/>
           {error ? <p>{error.message}</p> : null}
         </div>
-        <form onSubmit={onSubmit} className="border-t border-primary/10 py-1 pb-0 flex items-center gap-x-0 pr-0 sticky bottom-0">
+        <form onSubmit={onSubmit} className="border-t border-primary/10 py-1 pb-1 flex items-center gap-x-0 pl-1 sticky bottom-0">
           <Input disabled={isLoading} value={input} onChange={handleInputChange} placeholder="Type a message" className="rounded-lg bg-primary/10" />
           <Button type="submit" disabled={isLoading} variant="ghost">
                 {isLoading ? (

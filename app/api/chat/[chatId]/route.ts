@@ -122,7 +122,7 @@ export async function POST(
             },
         })
         const stream = await SteamshipStream(response, steamship, {
-            streamTimeoutSeconds: 30,
+            streamTimeoutSeconds: 60,
             format: "json-no-inner-stream"
         });
 

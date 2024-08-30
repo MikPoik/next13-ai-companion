@@ -323,8 +323,9 @@ export const CompanionForm = ({
 
     };
     const dropdownStyle: React.CSSProperties = {
-        maxHeight: "500px", // Limit the dropdown's height
-        overflowY: "auto" // Enable vertical scrolling
+        maxHeight: "450px", // Limit the dropdown's height
+        overflowY: "auto", // Enable vertical scrolling
+        WebkitOverflowScrolling: 'touch' // Show scrollbar
     };
     return (
         <div className="h-full p-4 space-y-2 max-w-3xl mx-auto">
@@ -596,8 +597,8 @@ export const CompanionForm = ({
 
                                             <SelectItem key="teknium/OpenHermes-2-Mistral-7B" value="teknium/OpenHermes-2-Mistral-7B">Mistral 7b</SelectItem>
                                             <SelectItem key="Gryphe/MythoMax-L2-13b" value="Gryphe/MythoMax-L2-13b">MythoMax 13b</SelectItem>                  
-                                            <SelectItem key="meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo" value="meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo">Meta Llama 3.1 8B Turbo</SelectItem>
-                                            <SelectItem key="gpt-3.5-turbo-0613" value="gpt-3.5-turbo-0613">GPT-3.5</SelectItem>
+                                            <SelectItem key="meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo" value="meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo">Meta Llama 3.1 8B Turbo (SFW)</SelectItem>
+                                            <SelectItem key="gpt-3.5-turbo-0613" value="gpt-3.5-turbo-0613">GPT-3.5 (SFW)</SelectItem>
                                         </SelectContent>
                                     </Select>
                                     <FormDescription>
