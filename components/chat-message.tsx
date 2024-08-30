@@ -31,17 +31,19 @@ export interface ChatMessageProps {
 const imageStyles = {
   wrapper: {
     backgroundColor: "rgb(50, 50, 50)",
-    minWidth: "512px",
-    minHeight: "686px",
     maxWidth: "512px",
+    aspectRatio: "3 / 4",
     transition: "background-color 0.5s ease-in-out",
     animation: "fadeInOut 2s infinite",
+    overflow: "hidden"
   },
   img: {
-    maxWidth: "512px",
+    maxWidth: "100%",
+    height: "auto",
     display: "block",
     opacity: 0,
     transition: "opacity 0.5s ease-in-out",
+    objectFit: "contain" as 'contain',
   },
   loadedWrapper: {
     backgroundColor: "transparent",
@@ -80,6 +82,7 @@ export const ChatMessage = ({
   const handleImageLoad = (wrapperElement: HTMLDivElement, imgElement: HTMLImageElement) => {
     setImageLoaded(true);
     applyLoadedStyles(wrapperElement, imgElement);
+    
   };
 
   if (isLoading || (streamState === 'started' && !streamedContent)) {
@@ -121,18 +124,24 @@ export const ChatMessage = ({
            return <StreamContent blockId={block.id} onContentUpdate={accumulatedContentRef?.current ? (newContent: string) => accumulatedContentRef.current = newContent : undefined} key={block.id} />;
         }
         if (block.messageType === MessageTypes.IMAGE || block.mimeType == "image/png") {
-          return <div key={block.id}>            
-            <div className={`image-placeholder-wrapper ${imageLoaded ? 'loaded' : ''}`} style={imageStyles.wrapper}>
-              {block.text && block.text !== "" && <span> {formatText(block.text)}</span>}
-              <img 
-                src={block.streamingUrl} 
-                alt={block.src} 
-                style={imageStyles.img}
-                onLoad={(e) => handleImageLoad(e.currentTarget.parentElement as HTMLDivElement, e.currentTarget)}
-              />
+          return  (
+            <div key={block.id}>
+              {block.text && block.text !== "" && (
+                <p className="mb-2">{formatText(block.text)}</p>
+              )}
+              <div
+                className={`image-placeholder-wrapper ${imageLoaded ? 'loaded' : ''}`}
+                style={imageStyles.wrapper}
+              >
+                <img 
+                  src={block.streamingUrl} 
+                  alt={block.src} 
+                  style={imageStyles.img}
+                  onLoad={(e) => handleImageLoad(e.currentTarget.parentElement as HTMLDivElement, e.currentTarget)}
+                />
+              </div>
             </div>
-            
-          </div>;
+          );
         }
         return null;
       }).filter(Boolean);
@@ -147,8 +156,12 @@ export const ChatMessage = ({
     <>
       <style jsx>{`
         @keyframes fadeInOut {
-          0%, 100% { opacity: 1; }
-          50% { opacity: 0.5; }
+          0%, 100% { opacity: 0.8; }
+          50% { opacity: 0.6; }
+        }
+        .image-placeholder-wrapper {
+          animation: fadeInOut 2s infinite;
+        }
         }
         .image-placeholder-wrapper {
           animation: fadeInOut 2s infinite;
@@ -158,14 +171,13 @@ export const ChatMessage = ({
         "group flex items-start gap-x-3 py-2 w-full",
         role === "user" && "justify-end"
       )}>
-        <div className="flex-1 mr-4">
+        <div className="flex-1 mr-4 space-y-2">
           <span className="text-sm text-gray-500">
             {role === "user" ? "You" : companionName}:
           </span>
-          <br />
-          <span className="leading-6 text-sm">
+          <div className="leading-6 text-sm">
             {renderContent()}
-          </span>
+          </div>
         </div>
       </div>
     </>

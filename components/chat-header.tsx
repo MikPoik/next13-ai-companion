@@ -81,7 +81,7 @@ export const ChatHeader = ({
     };
     
     return (
-        <div className="flex w-full justify-between items-center border-b border-primary/10 pb-4">
+        <div className="flex w-full justify-between items-center border-b border-primary/10 pb-0">
             
             <div className="flex gap-x-2 items-center">
                     <Button onClick={() => router.push(preserveQueryParams("/"))} size="icon" variant="ghost">

@@ -41,8 +41,8 @@
   }
 
   const scrollContainerStyle: React.CSSProperties = {
-    msOverflowStyle: "none",
-    scrollbarWidth: "none",
+    msOverflowStyle: "none", 
+    scrollbarWidth: "none" 
   };
 
   const transformChatMessageToPrismaMessage = (
@@ -330,7 +330,7 @@
     return (
       <div className="flex flex-col h-full">
         <ChatHeader isPro={isPro} companion={companion} />
-        <div style={scrollContainerStyle} className="flex-1 overflow-y-auto py-2 pb-5">
+        <div style={scrollContainerStyle} className="flex-1 overflow-y-auto py-2 pb-5 pl-1">
           {transformedMessages.map((message, index) => (
             <div key={message.id} className="flex items-center">
               <ChatMessageComponent

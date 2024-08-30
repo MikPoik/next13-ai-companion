@@ -52,7 +52,7 @@ export async function POST(
 
 
         const { prompt,id,blockList } = await request.json();
-        //console.log("Save-Response, prompt received:", prompt);
+        console.log("Save-Response, prompt received:", prompt);
         console.log("Message id ",id)
         //console.log("Block List ",blockList)
         //Parse blockList for possible image block and save to db also.
