@@ -145,8 +145,8 @@
             body: JSON.stringify({ prompt: finalStreamedContent, id: lastAssistantMessage.id, blockList: lastAssistantMessage.content })
           }); 
         }
-        console.log(messages)
-        console.log(messagesRef)
+        //console.log(messages)
+        //console.log(messagesRef)
         bottomRef.current?.scrollIntoView({ behavior: "smooth" });
         const parsedContent = parseImageFromBlocks(lastAssistantMessage.content,finalStreamedContent)
         //Loop messages here, check for last message and set the finalStreamedContent to the last message.content
@@ -161,10 +161,10 @@
           }
           return updatedMessages;
         };
-        console.log(updatedMessages)
+        //console.log(updatedMessages)
         setMessages(updatedMessages as unknown as ChatMessageType[]);
-        console.log(messages)
-        console.log(messagesRef)
+        //console.log(messages)
+        //console.log(messagesRef)
         // Clear the streaming message ID when the response is finished
 
         // Clear the content in the store
@@ -350,7 +350,7 @@
               )}
             </div>
           ))}
-          {streamContent && <div>{streamContent}</div>}
+          
           <div ref={bottomRef} />
           {isLoading ? <div style={{ display: 'flex', alignItems: 'center' }} ref={bottomRef}><BeatLoader color={theme === "light" ? "black" : "white"} size={5} /><Button onClick={stop} disabled={!isLoading} variant="ghost"><X className="w-4 h-4" /></Button></div> : null}
           {error ? <p>{error.message}</p> : null}
