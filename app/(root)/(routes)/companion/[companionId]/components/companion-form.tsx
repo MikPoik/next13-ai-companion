@@ -594,9 +594,8 @@ export const CompanionForm = ({
                                             <SelectItem key="cognitivecomputations/dolphin-2.9.1-llama-3-70b" value="cognitivecomputations/dolphin-2.9.1-llama-3-70b">Dolphin llama3 70b</SelectItem>
                                             <SelectItem key="NousResearch/Nous-Hermes-2-Yi-34B" value="NousResearch/Nous-Hermes-2-Yi-34B">Nous-Hermes-2-Yi-34B</SelectItem>
                                             <SelectItem key="NousResearch/Nous-Hermes-2-Mixtral-8x7B-DPO" value="NousResearch/Nous-Hermes-2-Mixtral-8x7B-DPO">Mixtral 8x7B DPO</SelectItem>
-
-                                            <SelectItem key="teknium/OpenHermes-2-Mistral-7B" value="teknium/OpenHermes-2-Mistral-7B">Mistral 7b</SelectItem>
-                                            <SelectItem key="Gryphe/MythoMax-L2-13b" value="Gryphe/MythoMax-L2-13b">MythoMax 13b</SelectItem>                  
+                                            <SelectItem key="Austism/chronos-hermes-13b-v2" value="Austism/chronos-hermes-13b-v2">Chronos Hermes 13B</SelectItem>  
+                                            <SelectItem key="Gryphe/MythoMax-L2-13b" value="Gryphe/MythoMax-L2-13b">MythoMax 13B</SelectItem>                  
                                             <SelectItem key="meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo" value="meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo">Meta Llama 3.1 8B Turbo (SFW)</SelectItem>
                                             <SelectItem key="gpt-3.5-turbo-0613" value="gpt-3.5-turbo-0613">GPT-3.5 (SFW)</SelectItem>
                                         </SelectContent>

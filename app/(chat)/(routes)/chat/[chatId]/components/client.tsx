@@ -16,6 +16,7 @@
   import { Button } from "@/components/ui/button";
   import useStreamStore from "@/lib/use-stream-store";
   import {parseImageFromBlocks} from "@/lib/utils";
+ import { useIsMobile } from '@/lib/is-mobile';
 
   interface ChatClientProps {
     isPro: boolean;
@@ -72,6 +73,9 @@
     const [isReloading, setIsReloading] = useState(false);
     const accumulatedContentRef = useRef<string | "">("");
     const streamContent = useStreamStore((state) => state.content);
+    const inputRef = useRef<HTMLInputElement>(null);
+    const isMobile = useIsMobile();
+    
     const initialMessages: PrismaMessage[] = [
       {
         id: "seed",
@@ -91,10 +95,10 @@
       })),
     ];
     useEffect(() => {
-      // Adding console to ensure it will log as expected when triggered.
-      //console.log('Scrolling to bottom on page load');
+
       bottomRef.current?.scrollIntoView({ behavior: "smooth" });
     }, []);
+    
     const {
       messages, 
       setMessages,
@@ -114,30 +118,30 @@
         chatId: `${companion.id}`,
       },
       onResponse(response) {
-        console.log(response)
+        //console.log(response)
         const lastUserMessage = messagesRef.current[messagesRef.current.length - 1];
-        console.log(lastUserMessage)
+        //console.log(lastUserMessage)
 
         fetch(`/api/chat/${companion.id}/save-prompt`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ prompt: lastUserMessage.content, id: lastUserMessage.id })
         }); 
-        console.log(messagesRef)
-        console.log(messages)
+        //console.log(messagesRef)
+        //console.log(messages)
         
         bottomRef.current?.scrollIntoView({ behavior: "smooth" });
       },
       onFinish(message){
         const finalStreamedContent = useStreamStore.getState().content;
-        console.log("Streamed content from Zustand:", finalStreamedContent);
+        //console.log("Streamed content from Zustand:", finalStreamedContent);
       
 
 
         const lastUserMessage = messagesRef.current[messagesRef.current.length - 2];
         const lastAssistantMessage = messagesRef.current[messagesRef.current.length - 1];
-        console.log(lastUserMessage)
-        console.log(lastAssistantMessage)
+        //console.log(lastUserMessage)
+        //console.log(lastAssistantMessage)
         setInput("");
         if (!lastAssistantMessage.content.includes("I'm sorry, I had an error when generating response")){
           fetch(`/api/chat/${companion.id}/save-response`, {
@@ -170,6 +174,12 @@
 
         // Clear the content in the store
         useStreamStore.getState().setContent("");
+
+        setTimeout(() => {
+          if (!isMobile && inputRef.current && !isLoading) {
+            inputRef.current.focus();
+          } 
+        }, 100); 
         
       },
       onError(error) {
@@ -320,17 +330,36 @@
       isLoading: false,
       src: ""
     }));
-    
+
     useEffect(() => {
-       if (isLoading) {
-        bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-       }
-    }, [messages]);
+      const scrollToBottom = () => {
+        if (!scrollRef.current && !isLoading) return;
+        if (scrollRef.current) {
+        const { scrollTop, scrollHeight, clientHeight } = scrollRef.current;
+        const isAtBottom = scrollHeight - scrollTop - clientHeight < 100;
+          console.log(isAtBottom)
+        if (isAtBottom || messages.length === 0) {
+          bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+        }
+        }
+      };
+      // Scroll on new messages or when loading starts/stops
+      scrollToBottom();
+      // Set up an interval to check for scrolling only while loading
+      let scrollInterval: NodeJS.Timeout | null = null;
+      if (isLoading) {
+        scrollInterval = setInterval(scrollToBottom, 500);
+      }
+      // Cleanup function
+      return () => {
+        if (scrollInterval) clearInterval(scrollInterval);
+      };
+    }, [messages, streamContent, isLoading]);
     
     return (
       <div className="flex flex-col h-full">
         <ChatHeader isPro={isPro} companion={companion} />
-        <div style={scrollContainerStyle} className="flex-1 overflow-y-auto py-2 pb-5 pl-1">
+        <div ref={scrollRef} style={scrollContainerStyle} className="flex-1 overflow-y-auto py-2 pb-5 pl-1">
           {transformedMessages.map((message, index) => (
             <div key={message.id} className="flex items-center">
               <ChatMessageComponent
@@ -349,15 +378,16 @@
                   <Trash2 className="w-4 h-4" /><MoveDown className="w-3 h-3" />
                 </Button>
               )}
+              
             </div>
           ))}
-          
           <div ref={bottomRef} />
-          <div style={{ display: 'flex', alignItems: 'center',padding:0,margin:9 }} ref={bottomRef}/>
+
+          
           {error ? <p>{error.message}</p> : null}
         </div>
         <form onSubmit={onSubmit} className="border-t border-primary/10 py-1 pb-1 flex items-center gap-x-0 pl-1 sticky bottom-0">
-          <Input disabled={isLoading} value={input} onChange={handleInputChange} placeholder="Type a message" className="rounded-lg bg-primary/10" />
+          <Input disabled={isLoading} value={input} onChange={handleInputChange} placeholder="Type a message" className="rounded-lg bg-primary/10" ref={inputRef} />
           <Button type="submit" disabled={isLoading} variant="ghost">
                 {isLoading ? (
              <MoonLoader size={20} color={theme === 'light' ? 'black' : 'white'} loading={isLoading} />

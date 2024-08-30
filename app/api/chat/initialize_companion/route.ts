@@ -110,6 +110,7 @@ export async function POST(req: NextRequest) {
     if (!companion) {
       return NextResponse.json({ error: 'Companion not found' }, { status: 404 });
     }
+    
     const companion_tags = companion.tags.map(tag => tag.name).join(', ');
     //console.log(companion.tags.map(tag => tag.name).join(', '));
     // Assign handle here so it is consistent within retries
@@ -123,6 +124,7 @@ export async function POST(req: NextRequest) {
 
     if (!companion.steamshipAgent.length) {
       console.log("No existing agents in db, create new agent");
+      console.log(companion)
       workspace_name = userId.replace("user_", "").toLowerCase() + "-" + ws_uuid;
       instance_handle = userId.replace("user_", "").toLowerCase() + "-" + bot_uuid;
       await updateAgent(
@@ -143,7 +145,7 @@ export async function POST(req: NextRequest) {
 
     } else if (agent_version !== companion.steamshipAgent[0].version || companion.steamshipAgent[0].revision !== companion.revision) {
       console.log("Newer version found, update agent version");
-
+      console.log(companion)
       workspace_name = companion.steamshipAgent[0].workspaceHandle;
       instance_handle = agent_version !== companion.steamshipAgent[0].version 
         ? userId.replace("user_", "").toLowerCase() + "-" + bot_uuid 
