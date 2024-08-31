@@ -10,6 +10,16 @@ import { absoluteUrl } from "@/lib/utils";
 export const dynamic = 'force-dynamic'
 const maxDuration = 60;
 
+const prices = {
+  pro: {
+    priceId: 'price_pro_id_here',
+    amount: 999,
+  },
+  unlimited: {
+    priceId: 'price_unlimited_id_here',
+    amount: 2499, // Example price
+  }
+};
 
 const settingsUrl = absoluteUrl("/settings");
 
