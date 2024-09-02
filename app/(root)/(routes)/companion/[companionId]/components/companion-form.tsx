@@ -591,7 +591,6 @@ export const CompanionForm = ({
                                         <SelectContent>
                                             <SelectItem key="lizpreciatior/lzlv_70b_fp16_hf" value="lizpreciatior/lzlv_70b_fp16_hf">Lzlv 70B</SelectItem>
                                             <SelectItem key="Sao10K/L3-70B-Euryale-v2.1" value="Sao10K/L3-70B-Euryale-v2.1">Euryale L3 70B</SelectItem>
-                                            <SelectItem key="cognitivecomputations/dolphin-2.9.1-llama-3-70b" value="cognitivecomputations/dolphin-2.9.1-llama-3-70b">Dolphin llama3 70b</SelectItem>
                                             <SelectItem key="NousResearch/Nous-Hermes-2-Yi-34B" value="NousResearch/Nous-Hermes-2-Yi-34B">Nous-Hermes-2-Yi-34B</SelectItem>
                                             <SelectItem key="NousResearch/Nous-Hermes-2-Mixtral-8x7B-DPO" value="NousResearch/Nous-Hermes-2-Mixtral-8x7B-DPO">Mixtral 8x7B DPO</SelectItem>
                                             <SelectItem key="Austism/chronos-hermes-13b-v2" value="Austism/chronos-hermes-13b-v2">Chronos Hermes 13B</SelectItem>  
