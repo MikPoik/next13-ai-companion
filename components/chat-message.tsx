@@ -90,9 +90,12 @@ export const ChatMessage = ({
   }
 
   const formatText = (text: string) => {
-    return text.split(/([*"].*?[*"])/).map((part, index) => {
+    return text.split(/([*[\]].*?[*\[\]])/).map((part, index) => {
       if (part.startsWith('*') && part.endsWith('*')) {
         return <i key={index} style={{ color: "rgba(255,255,255,0.6)" }}>{part.slice(1, -1)}</i>;
+      }
+      if (part.startsWith('[') && part.endsWith(']')) {
+        return <i key={index} style={{ color: 'rgba(255,255,255,0.6)' }}>{part.slice(1, -1)}</i>;
       }
       if (part.startsWith('"') && part.endsWith('"')) {
         return <i key={index} style={{ color: "rgba(255,255,255,0.9)" }}>{part.slice(1, -1)}</i>;

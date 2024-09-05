@@ -31,7 +31,7 @@ async function parseAndSaveImages(blockListStr: string, userId: string, chatId: 
     for (const block of blockList) {
       if (block.mimeType && block.mimeType.startsWith("image")) {
         const imageId = block.id || null;
-        console.log(`Found image block: ${imageId}`);
+        //console.log(`Found image block: ${imageId}`);
         // Return Image Id
         return imageId;
       }
@@ -52,8 +52,9 @@ export async function POST(
 
 
         const { prompt,id,blockList } = await request.json();
-        console.log("Save-Response, prompt received:", prompt);
-        console.log("Message id ",id)
+        //console.log("Save-Response, prompt received:", prompt);
+
+        //console.log("Message id ",id)
         //console.log("Block List ",blockList)
         //Parse blockList for possible image block and save to db also.
         
@@ -72,7 +73,9 @@ export async function POST(
         const image_url = await parseAndSaveImages(blockList,user.id,params.chatId,id);
         let finalContent = prompt
         if (image_url) {
-            finalContent = `[{"requestId":null,"text":"${prompt}","mimeType":"image/png","streamState":null,"url":null,"contentURL":null,"fileId":null,"id":"${image_url}","index":null,"publicData":true,"tags":[],"uploadBytes":null,"uploadType":null}]`;
+            //escape double quotes from prompt:
+            const processed_prompt = prompt.replace(/"/g, '\\"');
+            finalContent = `[{"requestId":null,"text":"${processed_prompt}","mimeType":"image/png","streamState":null,"url":null,"contentURL":null,"fileId":null,"id":"${image_url}","index":null,"publicData":true,"tags":[],"uploadBytes":null,"uploadType":null}]`;
             imageTokens = 500
         }
          await prismadb.message.upsert({
@@ -117,14 +120,14 @@ export async function POST(
                 userId: user.id
             },
         });
-        console.log(balance);
+        //console.log(balance);
         if (balance) {
             if (balance.tokenCount > balance.tokenLimit+balance.proTokens) {
                 return NextResponse.json("No balance");
             }
         }
         const tokenCost = roughTokenCount(responseText) + imageTokens + voiceTokens;
-        console.log("Token Cost: ", tokenCost);
+        //console.log("Token Cost: ", tokenCost);
         const currentDateTime = new Date().toISOString();
 
             if (!balance) {

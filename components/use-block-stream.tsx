@@ -8,7 +8,7 @@ export function useBlockStream(blockId: string) {
   useEffect(() => {
     const fetchData = async () => {
       setIsLoading(true);
-      console.log("start fetch")
+      //console.log("start fetch")
       try {
         const response = await fetch(`/api/block/${blockId}`);
         const textStream = await response.text();

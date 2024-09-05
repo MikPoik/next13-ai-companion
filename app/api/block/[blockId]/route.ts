@@ -6,7 +6,7 @@ export const dynamic = 'force-dynamic';
 const POST = async (req: Request, context: { params: any }) => {
  //console.log("[ROUTE] POST /api/block/[blockId]/route")
   const blockId = context.params.blockId;
-    console.log(`/api/block/${blockId}`);
+    //console.log(`/api/block/${blockId}`);
   const steamship = new Steamship({apiKey: process.env.STEAMSHIP_API_KEY})
   const response = await steamship.block.raw({ id: blockId });
   if (response.body) {

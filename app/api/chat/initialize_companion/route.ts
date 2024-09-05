@@ -20,7 +20,7 @@ async function updateAgent(name: string, description: string, personality: strin
         true,
         workspace_name
       );
-      console.log("Patch server settings")
+      //console.log("Patch server settings")
       const settings = await client.invoke("patch_server_settings", {
         chat_mode: true,
         enable_images_in_chat: create_images,
@@ -28,7 +28,7 @@ async function updateAgent(name: string, description: string, personality: strin
         image_theme_by_model: image_model,
       });
       const typedSettings = settings as { data: any };
-      console.log(typedSettings.data)
+      //console.log(typedSettings.data)
 
       if (!update_version) {
         console.log("Init companion chat")
@@ -63,7 +63,7 @@ async function updateAgent(name: string, description: string, personality: strin
         tags: tags
       });
       const typedGameState = game_state as { data: any };
-      console.log(typedGameState.data)
+      //console.log(typedGameState.data)
       
       console.log("Agent initialized successfully");
       break; // Exit the loop if the request is successful
@@ -124,7 +124,7 @@ export async function POST(req: NextRequest) {
 
     if (!companion.steamshipAgent.length) {
       console.log("No existing agents in db, create new agent");
-      console.log(companion)
+      //console.log(companion)
       workspace_name = userId.replace("user_", "").toLowerCase() + "-" + ws_uuid;
       instance_handle = userId.replace("user_", "").toLowerCase() + "-" + bot_uuid;
       await updateAgent(
@@ -145,7 +145,7 @@ export async function POST(req: NextRequest) {
 
     } else if (agent_version !== companion.steamshipAgent[0].version || companion.steamshipAgent[0].revision !== companion.revision) {
       console.log("Newer version found, update agent version");
-      console.log(companion)
+      //console.log(companion)
       workspace_name = companion.steamshipAgent[0].workspaceHandle;
       instance_handle = agent_version !== companion.steamshipAgent[0].version 
         ? userId.replace("user_", "").toLowerCase() + "-" + bot_uuid 
@@ -171,7 +171,7 @@ export async function POST(req: NextRequest) {
       workspace_name = companion.steamshipAgent[0].workspaceHandle;
       instance_handle = companion.steamshipAgent[0].instanceHandle;
     }
-    console.log(workspace_name, instance_handle)
+    //console.log(workspace_name, instance_handle)
     const agentSettings = await prismadb.steamshipAgent.upsert({
       where: {
         id: chatId,

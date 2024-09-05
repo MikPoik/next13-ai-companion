@@ -36,7 +36,7 @@ export function parseImageFromBlocks(
     for (const block of blockList) {
       if (block.mimeType && block.mimeType.startsWith("image")) {
         const imageId = block.id || null;
-        console.log(`Found image block: ${imageId}`);
+        //console.log(`Found image block: ${imageId}`);
         // Return Image Id
         const finalContent = `[{"requestId":null,"text":"${prompt}","mimeType":"image/png","streamState":null,"url":null,"contentURL":null,"fileId":null,"id":"${imageId}","index":null,"publicData":true,"tags":[],"uploadBytes":null,"uploadType":null}]`;
         return finalContent;

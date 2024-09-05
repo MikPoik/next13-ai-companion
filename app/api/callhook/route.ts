@@ -10,9 +10,9 @@ export async function POST(req: Request) {
     try {
         const body = await req.text();
         //console.log("CALL HOOK");
-        console.log("jsonbody", body);
+        //console.log("jsonbody", body);
         const data = JSON.parse(body);
-        console.log("data", data);
+        //console.log("data", data);
         const callId = data.id;
         const agentId = data.agent_id;
         //console.log('Call ID:', callId);
@@ -33,7 +33,7 @@ export async function POST(req: Request) {
                 }
                 return null;
             }).filter(Boolean);
-            console.log('Transcript User:', transcriptUser);
+            //console.log('Transcript User:', transcriptUser);
         } catch (transcriptError: any) {
             console.error('Error processing transcripts:', transcriptError);
             return new NextResponse(`Transcript Processing Error: ${transcriptError.message}`, { status: 400 });

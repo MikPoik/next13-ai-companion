@@ -22,7 +22,7 @@ const ChatIdPage = ({ params }: { params: { chatId: string } }) => {
 
   const initializeCompanion = async () => {
     if (initializingRef.current || initializedRef.current) {
-      console.log("Initialization already in progress or completed, skipping...");
+      //console.log("Initialization already in progress or completed, skipping...");
       return;
     }
 

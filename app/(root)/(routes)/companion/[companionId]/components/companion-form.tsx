@@ -110,7 +110,7 @@ export const CompanionForm = ({
     //const [newImageUrl, setNewImageUrl] = useState('');
     const preserveQueryParams = (path: string) => {
         const params = new URLSearchParams(searchParams.toString());
-        console.log(params.toString());
+        //console.log(params.toString());
         return `${path}${params.toString() ? `?${params.toString()}` : ''}`;
     };
     const onDelete = async (e: React.FormEvent) => {
@@ -594,7 +594,8 @@ export const CompanionForm = ({
                                             <SelectItem key="NousResearch/Nous-Hermes-2-Yi-34B" value="NousResearch/Nous-Hermes-2-Yi-34B">Nous-Hermes-2-Yi-34B</SelectItem>
                                             <SelectItem key="NousResearch/Nous-Hermes-2-Mixtral-8x7B-DPO" value="NousResearch/Nous-Hermes-2-Mixtral-8x7B-DPO">Mixtral 8x7B DPO</SelectItem>
                                             <SelectItem key="Austism/chronos-hermes-13b-v2" value="Austism/chronos-hermes-13b-v2">Chronos Hermes 13B</SelectItem>  
-                                            <SelectItem key="Gryphe/MythoMax-L2-13b" value="Gryphe/MythoMax-L2-13b">MythoMax 13B</SelectItem>                  
+                                            <SelectItem key="Gryphe/MythoMax-L2-13b" value="Gryphe/MythoMax-L2-13b">MythoMax 13B</SelectItem>       
+                                            <SelectItem key="mistralai/Mistral-Nemo-Instruct-2407" value="mistralai/Mistral-Nemo-Instruct-2407">Mistral Nemo 12B</SelectItem>      
                                             <SelectItem key="meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo" value="meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo">Meta Llama 3.1 8B Turbo (SFW)</SelectItem>
                                             <SelectItem key="gpt-3.5-turbo-0613" value="gpt-3.5-turbo-0613">GPT-3.5 (SFW)</SelectItem>
                                         </SelectContent>

@@ -108,7 +108,7 @@ export async function POST(req: Request) {
                 id: companion.phoneVoiceId
             }
         });
-        console.log("phoneVoice: ",phoneVoice)
+        //console.log("phoneVoice: ",phoneVoice)
         if (!phoneVoice) {
             return new NextResponse("No phone voice found", { status: 404 });
         }
@@ -222,8 +222,8 @@ export async function POST(req: Request) {
         //console.log("json body: ", JSON.stringify(create_bolna_agent_json, null, 2));
 
         
-        console.log("check agent id")
-        console.log(voice_agent_id)
+        //console.log("check agent id")
+        //console.log(voice_agent_id)
         if (!companion.voiceAgentId) {
             //if companion does not exist
             console.log("companion voice agent id not set")
@@ -260,7 +260,7 @@ export async function POST(req: Request) {
         
         console.log("Update agent: ",await update_voice_agent.json())
         let tags = companion.tags.map(tag => tag.name).join(", ");
-        console.log(tags)
+        //console.log(tags)
         
         const data = {
                 "agent_id": voice_agent_id, 
@@ -275,10 +275,10 @@ export async function POST(req: Request) {
                     "tags": tags,
                 }
             }
-        console.log(data);
+        //console.log(data);
         //call api post 'https://api.bland.ai/call', data, {headers};
         // Make the API call to bland.ai
-        console.log("making api call")
+        //console.log("making api call")
         /*
         const response = await fetch('https://api.bland.ai/v1/calls', {
             method: 'POST',
@@ -295,11 +295,11 @@ export async function POST(req: Request) {
         });
         
         const responseJson = await response.json(); // This converts the response to a JSON object
-        console.log(responseJson);
+        //console.log(responseJson);
 
         const callId = responseJson.call_id; // This extracts the call_id value from the response JSON
         const status = responseJson.status; // This extracts the status value from the response JSON
-        console.log(callId, status); // This logs the call_id value
+       //console.log(callId, status); // This logs the call_id value
         //if (status === 'success') {
         if (status === 'queued') {
             const callLog = await prismadb.callLog.create({
