@@ -4,7 +4,8 @@
         pkgs.yarn
         pkgs.esbuild
 
-        pkgs.nodejs_18
+        pkgs.nodejs_20
+
 
 
         pkgs.nodePackages.typescript

@@ -76,6 +76,8 @@ model Companion {
   tags           Tag[]  @relation("CompanionsTags")
   nsfw           Boolean @default(false)
   voiceAgentId   String?
+  steamshipAgent SteamshipAgent[]
+  revision       Int  @default(1)
 
 
   @@index([categoryId])
@@ -92,6 +94,19 @@ model Message {
   companion   Companion @relation(fields: [companionId], references: [id], onDelete: Cascade)
 
   @@index([companionId])
+}
+
+model SteamshipAgent {
+  id               String    @id @default(uuid())
+  userId           String
+  agentUrl         String
+  instanceHandle   String
+  workspaceHandle  String
+  version          String
+  createdAt        DateTime  @default(now())
+  companionId      String
+  companion        Companion @relation(fields: [companionId], references: [id], onDelete: Cascade)
+  revision         Int @default(1)
 }
 
 model UserSubscription {

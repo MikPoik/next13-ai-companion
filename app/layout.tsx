@@ -11,9 +11,10 @@ import './globals.css'
 
 const inter = Inter({ subsets: ['latin'] })
 
+
 export const metadata: Metadata = {
     title: 'truluv.me',
-    description: 'Your customized companions.',
+    description: 'AI companions, chat with your dream companion, create unique characters',
 }
 
 export default function RootLayout({
@@ -22,13 +23,18 @@ export default function RootLayout({
     children: React.ReactNode
 }) {
     return (
-        <ClerkProvider>
-            <html lang="en">
+        <ClerkProvider
+              publishableKey={process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY}
+              signInFallbackRedirectUrl={process.env.NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL}
+              signUpFallbackRedirectUrl={process.env.NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL}>
+            <html lang="en" suppressHydrationWarning>
                 <body className={cn("bg-secondary", inter.className)}>
                     <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
                         <ProModal />
                         <GoogleAnalytics />
+
                         {children}
+
                         <Toaster />
                     </ThemeProvider>
                 </body>

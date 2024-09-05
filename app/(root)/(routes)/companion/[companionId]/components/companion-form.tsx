@@ -19,7 +19,7 @@ import { Select, SelectContent, SelectItem, SelectValue, SelectTrigger } from "@
 import dotenv from "dotenv";
 dotenv.config({ path: `.env` });
 import Image from 'next/image'
-
+import { useSearchParams } from 'next/navigation';
 //Steamship bot handle for generating avatars
 const STEAMSHIP_IMG_BOT_URL = "https://mpoikkilehto.steamship.run/avatar-gen-dev/backend-test-bot-ad1e44c62e699fda311a8365b6193913/generate_avatar";
 
@@ -50,7 +50,7 @@ const formSchema = z.object({
     isPublic: z.boolean().optional(),
     createImages: z.boolean().optional(),
     behaviour: z.string().optional(),
-    backstory: z.string().optional(),
+    backstory: z.string().max(2000).optional(),
     selfiePre: z.string().optional(),
     selfiePost: z.string().optional(),
     model: z.string().min(1, {
@@ -62,7 +62,7 @@ const formSchema = z.object({
     voiceId: z.string().optional(),
     regenerateImage: z.boolean().optional(),
     phoneVoiceId: z.string().optional(),
-    tags: z.array(z.string()).optional(),
+    tags: z.array(z.string()).min(1,{ message: "tags are required" }),
     nsfw: z.boolean().optional()
 });
 
@@ -92,6 +92,7 @@ export const CompanionForm = ({
     const [selectedVoiceId, setSelectedVoiceId] = useState(initialData?.voiceId || 'none');
     const [sampleUrl, setSampleUrl] = useState(""); // State variable to store the sample URL
     const [imageUrl, setImageUrl] = useState(initialData?.src || "/placeholder.svg");
+    const searchParams = useSearchParams();
     // Assuming initialData might have a tags property, but TypeScript isn't aware of it.
     // A helper function to assert the type of `initialData.tags`
     function assertHasTags(data: any): data is Companion {
@@ -107,7 +108,11 @@ export const CompanionForm = ({
     //console.log(tags)
     //console.log(selectedTags)
     //const [newImageUrl, setNewImageUrl] = useState('');
-
+    const preserveQueryParams = (path: string) => {
+        const params = new URLSearchParams(searchParams.toString());
+        //console.log(params.toString());
+        return `${path}${params.toString() ? `?${params.toString()}` : ''}`;
+    };
     const onDelete = async (e: React.FormEvent) => {
         e.preventDefault(); // Prevent default form submission
         e.stopPropagation(); // Stop the event from propagating further
@@ -117,7 +122,7 @@ export const CompanionForm = ({
                description: "Success."
             });
             router.refresh();
-            router.push("/");
+            router.push(preserveQueryParams("/"));
         } catch (error) {
             toast({
                 variant: "destructive",
@@ -195,9 +200,9 @@ export const CompanionForm = ({
             behaviour: "",
             selfiePre: "",
             selfiePost: "",
-            model: "teknium/OpenHermes-2-Mistral-7B",
+            model: "Gryphe/MythoMax-L2-13b",
             createImages: false,
-            imageModel: "realistic",
+            imageModel: "https://civitai.com/api/download/models/281176?type=Model&format=SafeTensor&size=pruned&fp=fp16",
             voiceId: 'none',
             backstory: "",
             regenerateImage: false,
@@ -264,10 +269,10 @@ export const CompanionForm = ({
 
             router.refresh();
             if(initialData){
-                router.push(`/chat/${initialData.id}`);
+                router.push(preserveQueryParams(`/chat/${initialData.id}`));
             }
             else {
-                router.push("/")
+                router.push(preserveQueryParams("/"))
             }
         } catch (error) {
             //console.log(error);
@@ -319,8 +324,9 @@ export const CompanionForm = ({
 
     };
     const dropdownStyle: React.CSSProperties = {
-        maxHeight: "500px", // Limit the dropdown's height
-        overflowY: "auto" // Enable vertical scrolling
+        maxHeight: "450px", // Limit the dropdown's height
+        overflowY: "auto", // Enable vertical scrolling
+        WebkitOverflowScrolling: 'touch' // Show scrollbar
     };
     return (
         <div className="h-full p-4 space-y-2 max-w-3xl mx-auto">
@@ -392,15 +398,17 @@ export const CompanionForm = ({
                                                 <SelectItem key="mo-di-diffusion" value="mo-di-diffusion">Modern Disney Diffusion</SelectItem>
                                                 <SelectItem key="synthwave-punk-v2" value="synthwave-punk-v2">Synthwave Punk V2</SelectItem>
                                                 <SelectItem key="dream-shaper-v8" value="dream-shaper-v8">Dream Shaper V8</SelectItem>
-                                                <SelectItem key="https://civitai.com/api/download/models/294706" value="https://civitai.com/api/download/models/294706">iNiverseMix (SDXL)</SelectItem>
-                                                <SelectItem key="https://civitai.com/api/download/models/228559?type=Model&format=SafeTensor&size=pruned&fp=fp16" value="https://civitai.com/api/download/models/228559?type=Model&format=SafeTensor&size=pruned&fp=fp16">Omnigen XL (SDXL)</SelectItem>
-                                                <SelectItem key="https://civitai.com/api/download/models/281176?type=Model&format=SafeTensor&size=pruned&fp=fp16" value="https://civitai.com/api/download/models/281176?type=Model&format=SafeTensor&size=pruned&fp=fp16">Albedo (SDXL)</SelectItem>
-                                                <SelectItem key="https://civitai.com/api/download/models/384264?type=Model&format=SafeTensor&size=full&fp=fp16" value="https://civitai.com/api/download/models/384264?type=Model&format=SafeTensor&size=full&fp=fp16">AnythingXL (SDXL)</SelectItem>
-                                                <SelectItem key="https://civitai.com/api/download/models/293564?type=Model&format=SafeTensor&size=full&fp=fp32" value="https://civitai.com/api/download/models/293564?type=Model&format=SafeTensor&size=full&fp=fp32">Animagine (SDXL)</SelectItem>
+                                                <SelectItem key="https://civitai.com/api/download/models/294706" value="https://civitai.com/api/download/models/294706">iNiverseMix (SDXL) Realistic</SelectItem>
+                                                <SelectItem key="https://civitai.com/api/download/models/228559?type=Model&format=SafeTensor&size=pruned&fp=fp16" value="https://civitai.com/api/download/models/228559?type=Model&format=SafeTensor&size=pruned&fp=fp16">Omnigen XL (SDXL) Realistic/Anime</SelectItem>
+                                                <SelectItem key="https://civitai.com/api/download/models/281176?type=Model&format=SafeTensor&size=pruned&fp=fp16" value="https://civitai.com/api/download/models/281176?type=Model&format=SafeTensor&size=pruned&fp=fp16">Albedo (SDXL) Realistic</SelectItem>
+                                                <SelectItem key="https://civitai.com/api/download/models/384264?type=Model&format=SafeTensor&size=full&fp=fp16" value="https://civitai.com/api/download/models/384264?type=Model&format=SafeTensor&size=full&fp=fp16">AnythingXL (SDXL) Anime</SelectItem>
+                                                <SelectItem key="https://civitai.com/api/download/models/293564?type=Model&format=SafeTensor&size=full&fp=fp32" value="https://civitai.com/api/download/models/293564?type=Model&format=SafeTensor&size=full&fp=fp32">Animagine (SDXL) Anime</SelectItem>
                                                 <SelectItem key="https://civitai.com/api/download/models/156375" value="https://civitai.com/api/download/models/156375">Clearhung Anime (SDXL)</SelectItem>
-                                                <SelectItem key="https://civitai.com/api/download/models/378499" value="https://civitai.com/api/download/models/378499">Hassaku (SDXL)</SelectItem>
+                                                <SelectItem key="https://civitai.com/api/download/models/378499" value="https://civitai.com/api/download/models/378499">Hassaku (SDXL) Anime</SelectItem>
                                                 <SelectItem key="https://civitai.com/api/download/models/303526?type=Model&format=SafeTensor&size=full&fp=fp16" value="https://civitai.com/api/download/models/303526?type=Model&format=SafeTensor&size=full&fp=fp16">Animemix (SDXL)</SelectItem>
                                                 <SelectItem key="https://civitai.com/api/download/models/286821" value="https://civitai.com/api/download/models/286821">Deephentai (SDXL)</SelectItem>
+                                                <SelectItem key="flux-general-with-lora" value="flux-general-with-lora">FLUX.1 (SFW)</SelectItem>
+                                                <SelectItem key="stabilityai/stable-diffusion-xl-base-1.0" value="stabilityai/stable-diffusion-xl-base-1.0">StableDiffusion 1.0 XL (SFW)</SelectItem>
 
 
 
@@ -583,13 +591,16 @@ export const CompanionForm = ({
                                         </FormControl>
                                         <SelectContent>
 
-                                            <SelectItem key="cognitivecomputations/dolphin-2.5-mixtral-8x7b" value="cognitivecomputations/dolphin-2.5-mixtral-8x7b">Dolphin 2.5 8x7B</SelectItem>
+                                            <SelectItem key="lizpreciatior/lzlv_70b_fp16_hf" value="lizpreciatior/lzlv_70b_fp16_hf">Lzlv 70B</SelectItem>
+                                            <SelectItem key="Sao10K/L3-70B-Euryale-v2.1" value="Sao10K/L3-70B-Euryale-v2.1">Euryale L3 70B</SelectItem>
+                                            <SelectItem key="NousResearch/Nous-Hermes-2-Yi-34B" value="NousResearch/Nous-Hermes-2-Yi-34B">Nous-Hermes-2-Yi-34B</SelectItem>
                                             <SelectItem key="NousResearch/Nous-Hermes-2-Mixtral-8x7B-DPO" value="NousResearch/Nous-Hermes-2-Mixtral-8x7B-DPO">Mixtral 8x7B DPO</SelectItem>
-                                            <SelectItem key="NousResearch/Nous-Hermes-2-Mixtral-8x7B-SFT" value="NousResearch/Nous-Hermes-2-Mixtral-8x7B-SFT">Mixtral 8x7B SFT</SelectItem>
-                                            <SelectItem key="teknium/OpenHermes-2-Mistral-7B" value="teknium/OpenHermes-2-Mistral-7B">Mistral 7b</SelectItem>
-                                  <SelectItem key="Gryphe/MythoMax-L2-13b" value="Gryphe/MythoMax-L2-13b">MythoMax 13b</SelectItem>                                            
+                                            <SelectItem key="Austism/chronos-hermes-13b-v2" value="Austism/chronos-hermes-13b-v2">Chronos Hermes 13B</SelectItem>  
+                                            <SelectItem key="Gryphe/MythoMax-L2-13b" value="Gryphe/MythoMax-L2-13b">MythoMax 13B</SelectItem>       
+                                            <SelectItem key="mistralai/Mistral-Nemo-Instruct-2407" value="mistralai/Mistral-Nemo-Instruct-2407">Mistral Nemo 12B</SelectItem>      
+                                            <SelectItem key="meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo" value="meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo">Meta Llama 3.1 8B Turbo (SFW)</SelectItem>
+                                            <SelectItem key="gpt-3.5-turbo-0613" value="gpt-3.5-turbo-0613">GPT-3.5 (SFW)</SelectItem>
 
-                                            <SelectItem key="gpt-3.5-turbo-0613" value="gpt-3.5-turbo-0613">GPT-3.5</SelectItem>
                                         </SelectContent>
                                     </Select>
                                     <FormDescription>
@@ -661,7 +672,7 @@ export const CompanionForm = ({
                                     <Textarea disabled={isLoading} rows={6} className="bg-background resize-none" placeholder={PREAMBLE_BACKSTORY} {...field} />
                                 </FormControl>
                                 <FormDescription>
-                                    Describe all relevant facts and details, companion will dynamically use indexed data when responding.
+                                    Describe all relevant facts and details about companion.
                                 </FormDescription>
                                 <FormMessage />
                             </FormItem>

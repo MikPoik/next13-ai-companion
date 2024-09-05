@@ -34,19 +34,20 @@
         return null;
       }
 
-      return (
-        <Dialog open={proModal.isOpen} onOpenChange={proModal.onClose}>
-          <DialogContent>
-            <DialogHeader className="space-y-4">
-              <DialogTitle className="text-center">
-                Upgrade to Pro
-              </DialogTitle>
-              <DialogDescription className="text-center space-y-2">
-                <span className="text-sky-500 mx-1 font-medium">AI</span>
-                companions<br/>
-                * 100 000 tokens / month<br/>
-                * Better image resolution<br/>
-                <br/>
+
+  return (
+    <Dialog open={proModal.isOpen} onOpenChange={proModal.onClose}>
+      <DialogContent>
+        <DialogHeader className="space-y-4">
+          <DialogTitle className="text-center">
+            Upgrade to Pro
+          </DialogTitle>
+          <DialogDescription className="text-center space-y-2">
+            <span className="text-sky-500 mx-1 font-medium">AI</span>
+            companions<br/>
+            * 100 000 tokens / month<br/>
+            <br/>
+
 
               </DialogDescription>
             </DialogHeader>

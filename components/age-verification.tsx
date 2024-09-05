@@ -21,17 +21,12 @@ export const AgeVerification = () => {
     const handleConfirmation = (confirmation: boolean) => {
         if (confirmation) {
             setIsConfirmed(true);
-
-            // Save the state to local storage when the user selects "Yes"
             localStorage.setItem('age-verification-state', 'true');
-            // Use the window object to refresh the page
             if (typeof window !== 'undefined') {
                 window.location.reload();
             }
         } else {
-            setIsConfirmed(false);
-
-            // Save the state to local storage when the user selects "No"
+            setIsConfirmed(null); // Change this line
             localStorage.setItem('age-verification-state', 'false');
         }
     };
@@ -59,7 +54,7 @@ export const AgeVerification = () => {
     };
 
     const buttonStyle: React.CSSProperties = {
-        backgroundColor: '#006300', // Green button background
+        backgroundColor: '#1c941c', // Green button background
         color: '#fff', // White button text color
         padding: '10px 20px',
         margin: '10px',
@@ -67,7 +62,15 @@ export const AgeVerification = () => {
         borderRadius: '5px',
         cursor: 'pointer',
     };
-
+    const closeButtonStyle: React.CSSProperties = {
+        backgroundColor: '#6a6a6a', // Green button background
+        color: '#fff', // White button text color
+        padding: '10px 20px',
+        margin: '10px',
+        border: 'none',
+        borderRadius: '5px',
+        cursor: 'pointer',
+    };
     return (
         <div style={containerStyle}>
             {isConfirmed === false && (
@@ -76,9 +79,11 @@ export const AgeVerification = () => {
                     <button style={buttonStyle} onClick={() => handleConfirmation(true)}>
                         Yes, I am over 18.
                     </button>
+                    <button style={closeButtonStyle} onClick={() => handleConfirmation(false)}>
+                        No, I am not
+                    </button>
                 </div>
             )}
-
         </div>
     );
 };

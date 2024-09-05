@@ -9,7 +9,7 @@ language = "nodejs"
   guessImports = true
 
 [nix]
-channel = "stable-23_11"
+channel = "stable-24_05"
 
 [env]
 XDG_CONFIG_HOME = "$REPL_HOME/.config"
@@ -26,7 +26,9 @@ requiredFiles = [".replit", "replit.nix", ".config"]
     start = "typescript-language-server --stdio"
 
 [deployment]
-run = ["sh", "-c", "npm run start"]
+run = ["sh", "-c", "next start"]
+deploymentTarget = "cloudrun"
+build = ["sh", "-c", "next build"]
 
 [[ports]]
 localPort = 3000

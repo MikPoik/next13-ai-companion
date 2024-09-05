@@ -1,6 +1,6 @@
 import { headers } from "next/headers"
 import { NextResponse } from "next/server"
-import { auth, currentUser } from "@clerk/nextjs";
+import { auth, currentUser } from "@clerk/nextjs/server";
 import prismadb from "@/lib/prismadb"
 import { UserButton } from "@clerk/nextjs"
 import { checkSubscription } from "@/lib/subscription";
@@ -96,6 +96,7 @@ export async function POST(req: Request) {
                         userId: user.id,
                     },
                 },
+                tags: true,
             }
         });
         if (!companion) {
@@ -119,32 +120,47 @@ export async function POST(req: Request) {
         const EMOJI_PATTERN = /([\u{1F1E0}-\u{1F1FF}|\u{1F300}-\u{1F5FF}|\u{1F600}-\u{1F64F}|\u{1F680}-\u{1F6FF}|\u{1F700}-\u{1F77F}|\u{1F780}-\u{1F7FF}|\u{1F800}-\u{1F8FF}|\u{1F900}-\u{1F9FF}|\u{1FA00}-\u{1FA6F}|\u{1FA70}-\u{1FAFF}|\u{2702}-\u{27B0}])/gu;
         
         companion.messages.forEach((message) => {
-            console.log(message);
+            //console.log("Processing message:", message);
             const role = message.role;
             let text;
             try {
-                // Parse the content JSON string
-                const contentArray = JSON.parse(message.content);
-                const firstContentObject = contentArray[0];
+                if (typeof message.content === 'string') {
+                    // Use a regular expression to extract the text field
+                    const textMatch = message.content.match(/"text":"((?:[^"\\]|\\.)*)"/);
+                    if (textMatch && textMatch[1]) {
+                        text = textMatch[1];
+                        // Unescape any escaped characters
+                        text = text.replace(/\\(.)/g, "$1");
+                    } else {
+                        text = message.content;
+                    }
+                } else {
+                    console.error("Unexpected message content type:", typeof message.content);
+                    text = String(message.content);
+                }
                 // Remove most emojis from the text content
-
-                text = firstContentObject.text.replace(EMOJI_PATTERN, '');
-            } catch (parseError) {
-                // Directly use the content if not parsed correctly
-                text = message.content.replace(EMOJI_PATTERN, '');
-                text = message.content.replace(/\*[^\*]+\*/g, '');
-                console.error('Error parsing message content: ', parseError);
+                text = text.replace(EMOJI_PATTERN, '');
+                // Remove text between square brackets (like [Image of Caroline clothed])
+                text = text.replace(/\[.*?\]/g, '');
+                // Trim any extra whitespace
+                text = text.trim();
+            } catch (error) {
+                console.error('Error processing message');
+                text = String(message.content);
             }
             let roleText = role === 'system' || role === 'assistant' ? 'assistant' : 'user';
-            formattedMessages += `${roleText}:  ${text}\n`; // Append to the string with a newline character for separation
+            text = text.replace(/\n/g, ". ");
+            formattedMessages += `${roleText}: ${text}\n`;
+            //console.log("Formatted message:", `${roleText}: ${text}`);
         });
 
+        
         if (!formattedMessages.includes("assistant:")) {
             formattedMessages += `assistant:  ${companion.seed.replace(EMOJI_PATTERN, '')}\n` + formattedMessages;
         }
 
-        //console.log(formattedMessages);
-
+        console.log("***MESSAGES***\n"+formattedMessages);
+        
         // Create dynamic environment variables
         const now = new Date();
         const day = now.toLocaleString("en-US", { weekday: "long" }); // Get the current day name
@@ -236,16 +252,17 @@ export async function POST(req: Request) {
             
         }
         //update voice agent template
-       //console.log("update voice agent template")
+       console.log("update voice agent template")
         const update_voice_agent = await fetch(`https://api.bolna.dev/agent/${voice_agent_id}`, {
             method: 'PUT',
             headers: headers,
             body: JSON.stringify(create_bolna_agent_json),
         });
         
-        //console.log("Update agent: ",await update_voice_agent.json())
+        console.log("Update agent: ",await update_voice_agent.json())
+        let tags = companion.tags.map(tag => tag.name).join(", ");
+        //console.log(tags)
         
-
         const data = {
                 "agent_id": voice_agent_id, 
                 "recipient_phone_number": phoneNumber,
@@ -255,6 +272,8 @@ export async function POST(req: Request) {
                     "character_personality": companion.personality,
                     "character_appearance": companion.selfiePre,
                     "previous_messages": formattedMessages,
+                    "character_background": companion.backstory,
+                    "tags": tags,
                 }
             }
         //console.log(data);
@@ -269,6 +288,7 @@ export async function POST(req: Request) {
             body: JSON.stringify(data),
         });
         */
+        
         //console.log("Make Bolna API call")
         const response = await fetch('https://api.bolna.dev/call', {
             method: 'POST',
@@ -278,10 +298,12 @@ export async function POST(req: Request) {
         
         const responseJson = await response.json(); // This converts the response to a JSON object
 
+        //console.log(responseJson);
+
 
         const callId = responseJson.call_id; // This extracts the call_id value from the response JSON
         const status = responseJson.status; // This extracts the status value from the response JSON
-        //console.log(callId, status); // This logs the call_id value
+       //console.log(callId, status); // This logs the call_id value
         //if (status === 'success') {
         if (status === 'queued') {
             const callLog = await prismadb.callLog.create({

@@ -1,7 +1,7 @@
 import Stripe from "stripe"
 import { headers } from "next/headers"
 import { NextResponse } from "next/server"
-import { currentUser} from "@clerk/nextjs";
+import { currentUser} from "@clerk/nextjs/server";
 import prismadb from "@/lib/prismadb"
 import { stripe } from "@/lib/stripe"
 import { UserButton } from "@clerk/nextjs"

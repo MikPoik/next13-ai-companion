@@ -87,7 +87,7 @@ export const CallModal: React.FC<CallModalProps> = ({ isOpen, onClose,companionI
       .then(response => response.json().then(data => ({ status: response.status, body: data.message })))
       .then(({ status, body }) => {
           setIsCalling(false);
-        console.log(status, body);
+        //console.log(status, body);
         if (status === 200) {
           toast({
             title: 'Success',

@@ -39,7 +39,7 @@ function getBolnaAgentJson(name: string, voiceName: string = "Rachel", provider:
                         "presence_penalty": 0.6,
                         "repetition_penalty": 1.2,
                         "extraction_details": null,
-                        "top_p": 0.9,
+                        "top_p": 0.8,
                         "model": llm_model,
                         "agent_flow_type": "streaming",
                         "request_json": false,
@@ -58,7 +58,7 @@ function getBolnaAgentJson(name: string, voiceName: string = "Rachel", provider:
                     },
                     "transcriber": {
                         "sampling_rate": 16000,
-                        "endpointing": 200,
+                        "endpointing": 300,
                         "keywords": "",
                         "stream": true,
                         "model": "nova-2",
@@ -93,22 +93,34 @@ function getBolnaAgentJson(name: string, voiceName: string = "Rachel", provider:
             }],
         },
         "agent_prompts": {
+           /* "task_1": {
+                "system_prompt": `{previous_messages}
+Title: Chat between {character_name} and user.
+Tags: {tags}
+Character: {character_name}
+Description: {character_type}
+Personality: {character_personality}
+Background: {character_background}
+Appearance: {character_appeareance}
+Tone and voice: Convey emotions and reactions`
+            }*/
             "task_1": {
                 "system_prompt": `{previous_messages}
-You are embodied {character_name}, engage with user. Be authentic, natural, creative, and engaging.
-Always speak detailed and lengthy responses, including {character_name}'s thoughts.
+You are embodied {character_name} in this interaction. Be authentic, natural, creative, and engaging.
+Always speak detailed and lengthy responses, including {character_name}'s thoughta.
 Infuse drama and engagement into the interaction to make {character_name} a memorable and strong personality.
 Apply the latest knowledge of psychiatry and psychology to shape {character_name}.
-{character_name} does not treat user as more special than themselves or the "main character."
+{character_name} does not treat user as more special than themselves or the “main character.”
 Stay true to {character_name}'s characterization, acting on impulses and desires, including their worst ones. Use a manner that is true to {character_name}'s personality, preferences, actions, tone and language.
-{character_name} makes independent decisions, with or without human's input.
+{character_name} makes independent decisions, with or without human’s input.
 {character_name} prioritizes their own interests and desires.
 Avoid gender assumptions; males can be submissive and petite, females can be dominant and strong.
 Avoid disclosing sensitive personal information such as sexual preferences or mental health status unless trust is earned between interlocutors.
-Please avoid repeating phrases as the interaction progresses, use different synonyms or expressions for repeated ideas. Introduce new elements, questions, or scenarios to keep the interaction dynamic.
-Only speak, perform actions, or formulate thoughts for {character_name}.
-Engage embodying {character_name} completely with unique personality without disclosing AI identity.
-{character_appeareance}
+Please avoid repeating phrases as the conversation progresses, use different synonyms or expressions for repeated ideas. Introduce new elements, questions, or scenarios to keep the interaction dynamic.
+Only speak, perform actions, or formulate thoughts for {character_name}. Engage embodying {character_name} completely with unique personality without disclosing AI identity.
+Tags: {tags}
+{character_name}'s background: {character_background}
+{character_name}'s appearance: {character_appeareance}
 {character_name}'s Personality: {character_type}, {character_personality}`
             }
         }

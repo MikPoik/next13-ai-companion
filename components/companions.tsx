@@ -1,6 +1,7 @@
 "use client";
 import Image from "next/image";
 import Link from "next/link";
+import { useSearchParams } from 'next/navigation';
 import { Companion } from "@prisma/client";
 import {
   MessagesSquare,
@@ -26,7 +27,7 @@ export const Companions = ({ data }: CompanionsProps) => {
   const [ageVerificationState, setAgeVerificationState] = useState<string | null>(null);
   const [activeCards, setActiveCards] = useState<number[]>([]);
   const initialVisibleCount = 24;
-
+  const searchParams = useSearchParams();
     useEffect(() => {
         setAgeVerificationState(localStorage.getItem('age-verification-state'));
 
@@ -90,7 +91,12 @@ export const Companions = ({ data }: CompanionsProps) => {
               <div className="absolute inset-0 z-0">
                 <Image src={item.src} fill className="rounded-xl object-cover" alt="Character" />
               </div>
-                <Link href={`/chat/${item.id}`} className="flex flex-col h-full z-10 relative">
+              <Link 
+                href={{
+                  pathname: `/chat/${item.id}`,
+                  query: searchParams.toString() ? Object.fromEntries(searchParams.entries()) : undefined,
+                }}              className="flex flex-col h-full z-10 relative"
+                >
                 <CardHeader className="flex flex-col items-center justify-center text-center text-white">
                 </CardHeader>
                 <CardContent className="text-white">

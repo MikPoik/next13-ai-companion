@@ -2,7 +2,7 @@ import prismadb from "@/lib/prismadb";
 import { Categories } from "@/components/categories";
 import { Companions } from "@/components/companions";
 import { SearchInput } from "@/components/search-input";
-import { currentUser } from "@clerk/nextjs";
+import { currentUser } from "@clerk/nextjs/server";
 import { checkSubscription } from "@/lib/subscription";
 import { Companion } from "@prisma/client";
 import { Tag } from "@prisma/client";
