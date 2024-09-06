@@ -1,5 +1,5 @@
 
-function getBolnaAgentJson(name: string, voiceName: string = "Rachel", provider: string = "elevenlabs", voiceId: string = "21m00Tcm4TlvDq8ikWAM", modelName: string = "eleven_multilingual_v2", elevenlabs_turbo: boolean = false, pollyEngine: string = "neural", pollyLanguage: string = "en-US", llm_provider: string = "deepinfra", llm_model: string = "deepinfra/cognitivecomputations/dolphin-2.6-mixtral-8x7b") {
+function getBolnaAgentJson(name: string, voiceName: string = "Rachel", provider: string = "elevenlabs", voiceId: string = "21m00Tcm4TlvDq8ikWAM", modelName: string = "eleven_multilingual_v2", elevenlabs_turbo: boolean = false, pollyEngine: string = "neural", pollyLanguage: string = "en-US", llm_provider: string = "deepinfra", llm_model: string = "deepinfra/mistralai/Mistral-Nemo-Instruct-2407") {
     return {
         "agent_config": {
             "agent_name": name,
@@ -35,19 +35,19 @@ function getBolnaAgentJson(name: string, voiceName: string = "Rachel", provider:
                         "buffer_size": 150.0
                     },
                     "llm_agent": {
-                        "max_tokens": 100,
-                        "presence_penalty": 0.6,
-                        "repetition_penalty": 1.2,
+                        "max_tokens": 150,
+                        "presence_penalty": 0.01,
+                        "repetition_penalty": 1.01,
                         "extraction_details": null,
                         "top_p": 0.8,
                         "model": llm_model,
                         "agent_flow_type": "streaming",
                         "request_json": false,
                         "min_p": 0.05,
-                        "frequency_penalty": 0.1,
+                        "frequency_penalty": 0.01,
                         "stop": null,
                         "top_k": 0,
-                        "temperature": 0.75,
+                        "temperature": 0.8,
                         "backend": "bolna",
                         "provider": llm_provider,
                         "family": "mixtral",
@@ -83,7 +83,8 @@ function getBolnaAgentJson(name: string, voiceName: string = "Rachel", provider:
                     "backchanneling_start_delay": 5.0,
                     "call_cancellation_prompt": null,
                     "number_of_words_for_interruption": 3.0,
-                    "backchanneling_message_gap": 5.0
+                    "backchanneling_message_gap": 5.0,
+                    "trigger_user_online_message_after": 10.0,
                 },
                 "task_type": "conversation",
                 "toolchain": {
@@ -106,8 +107,8 @@ Tone and voice: Convey emotions and reactions`
             }*/
             "task_1": {
                 "system_prompt": `{previous_messages}
-You are embodied {character_name} in this interaction. Be authentic, natural, creative, and engaging.
-Always speak detailed and lengthy responses, including {character_name}'s thoughta.
+You are embodied {character_name} in this phone call. Be authentic, natural, creative, and engaging.
+Always speak detailed and lengthy responses, including {character_name}'s thoughts.
 Infuse drama and engagement into the interaction to make {character_name} a memorable and strong personality.
 Apply the latest knowledge of psychiatry and psychology to shape {character_name}.
 {character_name} does not treat user as more special than themselves or the “main character.”
