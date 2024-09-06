@@ -159,7 +159,7 @@ export async function POST(req: Request) {
             formattedMessages += `assistant:  ${companion.seed.replace(EMOJI_PATTERN, '')}\n` + formattedMessages;
         }
 
-        console.log("***MESSAGES***\n"+formattedMessages);
+        //console.log("***MESSAGES***\n"+formattedMessages);
         
         // Create dynamic environment variables
         const now = new Date();
@@ -251,7 +251,7 @@ export async function POST(req: Request) {
             
         }
         //update voice agent template
-       console.log("update voice agent template")
+       //console.log("update voice agent template")
         const update_voice_agent = await fetch(`https://api.bolna.dev/agent/${voice_agent_id}`, {
             method: 'PUT',
             headers: headers,
