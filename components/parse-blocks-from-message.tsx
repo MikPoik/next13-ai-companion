@@ -10,12 +10,12 @@ const { v4: uuidv4 } = require('uuid');
  * @returns Array of ExtendedBlock objects.
  */
 function replaceQuotesInText(text: string): string {
-  const regex = /"text":\s*"(.*?)",\s*"mimeType"/;
+  const regex = /"text":\s*"(.*?)",\s*"mimeType"/s;
   const match = text.match(regex);
 
   if (match) {
     const originalText = match[1];
-    const escapedText = originalText.replace(/"/g, '\\"');
+    const escapedText = originalText.replace(/"/g, '\\"').replace(/\n/g, '\\n');
     return text.replace(originalText, escapedText);
   } else {
     return text;
