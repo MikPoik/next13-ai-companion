@@ -337,7 +337,7 @@
         if (scrollRef.current) {
         const { scrollTop, scrollHeight, clientHeight } = scrollRef.current;
         const isAtBottom = scrollHeight - scrollTop - clientHeight < 100;
-          //console.log(isAtBottom)
+
         if (isAtBottom && messages.length > 4) {
           bottomRef.current?.scrollIntoView({ behavior: "smooth" });
         }
