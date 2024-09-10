@@ -599,7 +599,7 @@ export const CompanionForm = ({
                                             <SelectItem key="Gryphe/MythoMax-L2-13b" value="Gryphe/MythoMax-L2-13b">MythoMax 13B</SelectItem>       
                                             <SelectItem key="mistralai/Mistral-Nemo-Instruct-2407" value="mistralai/Mistral-Nemo-Instruct-2407">Mistral Nemo 12B</SelectItem>      
                                             <SelectItem key="meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo" value="meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo">Meta Llama 3.1 8B Turbo (SFW)</SelectItem>
-                                            <SelectItem key="gpt-3.5-turbo-0613" value="gpt-3.5-turbo-0613">GPT-3.5 (SFW)</SelectItem>
+                                            <SelectItem key="gpt-4o-mini" value="gpt-4o-mini">GPT-4o-mini (SFW)</SelectItem>
                                         </SelectContent>
                                     </Select>
                                     <FormDescription>

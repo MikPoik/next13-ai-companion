@@ -75,7 +75,7 @@ export async function POST(
         if (image_url) {
             //escape double quotes from prompt:
             const processed_prompt = prompt.replace(/"/g, '\\"');
-            finalContent = `[{"requestId":null,"text":"${processed_prompt}","mimeType":"image/png","streamState":null,"url":null,"contentURL":null,"fileId":null,"id":"${image_url}","index":null,"publicData":true,"tags":[],"uploadBytes":null,"uploadType":null}]`;
+            finalContent = `[{"requestId":null,"text":"${processed_prompt}","mimeType":"image/png","streamState":null,"url":null,"contentURL":null,"fileId":null,"id":"${image_url}","index":null,"publicData":true,"tags":null,"uploadBytes":null,"uploadType":null}]`;
             imageTokens = 500
         }
          await prismadb.message.upsert({
