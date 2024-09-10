@@ -140,53 +140,8 @@ export async function PATCH(
                 revision: companion.revision + 1,
             }
         });
-        /*
-            if (body['model'] != companion.model || body[createImages] != companion.createImages) {
-                llm_model = body['model'];
-                //instance_handle = user.id.replace("user_", "").toLowerCase() + "-" + uuidv4().replace(/-/g, "").toLowerCase();
-                /* 
-                const client = await SteamshipV2.use(env_packageName, companion.steamshipAgent[0].instanceHandle, { }, companion.steamshipAgent[0].version, true, companion.steamshipAgent[0].workspaceName);
-                
-            }
-        */
-        //console.log(llm_model);
-        //console.log(instance_handle);
 
-        //console.log("backstory"+backstory)
-        /*
-        if (backstory.length != companion.backstory.length) {
-            //console.log("index text"+backstory)
-                
-                if (companion) {
-                    const indexTextResponse = await indexTextSteamship(
-                        'index_text',
-                        backstory,
-                        user.id,
-                        companion.packageName,
-                        instance_handle,
-                        companion.workspaceName,
-                        personality,
-                        name,
-                        description,
-                        behaviour,
-                        selfiePre,
-                        selfiePost,
-                        seed,
-                        llm_model,
-                        imageModel,
-                        createImages,
-                        voiceId);
-                    //console.log(indexTextResponse);
-                    const indexTextResponseBlocks = JSON.parse(indexTextResponse);
-                    //console.log(indexTextResponseBlocks);
-                }
-            }
-        
-        
-        else {
-            console.log("no change in backstory")
-        }
-        */
+
           //update bolna agent, add bolna agent id to companion db table
             const apiKey = process.env["BOLNA_API_KEY"];
             if (!apiKey) {

@@ -53,6 +53,19 @@ async function updateAgent(name: string, description: string, personality: strin
           tags:tags
         });
       }
+      /*
+      //todo finish up vector memory
+      if (background.length  > 0 && background != "N/A") {
+        //console.log("index text"+backstory)
+
+        const reset_index_response = await client.invoke("reset_index");
+        const index_text = await client.invoke("index_text", {
+          text: background
+        })
+        
+      }
+      */
+
       const game_state = await client.invoke("game_state", {
         name: name,
         description: description,
@@ -180,7 +193,7 @@ export async function POST(req: NextRequest) {
       create: {
         id: chatId,
         userId: userId,
-        agentUrl: `https://${process.env.STEAMSHIP_BASE_URL}.steamship.run/${workspace_name}/${instance_handle}/`,
+        agentUrl: `${process.env.STEAMSHIP_BASE_URL}.steamship.run/${workspace_name}/${instance_handle}/`,
         instanceHandle: instance_handle,
         workspaceHandle: workspace_name,
         companionId: chatId,
@@ -191,7 +204,7 @@ export async function POST(req: NextRequest) {
       update: {
         id: chatId,
         userId: userId,
-        agentUrl: `https://${process.env.STEAMSHIP_BASE_URL}.steamship.run/${workspace_name}/${instance_handle}/`,
+        agentUrl: `${process.env.STEAMSHIP_BASE_URL}.steamship.run/${workspace_name}/${instance_handle}/`,
         createdAt: new Date(Date.now() + 1000),
         version: agent_version,
         instanceHandle: instance_handle,
