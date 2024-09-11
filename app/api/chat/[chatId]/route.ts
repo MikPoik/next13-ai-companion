@@ -113,7 +113,7 @@ export async function POST(
         //console.log(agentInstanceHandle)
         const steamship = new Steamship({ apiKey: process.env.STEAMSHIP_API_KEY })
         const base_url=process.env.STEAMSHIP_BASE_URL + agentWorkspace+"/"+agentInstanceHandle+"/";
-        //console.log(base_url);
+        console.log(base_url);
         const response = await steamship.agent.respondAsync({            
             url: base_url,
             input: {
@@ -121,10 +121,20 @@ export async function POST(
                 context_id: user.id
             },
         })
-        const stream = await SteamshipStream(response, steamship, {
-            streamTimeoutSeconds: 60,
-            format: "json-no-inner-stream"
-        });
+        let stream;
+        try {
+            stream = await SteamshipStream(response, steamship, {
+                streamTimeoutSeconds: 60,
+                format: "json-no-inner-stream"
+            });
+        } catch (streamError) {
+            const error = streamError as any;
+            if (error.code === 'ERR_INVALID_STATE') {
+                console.error('Steamship stream error:', error.message);
+                return new NextResponse("Stream error occurred. Please try again.", { status: 500 });
+            }
+            throw streamError; // Re-throw if it's not the specific error we're handling
+        }
 
         return new Response(stream);
 
