@@ -75,6 +75,7 @@
     const streamContent = useStreamStore((state) => state.content);
     const inputRef = useRef<HTMLInputElement>(null);
     const isMobile = useIsMobile();
+    const [isSubmitting, setIsSubmitting] = useState(false);
     
     const initialMessages: PrismaMessage[] = [
       {
@@ -179,8 +180,8 @@
           if (!isMobile && inputRef.current && !isLoading) {
             inputRef.current.focus();
           } 
-        }, 100); 
-        
+        },50); 
+        setIsSubmitting(false);
       },
       onError(error) {
         console.error(error);
@@ -293,7 +294,22 @@
       setMessages((messages as PrismaMessage[]).filter(message => message.id !== id && message.id !== id2));
       setIsDeleting(false);
     };
-
+    
+    const submitWithRetry = async (input: string, maxRetries = 3, delay = 1000) => {
+      for (let i = 0; i < maxRetries; i++) {
+        try {
+          await append({ role: 'user', content: input });
+          return true; // Successful submission
+        } catch (error) {
+          console.error(`Submission attempt ${i + 1} failed:`, error);
+          if (i < maxRetries - 1) {
+            await new Promise(resolve => setTimeout(resolve, delay));
+          }
+        }
+      }
+      return false; // All attempts failed
+    };
+    
     const onSubmit = async (e: FormEvent<HTMLFormElement>) => {
       e.preventDefault();
       if (!input) {
@@ -319,8 +335,18 @@
         });
         return;
       }
+      setIsSubmitting(true);
+      const success = await submitWithRetry(input);
 
-      append({ role: 'user', content: input });
+      if (success) {
+        setInput(""); // Clear input on successful submission
+      } else {
+        if (inputRef.current) {
+          setTimeout(() => {
+          }, 1000);
+        }
+      }
+     
     };
 
     const transformedMessages: ChatMessageProps[] = messages.map((message) => ({
@@ -384,12 +410,11 @@
           <div ref={bottomRef} />
 
           
-          {error ? <p>{error.message}</p> : null}
         </div>
         <form onSubmit={onSubmit} className="border-t border-primary/10 py-1 pb-1 flex items-center gap-x-0 pl-1 sticky bottom-0">
-          <Input disabled={isLoading} value={input} onChange={handleInputChange} placeholder="Type a message" className="rounded-lg bg-primary/10" ref={inputRef} />
-          <Button type="submit" disabled={isLoading} variant="ghost">
-                {isLoading ? (
+          <Input disabled={isLoading || isSubmitting} value={input} onChange={handleInputChange} placeholder="Type a message" className="rounded-lg bg-primary/10" ref={inputRef} />
+          <Button type="submit" disabled={isLoading || isSubmitting} variant="ghost">
+                {isLoading || isSubmitting ? (
              <MoonLoader size={20} color={theme === 'light' ? 'black' : 'white'} loading={isLoading} />
                 ) : (
                   <SendHorizonal className="w-4 h-4" />

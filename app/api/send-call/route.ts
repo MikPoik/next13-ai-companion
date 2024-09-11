@@ -142,6 +142,8 @@ export async function POST(req: Request) {
                 text = text.replace(EMOJI_PATTERN, '');
                 // Remove text between square brackets (like [Image of Caroline clothed])
                 text = text.replace(/\[.*?\]/g, '');
+                // Remove text between asterisks
+                text = text.replace(/\*.*?\*/g, '');
                 // Trim any extra whitespace
                 text = text.trim();
             } catch (error) {
