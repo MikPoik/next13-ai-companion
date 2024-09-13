@@ -116,10 +116,14 @@ const SettingsPage = async () => {
             )}
             <span className="mr-2"></span>
             <br />
+             {!subcriptionButtonState && (
+            <div>
             <div className="text-muted-foreground text-sm">
                 Top up your account with <span className="text-sky-500 mx-1 font-medium">Pro</span>token pack:
             </div>
             <TopUpButton isPro={isSubscribed} /><span className="ml-5"> </span>
+            </div>    
+            )}
             <br />
 
             <div className="text-muted-foreground text-sm">
@@ -133,8 +137,11 @@ const SettingsPage = async () => {
             <br />
             <h3 className="text-lg font-medium">Usage</h3>
             <div className="text text-sm">
-                You are have used {tokens} tokens out of {token_limit}. <br />
-                You have {proTokens} <span className="text-sky-500 mx-1 font-medium">Pro</span> tokens.<br />
+                {tier === 'unlimited' 
+                    ? 'You have unlimited usage.
+                    : `You have used ${tokens} tokens out of ${token_limit}.`
+                }
+                <br/>You have {proTokens} <span className="text-sky-500 mx-1 font-medium">Pro</span> tokens.<br />
                 You have {callTimeMinutes} minutes and {callTimeSeconds} seconds of call time
             </div>
         </div>
