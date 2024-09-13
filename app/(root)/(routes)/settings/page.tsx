@@ -114,11 +114,25 @@ const SettingsPage = async () => {
                     <SubscriptionButton isPro={true} tier={tier} />
                 </div>
             )}
+            {subcriptionButtonState && tier == 'pro' && (
+                <div className="mt-4 py-2">
+                    <div className="text-muted-foreground text-sm py-2 pb-2 pl-1">
+                        Want to upgrade? (cancel current sub to upgrade)<br />
+                        
+                    </div>   
+                    <span className="text-purple-500 mx-1 font-medium">Unlimited plan</span> - <span className="text-purple-500 mx-1 font-medium">24.99$</span> / month.
+                    <div className="text-muted-foreground text-sm py-2 pb-2 pl-1">
+                        * Unlimited tokens for chat and images<br /> 
+                        
+                    </div>                    
+            </div>
+
+            )}
             <span className="mr-2"></span>
             <br />
              {!subcriptionButtonState && (
             <div>
-            <div className="text-muted-foreground text-sm">
+            <div className="text-muted-foreground text-sm pb-1">
                 Top up your account with <span className="text-sky-500 mx-1 font-medium">Pro</span>token pack:
             </div>
             <TopUpButton isPro={isSubscribed} /><span className="ml-5"> </span>
