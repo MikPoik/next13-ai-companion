@@ -117,7 +117,7 @@ const SettingsPage = async () => {
             {subcriptionButtonState && tier == 'pro' && (
                 <div className="mt-4 py-2">
                     <div className="text-muted-foreground text-sm py-2 pb-2 pl-1">
-                        Want to upgrade? (cancel current sub to upgrade)<br />
+                        Want to upgrade? (cancel current plan to upgrade)<br />
                         
                     </div>   
                     <span className="text-purple-500 mx-1 font-medium">Unlimited plan</span> - <span className="text-purple-500 mx-1 font-medium">24.99$</span> / month.
@@ -152,11 +152,12 @@ const SettingsPage = async () => {
             <h3 className="text-lg font-medium">Usage</h3>
             <div className="text text-sm">
                 {tier === 'unlimited' 
-                    ? 'You have unlimited usage.
+                    ? 'You have unlimited usage.'
                     : `You have used ${tokens} tokens out of ${token_limit}.`
                 }
-                <br/>You have {proTokens} <span className="text-sky-500 mx-1 font-medium">Pro</span> tokens.<br />
-                You have {callTimeMinutes} minutes and {callTimeSeconds} seconds of call time
+                
+                {tier !== 'unlimited' && (<><br/>You have {proTokens} <span className="text-sky-500 mx-1 font-medium">Pro</span> tokens.<br /></>)}
+                <br/>You have {callTimeMinutes} minutes and {callTimeSeconds} seconds of call time
             </div>
         </div>
     );
