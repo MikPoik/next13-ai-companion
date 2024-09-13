@@ -53,10 +53,9 @@ async function updateAgent(name: string, description: string, personality: strin
           tags:tags
         });
       }
-      /*
+      
       //todo finish up vector memory
-      if (background.length  > 0 && background != "N/A") {
-        //console.log("index text"+backstory)
+      if (background.length  > 3 && background != "N/A") {        
 
         const reset_index_response = await client.invoke("reset_index");
         const index_text = await client.invoke("index_text", {
@@ -64,7 +63,7 @@ async function updateAgent(name: string, description: string, personality: strin
         })
         
       }
-      */
+      
 
       const game_state = await client.invoke("game_state", {
         name: name,
@@ -105,7 +104,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Missing chatId' }, { status: 400 });
   }
 
-  const isPro = await checkSubscription();
+  const { isSubscribed, tier } = await checkSubscription();
   try {
     const companion = await prismadb.companion.findUnique({
       where: { id: chatId },
@@ -214,7 +213,7 @@ export async function POST(req: NextRequest) {
     });
 
     console.log("Steamship companion initialized");
-    return NextResponse.json({ companion, isPro }, { status: 200 });
+    return NextResponse.json({ companion, isSubscribed }, { status: 200 });
 
   } catch (error) {
     console.error(error);

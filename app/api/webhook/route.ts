@@ -16,6 +16,7 @@ export async function POST(req: Request) {
     const signature = headers().get("Stripe-Signature") as string
 
     let event: Stripe.Event
+    let tier = 'pro'
 
     try {
         event = stripe.webhooks.constructEvent(
@@ -24,6 +25,7 @@ export async function POST(req: Request) {
             process.env.STRIPE_WEBHOOK_SECRET!
         )
     } catch (error: any) {
+        console.log("Webhook error:", error.message)
         return new NextResponse(`Webhook Error: ${error.message}`, { status: 400 })
     }
     console.log("[STRIPE EVENT]");
@@ -40,8 +42,15 @@ export async function POST(req: Request) {
             )
 
             if (!session?.metadata?.userId) {
+                console.log("No userId found in metadata checkoutsession")
                 return new NextResponse("User id is required", { status: 400 });
             }
+            if (session.metadata.tier) {
+                tier = session.metadata.tier as 'pro' | 'unlimited';
+                //console.log(`[STRIPE SUBSCRIPTION] Tier: ${tier}`);
+            }
+            
+            
             console.log("[STRIPE CREATE SUBSCRIPTION]");
             var user_sub = await prismadb.userSubscription.create({
                 data: {
@@ -52,6 +61,7 @@ export async function POST(req: Request) {
                     stripeCurrentPeriodEnd: new Date(
                         subscription.current_period_end * 1000
                     ),
+                    tier: tier,
                 },
             });
             console.log("[STRIPE CREATE SUBSCRIPTION END, UPDATE BALANCE]");
@@ -102,6 +112,7 @@ export async function POST(req: Request) {
             // Check for one-time top-up based on SKU or calltime
             const userId = session.metadata?.userId;
             if (!userId) {
+                console.log("No userId found in topup")
                 return new NextResponse("Metadata with user id is required for top-up", { status: 400 });
             }
             if (session?.metadata?.tokens === 'tokens-topup-50000') {
@@ -131,6 +142,7 @@ export async function POST(req: Request) {
         console.log("[INVOICE]");
         // Check if the invoice has a subscription ID
         if (!invoice.subscription) {
+            console.log("[STRIPE INVOICE PAYMENT, NO SUBSCRIPTION]");
             return new NextResponse("Subscription id is required", { status: 400 });
         }
 
@@ -147,7 +159,7 @@ export async function POST(req: Request) {
         });
         
         if (existingSub) {
-            console.log(existingSub)
+            //console.log(existingSub)
             const sub = await prismadb.userSubscription.update({
                 where: {
                     stripeSubscriptionId: subscription.id,
@@ -193,6 +205,25 @@ export async function POST(req: Request) {
             const subscription = await stripe.subscriptions.retrieve(
                 session.subscription as string
             )
+            // Check if the subscription plan has changed
+            const previousAttributes = event.data.previous_attributes as Stripe.Subscription | undefined;
+            if (previousAttributes?.items?.data[0]?.price?.id !== subscription.items.data[0].price.id) {
+                // The plan has changed, update the tier. Not needed now, subs are changed only after expiration
+                console.log("Subscription plan has changed")
+                /*const newTier = subscription.items.data[0].price.id === 'price_unlimited_id_here' ? 'unlimited' : 'pro';
+
+                await prismadb.userSubscription.update({
+                    where: {
+                        stripeSubscriptionId: subscription.id,
+                    },
+                    data: {
+                        stripePriceId: subscription.items.data[0].price.id,
+                        stripeCurrentPeriodEnd: new Date(subscription.current_period_end * 1000),
+                        tier: newTier,
+                    },
+                });
+                */
+            }
 
         } else {
             console.log('session.subscription is undefined, retrieve event.')
@@ -214,28 +245,23 @@ export async function POST(req: Request) {
             else {
                 console.log("[STRIPE UNHANDLED SUB EVENT]");
                 const subscriptionUpdateData = event.data.object as Stripe.Subscription;
-                
+                //console.log(subscriptionUpdateData)
                 if (subscriptionUpdateData.status === 'active') {
                     // Your logic here to renew the subscription in your database
                     // For example, update the `stripeCurrentPeriodEnd` field and other relevant fields
                     const user = await currentUser();
-                    if (!user) {
-                        return new NextResponse("User id is required", { status: 400 });
-                    }
-                    const updatedSub = await prismadb.userSubscription.upsert({
+                    //if (!user) {
+                    //    console.log("No userId found in sub event")
+                    //    return new NextResponse("User id is required", { status: 400 });
+                    //}
+                    const updatedSub = await prismadb.userSubscription.update({
                         where: {
                             stripeSubscriptionId: subscriptionUpdateData.id,
                         },
-                        create: {
-                            userId: user.id, 
-                            stripeSubscriptionId: subscriptionUpdateData.id,
-                            stripeCustomerId: subscriptionUpdateData.customer as string,
-                            stripePriceId: subscriptionUpdateData.items.data[0].price.id,
+                        data: {
                             stripeCurrentPeriodEnd: new Date(subscriptionUpdateData.current_period_end * 1000),
-                            // ... other fields you need to include during creation
-                        },
-                        update: {
-                            stripeCurrentPeriodEnd: new Date(subscriptionUpdateData.current_period_end * 1000),
+                            //tier: tier
+                            // ... other fields you need to include during update
                             // ... other fields you need to update
                         },
                     });

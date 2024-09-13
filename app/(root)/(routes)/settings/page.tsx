@@ -4,9 +4,10 @@ import { CallTopUpButton } from "@/components/call-topup-button";
 import { checkSubscription } from "@/lib/subscription";
 import prismadb from "@/lib/prismadb";
 import { auth, currentUser, } from "@clerk/nextjs/server";
+import { Separator } from "@/components/ui/separator";
 
 const SettingsPage = async () => {
-    const isPro = await checkSubscription();
+    const { isSubscribed, tier } = await checkSubscription();
     const user = await currentUser();
 
     if (!user) {
@@ -48,9 +49,9 @@ const SettingsPage = async () => {
     // Convert callTime to minutes and seconds
     const callTimeMinutes = Math.floor(callTime / 60);
     const callTimeSeconds = callTime % 60;
-    
+    let subEndDate = "";
     let subcriptionButtonState = false;
-    if (isPro) {
+    if (isSubscribed) {
         //a bit duplicate check to manage sub button state
           const DAY_IN_MS = 86_400_000;
           const userSubscription = await prismadb.userSubscription.findUnique({
@@ -62,6 +63,9 @@ const SettingsPage = async () => {
               stripePriceId: true,
             },
           });
+          if (userSubscription && userSubscription.stripeCurrentPeriodEnd) {
+              subEndDate = new Date(userSubscription.stripeCurrentPeriodEnd).toISOString().split('T')[0];
+          }
 
         const hasValidSubscription = userSubscription?.stripeCurrentPeriodEnd 
            ? (userSubscription.stripeCurrentPeriodEnd.getTime() + DAY_IN_MS) > Date.now() 
@@ -73,30 +77,58 @@ const SettingsPage = async () => {
     return (
         <div className="h-full p-4 space-y-2">
             <h3 className="text-lg font-medium">Settings</h3>
-            <div className="text-muted-foreground text-sm">
-                {isPro ? "You are currently on a Pro plan (Subscription or Pro tokens)." : "You are currently on a free plan."}
+            <div className="text-muted-foreground text-sm pb-4">
+                {isSubscribed 
+                    ? tier === 'unlimited'
+                        ? `You are currently on an UNLIMITED plan.`
+                        : subcriptionButtonState
+                            ? `You are currently on a PRO plan.`
+                            : `You are currently on a PRO plan from Pro Tokens.`
+                    : "You are currently on a free plan."}
             </div>
-            {!isPro && (
+
+            {!isSubscribed && (
                 <div>
-                    <span className="text-sky-500 mx-1 font-medium">Pro</span> plan subscription   <span className="text-sky-500 mx-1 font-medium">9.99$</span> / month.
-                    <div className="text-muted-foreground text-sm">
-                        * 100 000 tokens / month<br />
-                    </div></div>)}
-            <SubscriptionButton isPro={subcriptionButtonState} />
+                    <div className="py-2">
+                        <span className="text-sky-500 mx-1 font-medium" >Pro plan</span> - <span className="text-sky-500 mx-1 font-medium">9.99$</span> / month.
+                        
+                        <div className="text-muted-foreground text-sm py-2 pb-2 pl-1">
+                            * 100,000 tokens / month<br />
+                        </div>
+                        <SubscriptionButton isPro={false} tier="pro" />
+                    </div>
+
+                    <div className="mt-4 py-2">
+                       
+                        <span className="text-purple-500 mx-1 font-medium">Unlimited plan</span> - <span className="text-purple-500 mx-1 font-medium">24.99$</span> / month.
+                        <div className="text-muted-foreground text-sm py-2 pb-2 pl-1">
+                            * Unlimited tokens for chat and images<br />
+                        </div>
+                        <SubscriptionButton isPro={false} tier="unlimited" />
+                    </div>
+                </div>
+            )}
+
+            {subcriptionButtonState && (
+                <div className="pb-3" >
+                    <SubscriptionButton isPro={true} tier={tier} />
+                </div>
+            )}
             <span className="mr-2"></span>
-            <br /><br />
+            <br />
             <div className="text-muted-foreground text-sm">
                 Top up your account with <span className="text-sky-500 mx-1 font-medium">Pro</span>token pack:
             </div>
-            <TopUpButton isPro={isPro} /><span className="ml-5"> </span>
+            <TopUpButton isPro={isSubscribed} /><span className="ml-5"> </span>
             <br />
+
             <div className="text-muted-foreground text-sm">
                 <br />
                 Buy call time for companion:
             </div>
 
-            <CallTopUpButton amount={5} price="4.99$" isPro={isPro} /><span className="mr-2"></span>
-            <CallTopUpButton amount={10} price="8.99$" isPro={isPro} /><span className="mr-2"></span><CallTopUpButton amount={30} price="24.99$" isPro={isPro} />
+            <CallTopUpButton amount={5} price="4.99$" isPro={isSubscribed} /><span className="mr-2"></span>
+            <CallTopUpButton amount={10} price="8.99$" isPro={isSubscribed} /><span className="mr-2"></span><CallTopUpButton amount={30} price="24.99$" isPro={isSubscribed} />
             <br />
             <br />
             <h3 className="text-lg font-medium">Usage</h3>

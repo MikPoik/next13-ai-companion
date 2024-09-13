@@ -39,7 +39,7 @@ export const ProModal = () => {
       <DialogContent>
         <DialogHeader className="space-y-4">
           <DialogTitle className="text-center">
-            Upgrade to Pro
+            Pro plan - $9<span className="text-sm font-normal">.99 / month</span>
           </DialogTitle>
           <DialogDescription className="text-center space-y-2">
             <span className="text-sky-500 mx-1 font-medium">AI</span>
@@ -48,16 +48,23 @@ export const ProModal = () => {
             <br/>
 
           </DialogDescription>
+          <Separator />
+          <DialogTitle className="text-center">
+            Unlimited plan - $24<span className="text-sm font-normal">.99 / month</span>
+          </DialogTitle>
+          <DialogDescription className="text-center space-y-2">
+            <span className="text-sky-500 mx-1 font-medium">AI</span>
+            companions<br/>
+            * Unlimited chat and images<br/>
+            <br/>
+
+          </DialogDescription>
         </DialogHeader>
         <Separator />
-        <div className="flex justify-between">
-          <p className="text-2xl font-medium">
-            $9<span className="text-sm font-normal">.99 / month</span>
-          </p>
-        </div> 
+
 
           <Button onClick={onSubscribe} variant="premium">
-            Subscribe
+            Go to Settings
           </Button>
           <span className="text-sm">Or you can buy token pack:</span>
             <Button onClick={onSubscribe} variant="premium">

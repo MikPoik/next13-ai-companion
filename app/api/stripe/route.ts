@@ -10,21 +10,13 @@ import { absoluteUrl } from "@/lib/utils";
 export const dynamic = 'force-dynamic'
 const maxDuration = 60;
 
-const prices = {
-  pro: {
-    priceId: 'price_pro_id_here',
-    amount: 999,
-  },
-  unlimited: {
-    priceId: 'price_unlimited_id_here',
-    amount: 2499, // Example price
-  }
-};
 
 const settingsUrl = absoluteUrl("/settings");
 
-export async function GET() {
+export async function GET(req: Request) {
     try {
+        const { searchParams } = new URL(req.url);
+        const tier = searchParams.get('tier') as 'pro' | 'unlimited';
         const { userId } = auth();
         const user = await currentUser();
 
@@ -78,22 +70,13 @@ export async function GET() {
             customer_email: user.emailAddresses[0].emailAddress,
             line_items: [
                 {
-                    price_data: {
-                        currency: "USD",
-                        product_data: {
-                            name: "Companion Pro",
-                            description: "Create Custom AI Companions"
-                        },
-                        unit_amount: 999,
-                        recurring: {
-                            interval: "month"
-                        }
-                    },
+                    price: tier === 'unlimited' ? process.env.UNLIMITED_SUB_PRICE_ID : process.env.PRO_SUB_PRICE_ID,
                     quantity: 1,
                 },
             ],
             metadata: {
-                userId,
+                userId: userId,
+                tier: tier
             },
         })
 

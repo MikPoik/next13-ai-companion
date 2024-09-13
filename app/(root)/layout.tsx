@@ -9,13 +9,13 @@ const RootLayout = async ({
 }: {
   children: React.ReactNode;
 }) => {
-  const isPro =  await checkSubscription();
+  const { isSubscribed, tier } = await checkSubscription();
   return ( 
     <div className="h-screen flex flex-col">
         
-      <Navbar isPro={isPro} />
+      <Navbar isPro={isSubscribed} tier={tier} />
       <div className="hidden md:flex mt-16 h-full w-20 flex-col fixed inset-y-0">
-        <Sidebar isPro={isPro} />
+        <Sidebar isPro={isSubscribed} />
       </div>
       <main className="md:pl-20 pt-16 flex-grow">
            <AgeVerification />

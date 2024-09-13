@@ -5,6 +5,7 @@ import { UserButton } from "@clerk/nextjs"
 import { Steamship as SteamshipV2 } from 'steamship-client-v2';
 import {Role } from "@prisma/client";
 export const maxDuration = 60;
+import { checkSubscription } from "@/lib/subscription";
 
 export async function POST(req: Request) {
     try {
@@ -105,6 +106,8 @@ export async function POST(req: Request) {
         }
         //console.log('update_history', update_history);
         // Update user balance
+        //const { isSubscribed, tier } = await checkSubscription();
+
         const userBalance = await prismadb.userBalance.update({
             where: {
                 userId: userId
@@ -128,6 +131,7 @@ export async function POST(req: Request) {
                 }
             });
         }
+        
         const companion = await prismadb.companion.findUnique({
           where: { id: companionId },
           include: { 

@@ -50,7 +50,7 @@ const formSchema = z.object({
     isPublic: z.boolean().optional(),
     createImages: z.boolean().optional(),
     behaviour: z.string().optional(),
-    backstory: z.string().max(2000).optional(),
+    backstory: z.string().max(10000).optional(),
     selfiePre: z.string().optional(),
     selfiePost: z.string().optional(),
     model: z.string().min(1, {
