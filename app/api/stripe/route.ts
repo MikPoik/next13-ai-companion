@@ -17,6 +17,7 @@ export async function GET(req: Request) {
     try {
         const { searchParams } = new URL(req.url);
         const tier = searchParams.get('tier') as 'pro' | 'unlimited';
+        const upgrade = searchParams.get('upgrade') === 'true';
         const { userId } = auth();
         const user = await currentUser();
 
@@ -32,6 +33,30 @@ export async function GET(req: Request) {
 
 
         if (userSubscription && userSubscription.stripeCustomerId) {
+              if (upgrade) {
+                // Handle upgrade scenario
+                console.log("Handling upgrade to", tier);
+                const stripeSession = await stripe.checkout.sessions.create({
+                  success_url: settingsUrl,
+                  cancel_url: settingsUrl,
+                  payment_method_types: ["card"],
+                  mode: "subscription",
+                  billing_address_collection: "auto",
+                  customer: userSubscription.stripeCustomerId,
+                  line_items: [
+                    {
+                      price: process.env.UNLIMITED_SUB_PRICE_ID,
+                      quantity: 1,
+                    },
+                  ],
+                  metadata: {
+                    userId: userId,
+                    tier: tier,
+                    upgrade: 'true'
+                  },
+                });
+                  return new NextResponse(JSON.stringify({ url: stripeSession.url }));
+              }
             const DAY_IN_MS = 86_400_000;
             const hasValidSubscription = userSubscription && userSubscription.stripePriceId &&
             userSubscription.stripeCurrentPeriodEnd &&

@@ -117,16 +117,29 @@ const SettingsPage = async () => {
             {subcriptionButtonState && tier == 'pro' && (
                 <div className="mt-4 py-2">
                     <div className="text-muted-foreground text-sm py-2 pb-2 pl-1">
-                        Want to upgrade? (cancel current plan to upgrade)<br />
+                        Want to upgrade to Unlimited?<br />
                         
                     </div>   
                     <span className="text-purple-500 mx-1 font-medium">Unlimited plan</span> - <span className="text-purple-500 mx-1 font-medium">24.99$</span> / month.
                     <div className="text-muted-foreground text-sm py-2 pb-2 pl-1">
                         * Unlimited tokens for chat and images<br /> 
                         
-                    </div>                    
+                    </div>           
+                    <SubscriptionButton isPro={true} tier="unlimited" isUpgrade={true} />
             </div>
 
+            )}
+            {(proTokens > 0 && (isSubscribed && tier === 'pro')) && (
+                <div className="mt-4 py-2">
+                    <div className="text-muted-foreground text-sm py-2 pb-2 pl-1">
+                        Want to upgrade to Unlimited?
+                    </div>   
+                    <span className="text-purple-500 mx-1 font-medium">Unlimited plan</span> - <span className="text-purple-500 mx-1 font-medium">24.99$</span> / month.
+                    <div className="text-muted-foreground text-sm py-2 pb-2 pl-1">
+                        * Unlimited tokens for chat and images<br /> 
+                    </div>           
+                    <SubscriptionButton isPro={true} tier="unlimited" isUpgrade={true} />
+                </div>
             )}
             <span className="mr-2"></span>
             <br />
