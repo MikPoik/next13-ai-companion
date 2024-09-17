@@ -289,7 +289,7 @@ export async function POST(req: Request) {
         });
         */
         
-        //console.log("Make Bolna API call")
+        console.log("Make Bolna API call")
         const response = await fetch('https://api.bolna.dev/call', {
             method: 'POST',
             headers: headers,
@@ -297,11 +297,11 @@ export async function POST(req: Request) {
         });
         
         const responseJson = await response.json(); // This converts the response to a JSON object
-        //console.log(responseJson);
+        //console.log("response",responseJson);
 
         const callId = responseJson.call_id; // This extracts the call_id value from the response JSON
         const status = responseJson.status; // This extracts the status value from the response JSON
-       //console.log(callId, status); // This logs the call_id value
+        //console.log(callId, status); // This logs the call_id value
         //if (status === 'success') {
         if (status === 'queued') {
             const callLog = await prismadb.callLog.create({
@@ -313,11 +313,22 @@ export async function POST(req: Request) {
                 }
             });
             //console.log(callLog);
+            return new NextResponse(JSON.stringify({ message: 'ok', callId, status }), {
+              status: 200,
+              headers: { 'Content-Type': 'application/json' }
+            });
+        } else {
+        // Return a response for successful cases
+            console.log(responseJson,callId, status)
+            return new NextResponse(JSON.stringify({ message: 'Something went wrong, please try again', callId, status }), {
+              status: 400,
+              headers: { 'Content-Type': 'application/json' }
+            });
         }
     } catch (error: any) {
         console.error('Error while processing send-call:', error);
         return new NextResponse(`Error: ${error.message}`, { status: 400 });
     }
 
-    return new NextResponse(JSON.stringify({ message: 'ok' }), { status: 200, headers: { 'Content-Type': 'application/json' } });
+    
 }
