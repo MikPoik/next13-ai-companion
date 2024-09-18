@@ -39,7 +39,6 @@ export async function GET(request: Request) {
                     messageLimit: 1000,
                     tokenLimit: 10000,
                     firstMessage: currentDateTime,
-                    // Assuming initial setting for proTokens and callTime needs to be handled here as well
                     proTokens: 0,
                     callTime: 300,
                     lastMessage: currentDateTime
@@ -47,6 +46,7 @@ export async function GET(request: Request) {
             });
             return new NextResponse(JSON.stringify({ message: 'Not enough balance' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
         }
+        return new NextResponse(JSON.stringify({ message: 'OK' }), { status: 200, headers: { 'Content-Type': 'application/json' } });
     }
     catch (error: any) {
         console.error('Error checking balance:', error);
@@ -58,30 +58,28 @@ export async function POST(req: Request) {
     try {
         // Get the body from the POST request
         const body = await req.json();
-        const phoneNumber = body.phoneNumber; // Access the phone number from the request body
+        const phoneNumber = body.phoneNumber;
         const companionId = body.companionId;
-        //console.log('Phone Number:', phoneNumber);
-        //console.log('Companion ID:', companionId);
+
         const user = await currentUser();
         if (!user || !user.id) {
             return new NextResponse("Unauthorized", { status: 401 });
         }
-
-
 
         const balance = await prismadb.userBalance.findUnique({
             where: {
                 userId: user.id
             },
         });
-        //TODO different balance for calls
 
         if (balance) {
             if (balance.callTime < 6) {
                 return new NextResponse(JSON.stringify({ message: 'Not enough balance' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
             }
+        } else {
+            return new NextResponse(JSON.stringify({ message: 'User balance not found' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
         }
-        //console.log("user balance: ",balance)
+
         const companion = await prismadb.companion.findUnique({
             where: {
                 id: companionId
@@ -102,34 +100,28 @@ export async function POST(req: Request) {
         if (!companion) {
             return new NextResponse("No companion found", { status: 404 });
         }
-        //console.log(companion);
+
         const phoneVoice = await prismadb.phoneVoice.findUnique({
             where: {
                 id: companion.phoneVoiceId
             }
         });
-        //console.log("phoneVoice: ",phoneVoice)
         if (!phoneVoice) {
             return new NextResponse("No phone voice found", { status: 404 });
         }
-        
-        //retrieve chat history from db, last 10 messages    
+
         let formattedMessages = ''
 
-        //console.log(formattedMessages)
         const EMOJI_PATTERN = /([\u{1F1E0}-\u{1F1FF}|\u{1F300}-\u{1F5FF}|\u{1F600}-\u{1F64F}|\u{1F680}-\u{1F6FF}|\u{1F700}-\u{1F77F}|\u{1F780}-\u{1F7FF}|\u{1F800}-\u{1F8FF}|\u{1F900}-\u{1F9FF}|\u{1FA00}-\u{1FA6F}|\u{1FA70}-\u{1FAFF}|\u{2702}-\u{27B0}])/gu;
-        
+
         companion.messages.forEach((message) => {
-            //console.log("Processing message:", message);
             const role = message.role;
             let text;
             try {
                 if (typeof message.content === 'string') {
-                    // Use a regular expression to extract the text field
                     const textMatch = message.content.match(/"text":"((?:[^"\\]|\\.)*)"/);
                     if (textMatch && textMatch[1]) {
                         text = textMatch[1];
-                        // Unescape any escaped characters
                         text = text.replace(/\\(.)/g, "$1");
                     } else {
                         text = message.content;
@@ -138,13 +130,9 @@ export async function POST(req: Request) {
                     console.error("Unexpected message content type:", typeof message.content);
                     text = String(message.content);
                 }
-                // Remove most emojis from the text content
                 text = text.replace(EMOJI_PATTERN, '');
-                // Remove text between square brackets (like [Image of Caroline clothed])
                 text = text.replace(/\[.*?\]/g, '');
-                // Remove text between asterisks
                 text = text.replace(/\*.*?\*/g, '');
-                // Trim any extra whitespace
                 text = text.trim();
             } catch (error) {
                 console.error('Error processing message');
@@ -153,36 +141,21 @@ export async function POST(req: Request) {
             let roleText = role === 'system' || role === 'assistant' ? 'assistant' : 'user';
             text = text.replace(/\n/g, ". ");
             formattedMessages += `${roleText}: ${text}\n`;
-            //console.log("Formatted message:", `${roleText}: ${text}`);
         });
 
-        
         if (!formattedMessages.includes("assistant:")) {
             formattedMessages += `assistant:  ${companion.seed.replace(EMOJI_PATTERN, '')}\n` + formattedMessages;
         }
 
-        //console.log("***MESSAGES***\n"+formattedMessages);
-        
         // Create dynamic environment variables
         const now = new Date();
-        const day = now.toLocaleString("en-US", { weekday: "long" }); // Get the current day name
-        const time = now.toLocaleTimeString("en-US", { hour12: true }); // Get the current time (AM/PM format)
-        const date = now.toLocaleDateString("en-US"); // Get the current date in MM/DD/YYYY format
+        const day = now.toLocaleString("en-US", { weekday: "long" });
+        const time = now.toLocaleTimeString("en-US", { hour12: true });
+        const date = now.toLocaleDateString("en-US");
 
-
-
-        //console.log(call_prompt);
-        // Your call initiation logic goes here
-        // Headers  
-        /*
-        const apiKey = process.env["BLAND_API_KEY"];
-        if (!apiKey) {
-            throw new Error('BLAND_API_KEY is not defined in environment variables');
-        }
-        */
         const apiKey = process.env["BOLNA_API_KEY"];
         if (!apiKey) {
-            throw new Error('BOLNA_API_KEY is not defined in environment variables');
+            return new NextResponse("BOLNA_API_KEY is not defined", { status: 500 });
         }
         const headers = {
             'Authorization': `Bearer ${apiKey}`,
@@ -198,49 +171,23 @@ export async function POST(req: Request) {
                 maxDuration = 2;
             }
         }
-        let voice_id = null
-        let voice_preset = null
+        let voice_preset = phoneVoice.voice_preset;
 
-        voice_preset = phoneVoice.voice_preset;
-
-        /*
-        const data = {
-            'phone_number': phoneNumber,
-            'task': call_prompt,
-            'reduce_latency': phoneVoice.reduceLatency,
-            'webhook': `${process.env["NEXT_PUBLIC_APP_URL"]}/api/callhook`,
-            'max_duration': maxDuration,
-            'interruption_threshold': 300,
-            'temperature': 0.9,
-            'voice': voice_preset,
-            'model': 'turbo'
-
-        }
-        */
         let voice_agent_id = companion.voiceAgentId;
 
-        
         const create_bolna_agent_json = getBolnaAgentJson(companion.name,phoneVoice.bolnaVoice,phoneVoice.bolnaProvider,phoneVoice.bolnaVoiceId,phoneVoice.bolnaModel,phoneVoice.bolnaElevenlabTurbo,phoneVoice.bolnaPollyEngine,phoneVoice.bolnaPollyLanguage)
-        //console.log("json body: ", JSON.stringify(create_bolna_agent_json, null, 2));
 
-        
-        //console.log("check agent id")
-        //console.log(voice_agent_id)
         if (!companion.voiceAgentId) {
-            //if companion does not exist
             console.log("companion voice agent id not set")
 
-            
             const response = await fetch('https://api.bolna.dev/agent', {
                 method: 'POST',
                 headers: headers,
                 body: JSON.stringify(create_bolna_agent_json),
             });
             const result = await response.json();
-            //console.log(result);
-            
+
             voice_agent_id = result.agent_id;  
-            //console.log(companionId,user.id,result.agent_id)
             const updateCompanion = await prismadb.companion.update({
                 where: {
                     id: companionId,
@@ -248,61 +195,46 @@ export async function POST(req: Request) {
                 data: {
                     voiceAgentId: voice_agent_id,
                 }
-                });
-            //console.log(updateCompanion)
-            
+            });
+            await new Promise(resolve => setTimeout(resolve, 3000));
         }
-        //update voice agent template
-       //console.log("update voice agent template")
         const update_voice_agent = await fetch(`https://api.bolna.dev/agent/${voice_agent_id}`, {
             method: 'PUT',
             headers: headers,
             body: JSON.stringify(create_bolna_agent_json),
         });
-        
-        console.log("Update agent: ",await update_voice_agent.json())
+        console.log("Update agent: ", await update_voice_agent.json())
+        await new Promise(resolve => setTimeout(resolve, 3000));
+
         let tags = companion.tags.map(tag => tag.name).join(", ");
-        //console.log(tags)
-        
+
         const data = {
-                "agent_id": voice_agent_id, 
-                "recipient_phone_number": phoneNumber,
-                "user_data": {
-                    "character_name": companion.name,
-                    "character_type": companion.description,
-                    "character_personality": companion.personality,
-                    "character_appearance": companion.selfiePre,
-                    "previous_messages": formattedMessages,
-                    "character_background": companion.backstory.length > 2000 ? companion.backstory.slice(0, 2000) : companion.backstory,
-                    "tags": tags,
-                }
+            "agent_id": voice_agent_id, 
+            "recipient_phone_number": phoneNumber,
+            "user_data": {
+                "character_name": companion.name,
+                "character_type": companion.description,
+                "character_personality": companion.personality,
+                "character_appearance": companion.selfiePre,
+                "previous_messages": formattedMessages,
+                "character_background": companion.backstory.length > 2000 ? companion.backstory.slice(0, 2000) : companion.backstory,
+                "tags": tags,
             }
-        //console.log(data);
-        //call api post 'https://api.bland.ai/call', data, {headers};
-        // Make the API call to bland.ai
-        //console.log("making api call")
-        /*
-        const response = await fetch('https://api.bland.ai/v1/calls', {
-            method: 'POST',
-            headers: headers,
-            body: JSON.stringify(data),
-        });
-        */
-        
-        console.log("Make Bolna API call")
+        }
+
         const response = await fetch('https://api.bolna.dev/call', {
             method: 'POST',
             headers: headers,
             body: JSON.stringify(data),
         });
-        
-        const responseJson = await response.json(); // This converts the response to a JSON object
-        //console.log("response",responseJson);
 
-        const callId = responseJson.call_id; // This extracts the call_id value from the response JSON
-        const status = responseJson.status; // This extracts the status value from the response JSON
-        //console.log(callId, status); // This logs the call_id value
-        //if (status === 'success') {
+        const responseJson = await response.json();
+        console.log("response", responseJson);
+
+        const callId = responseJson.call_id;
+        const status = responseJson.status;
+        console.log(callId, status);
+
         if (status === 'queued') {
             const callLog = await prismadb.callLog.create({
                 data: {
@@ -312,14 +244,12 @@ export async function POST(req: Request) {
                     status: 'call-requested',
                 }
             });
-            //console.log(callLog);
             return new NextResponse(JSON.stringify({ message: 'ok', callId, status }), {
               status: 200,
               headers: { 'Content-Type': 'application/json' }
             });
         } else {
-        // Return a response for successful cases
-            console.log(responseJson,callId, status)
+            console.log(responseJson, callId, status)
             return new NextResponse(JSON.stringify({ message: 'Something went wrong, please try again', callId, status }), {
               status: 400,
               headers: { 'Content-Type': 'application/json' }
@@ -327,8 +257,15 @@ export async function POST(req: Request) {
         }
     } catch (error: any) {
         console.error('Error while processing send-call:', error);
-        return new NextResponse(`Error: ${error.message}`, { status: 400 });
+        return new NextResponse(JSON.stringify({ error: error.message }), {
+          status: 500,
+          headers: { 'Content-Type': 'application/json' }
+        });
     }
 
-    
+    // Fallback response in case none of the above conditions are met
+    return new NextResponse(JSON.stringify({ message: 'Unexpected end of function reached' }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' }
+    });
 }

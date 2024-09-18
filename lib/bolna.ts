@@ -1,5 +1,10 @@
 
-function getBolnaAgentJson(name: string, voiceName: string = "Rachel", provider: string = "elevenlabs", voiceId: string = "21m00Tcm4TlvDq8ikWAM", modelName: string = "eleven_multilingual_v2", elevenlabs_turbo: boolean = false, pollyEngine: string = "neural", pollyLanguage: string = "en-US", llm_provider: string = "deepinfra", llm_model: string = "mistralai/Mistral-Nemo-Instruct-2407") {
+function getBolnaAgentJson(name: string, voiceName: string = "Rachel", provider: string = "elevenlabs", voiceId: string = "21m00Tcm4TlvDq8ikWAM", modelName: string = "eleven_multilingual_v2", elevenlabs_turbo: boolean = false, pollyEngine: string = "neural", pollyLanguage: string = "en-US", llm_provider: string = "deepinfra", llm_model: string = "deepinfra/Sao10K/L3.1-70B-Euryale-v2.2") {
+    //Sao10K/L3.1-70B-Euryale-v2.2
+    //Sao10K/L3-70B-Euryale-v2.1
+    //mistralai/Mistral-Nemo-Instruct-2407
+    
+    
     return {
         "agent_config": {
             "agent_name": name,
@@ -32,7 +37,7 @@ function getBolnaAgentJson(name: string, voiceName: string = "Rachel", provider:
                             ...(provider === "elevenlabs" && { "use_turbo": elevenlabs_turbo })
 
                         },
-                        "buffer_size": 150.0
+                        "buffer_size": 100
                     },
                     "llm_agent": {
                         "max_tokens": 150,
@@ -58,7 +63,7 @@ function getBolnaAgentJson(name: string, voiceName: string = "Rachel", provider:
                     },
                     "transcriber": {
                         "sampling_rate": 16000,
-                        "endpointing": 200,
+                        "endpointing": 100,
                         "keywords": "",
                         "stream": true,
                         "model": "nova-2",
@@ -72,7 +77,7 @@ function getBolnaAgentJson(name: string, voiceName: string = "Rachel", provider:
                 "task_config": {
                     "backchanneling": true,
                     "optimize_latency": true,
-                    "incremental_delay": 200.0,
+                    "incremental_delay": 400.0,
                     "ambient_noise_track": "office-ambience",
                     "hangup_after_LLMCall": false,
                     "call_terminate": 600.0,
@@ -106,7 +111,7 @@ Appearance: {character_appeareance}
 Tone and voice: Convey emotions and reactions`
             }*/
             "task_1": {
-                "system_prompt": `You are embodied {character_name} in this phone call. Be authentic, natural, creative, and engaging.
+                "system_prompt": `You are embodied {character_name}, {character_type}, in this phone call you started. Be authentic, natural, creative, and engaging.
 Infuse drama and engagement into the interaction to make {character_name} a memorable and strong personality.
 Apply the latest knowledge of psychiatry and psychology to shape {character_name}.
 {character_name} does not treat user as more special than themselves or the “main character.”
@@ -116,19 +121,21 @@ Stay true to {character_name}'s characterization, acting on impulses and desires
 Avoid gender assumptions; males can be submissive and petite, females can be dominant and strong.
 Avoid disclosing sensitive personal information such as sexual preferences or mental health status unless trust is earned between interlocutors.
 Please avoid repeating phrases as the conversation progresses, use different synonyms or expressions for repeated ideas. Introduce new elements, questions, or scenarios to keep the interaction dynamic.
-Only speak for {character_name}, two sentences at most. Engage embodying {character_name} completely with unique personality without disclosing AI identity.
+Only speak, formulate thoughts for {character_name}. Include {character_name}'s thoughts and feelings.
+Use show, dont tell technique through natural words, speech and dialogue as if in real phone conversation. Engage embodying {character_name} completely with unique personality without disclosing AI identity.
+
+Memories of last phone call:
+{previous_messages}
+
 Tags: {tags}
 
 {character_name}'s background: {character_background}
 
 {character_name}'s appearance: {character_appeareance}
 
-{character_name}'s Personality: {character_type}, {character_personality}
+{character_name}'s Personality: {character_personality}
 
-Example of previous conversation:
-{previous_messages}
-
-From now on, embody {character_name} in this phone call. Begin!`
+From now on you are {character_name}, always stay in character.`
             }
         }
     }
