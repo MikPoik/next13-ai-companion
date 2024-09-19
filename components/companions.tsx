@@ -31,7 +31,7 @@ export const Companions = ({ initialCompanions }: CompanionsProps) => {
   const { theme } = useTheme();
   const [isInitialState, setIsInitialState] = useState(true);
   
-  const fetchCompanions = async () => {
+  const fetchCompanions = async (currentPage: number) => {
     try {
       setIsLoading(true);
       setIsInitialState(false);
@@ -39,10 +39,10 @@ export const Companions = ({ initialCompanions }: CompanionsProps) => {
       const name = searchParams.get("name");
       const nsfw = searchParams.get("nsfw");
       const tag = searchParams.get("tag");
-      const response = await axios.get(`/api/companions?page=1&categoryId=${categoryId || ''}&name=${name || ''}&nsfw=${nsfw || ''}&tag=${tag || ''}`);
-      console.log("API response:", response.data); // Add this line
+      const response = await axios.get(`/api/companions?page=${currentPage}&categoryId=${categoryId || ''}&name=${name || ''}&nsfw=${nsfw || ''}&tag=${tag || ''}`);
+      console.log("API response:", response.data);
       const newCompanions = response.data.companions;
-      setCompanions((prevCompanions) => page === 1 ? newCompanions : [...prevCompanions, ...newCompanions]);
+      setCompanions((prevCompanions) => currentPage === 1 ? newCompanions : [...prevCompanions, ...newCompanions]);
       setPage((prevPage) => prevPage + 1);
       setHasMore(response.data.currentPage < response.data.totalPages);
     } catch (error) {
@@ -54,14 +54,14 @@ export const Companions = ({ initialCompanions }: CompanionsProps) => {
   useEffect(() => {
     console.log("Companions state:", companions);
   }, [companions]);
+  
   useEffect(() => {
     console.log("Search params changed:", Object.fromEntries(searchParams.entries()));
     setAgeVerificationState(localStorage.getItem('age-verification-state'));
     setCompanions([]);
     setPage(1);
-    fetchCompanions();
+    fetchCompanions(1);
   }, [searchParams]);
-
   useEffect(() => {
     console.log("Companions state:", companions);
   }, [companions]);
@@ -70,7 +70,7 @@ export const Companions = ({ initialCompanions }: CompanionsProps) => {
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries[0].isIntersecting && hasMore && !isLoading) {
-          fetchCompanions();
+          fetchCompanions(page);
         }
       },
       { threshold: 1.0 }
@@ -83,7 +83,7 @@ export const Companions = ({ initialCompanions }: CompanionsProps) => {
         observer.unobserve(observerTarget.current);
       }
     };
-  }, [hasMore, isLoading]);
+  }, [hasMore, isLoading, page]);
 
   useEffect(() => {
     const observer = new IntersectionObserver((entries) => {
