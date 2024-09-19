@@ -8,19 +8,22 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 
 export const SubscriptionButton = ({
-  isPro = false
+  isPro = false,
+  tier = 'pro',
+  isUpgrade = false,
 }: {
   isPro: boolean;
+  tier: 'free'|'pro' | 'unlimited';
+  isUpgrade?: boolean;
 }) => {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
-
   const onClick = async () => {
     try {
       setLoading(true);
-
-      const response = await axios.get("/api/stripe");
-
+      const response = await axios.get("/api/stripe", {
+        params: { tier ,upgrade: isUpgrade}
+      });
       window.location.href = response.data.url;
     } catch (error) {
       toast({
@@ -31,11 +34,10 @@ export const SubscriptionButton = ({
       setLoading(false);
     }
   };
-
   return (
-    <Button size="sm" variant={isPro ? "default" : "premium"} disabled={loading} onClick={onClick} >
-      {isPro ? "Manage Subscription" : "Subscribe"}
-      {!isPro && <Sparkles className="w-4 h-4 ml-2 fill-white" />}
+    <Button size="sm" variant={isPro && !isUpgrade ? "default" : "premium"} disabled={loading} onClick={onClick} >
+      {isPro && !isUpgrade ? "Manage Subscription" : `${isUpgrade ? "Upgrade to" : "Subscribe to"} ${tier.charAt(0).toUpperCase() + tier.slice(1)}`}
+      {(!isPro || isUpgrade) && <Sparkles className="w-4 h-4 ml-2 fill-white" />}
     </Button>
   )
 };

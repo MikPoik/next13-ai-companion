@@ -2,7 +2,7 @@ import prismadb from "@/lib/prismadb";
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import {Role} from "@prisma/client"
-
+import { checkSubscription } from "@/lib/subscription";
 
 function roughTokenCount(text: string): number {
     // Use regular expression to split text based on whitespace and punctuation
@@ -50,7 +50,7 @@ export async function POST(
 ) {
     try {
 
-
+        
         const { prompt,id,blockList } = await request.json();
         //console.log("Save-Response, prompt received:", prompt);
 
@@ -62,6 +62,8 @@ export async function POST(
         if (!user || !user.id) {
             return new NextResponse("Unauthorized", { status: 401 });
         }
+        
+        const { isSubscribed, tier } = await checkSubscription();
         
         var imageTokens = 0;
         var voiceTokens = 0;
@@ -101,91 +103,80 @@ export async function POST(
          });
         
         
-        
-        
-
-        
-        /*
-        for (const block of blockList) {
-            console.log(block);
-            if (block.mimeType.startsWith("image")) {
-                imageTokens += 500;
-            } else if (block.mimeType.startsWith("audio")) {
-                hasAudio = 1;
+        if (tier !="unlimited") {            
+            const balance = await prismadb.userBalance.findUnique({
+                where: {
+                    userId: user.id
+                },
+            });
+            //console.log(balance);
+            if (balance) {
+                if (balance.tokenCount > balance.tokenLimit+balance.proTokens) {
+                    return NextResponse.json("No balance");
+                }
             }
-        }
-        */
-        const balance = await prismadb.userBalance.findUnique({
-            where: {
-                userId: user.id
-            },
-        });
-        //console.log(balance);
-        if (balance) {
-            if (balance.tokenCount > balance.tokenLimit+balance.proTokens) {
-                return NextResponse.json("No balance");
-            }
-        }
-        const tokenCost = roughTokenCount(responseText) + imageTokens + voiceTokens;
-        //console.log("Token Cost: ", tokenCost);
-        const currentDateTime = new Date().toISOString();
-
-            if (!balance) {
-                // Create the new balance record if it does not exist
-                await prismadb.userBalance.create({
-                    data: {
-                        userId: user.id,
-                        tokenCount: tokenCost,
-                        messageCount: 1,
-                        messageLimit: 1000,
-                        tokenLimit: 10000,
-                        firstMessage: currentDateTime,
-                        // Assuming initial setting for proTokens and callTime needs to be handled here as well
-                        proTokens: 0,
-                        callTime: 300,
-                        lastMessage: currentDateTime
-                    }
-                });
-            } else {
-                // Check if proTokens cover all the cost
-                if (balance.proTokens >= tokenCost) {
-                    // Decrement from proTokens only
-                    await prismadb.userBalance.update({
-                        where: {
-                            userId: user.id
-                        },
+            const tokenCost = roughTokenCount(responseText) + imageTokens + voiceTokens;
+            //console.log("Token Cost: ", tokenCost);
+            const currentDateTime = new Date().toISOString();
+    
+                if (!balance) {
+                    // Create the new balance record if it does not exist
+                    await prismadb.userBalance.create({
                         data: {
-                            proTokens: {
-                                decrement: tokenCost
-                            },
-                            messageCount: {
-                                increment: 1
-                            },
+                            userId: user.id,
+                            tokenCount: tokenCost,
+                            messageCount: 1,
+                            messageLimit: 1000,
+                            tokenLimit: 10000,
+                            firstMessage: currentDateTime,
+                            // Assuming initial setting for proTokens and callTime needs to be handled here as well
+                            proTokens: 0,
+                            callTime: 300,
                             lastMessage: currentDateTime
                         }
                     });
                 } else {
-                    // Use up all proTokens and remainder goes to tokenCount
-                    const remainder = tokenCost - balance.proTokens;
-                    await prismadb.userBalance.update({
-                        where: {
-                            userId: user.id
-                        },
-                        data: {
-                            proTokens: {
-                                decrement: balance.proTokens
+                    // Check if proTokens cover all the cost
+                    if (balance.proTokens >= tokenCost) {
+                        // Decrement from proTokens only
+                        await prismadb.userBalance.update({
+                            where: {
+                                userId: user.id
                             },
-                            tokenCount: {
-                                increment: remainder
+                            data: {
+                                proTokens: {
+                                    decrement: tokenCost
+                                },
+                                messageCount: {
+                                    increment: 1
+                                },
+                                lastMessage: currentDateTime
+                            }
+                        });
+                    } else {
+                        // Use up all proTokens and remainder goes to tokenCount
+                        const remainder = tokenCost - balance.proTokens;
+                        await prismadb.userBalance.update({
+                            where: {
+                                userId: user.id
                             },
-                            messageCount: {
-                                increment: 1
-                            },
-                            lastMessage: currentDateTime
-                        }
-                    });
+                            data: {
+                                proTokens: {
+                                    decrement: balance.proTokens
+                                },
+                                tokenCount: {
+                                    increment: remainder
+                                },
+                                messageCount: {
+                                    increment: 1
+                                },
+                                lastMessage: currentDateTime
+                            }
+                        });
+                    }
                 }
-            }
+        }
+
         return NextResponse.json("prompt saved")
     }
     catch (error) {

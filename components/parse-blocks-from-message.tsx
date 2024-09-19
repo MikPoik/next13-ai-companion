@@ -10,16 +10,16 @@ const { v4: uuidv4 } = require('uuid');
  * @returns Array of ExtendedBlock objects.
  */
 function replaceQuotesInText(text: string): string {
-  const regex = /"text":\s*"(.*?)",\s*"mimeType"/s;
+  const regex = /("text":\s*")((?:\\.|[^"\\])*)("(?=\s*,\s*"mimeType"))/;
+  
   const match = text.match(regex);
-
-  if (match) {
-    const originalText = match[1];
-    const escapedText = originalText.replace(/"/g, '\\"').replace(/\n/g, '\\n');
-    return text.replace(originalText, escapedText);
-  } else {
-    return text;
-  }
+if (match) {
+  const [fullMatch, textStart, originalText, textEnd] = match;
+  const escapedText = originalText.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+  return text.replace(fullMatch, `${textStart}${escapedText}${textEnd}`);
+} else {
+  return text;
+}
 }
 
 function sanitizeJSONString(content: string): string {
@@ -45,18 +45,18 @@ export function chatMessageJsonlToBlock(
     // Check if message content is a JSON array and parse the "text" field to message.content for previous message format
     try {
       if (message.content.startsWith("[") && message.content.endsWith("]")){
-        //console.log("JSON array detected")
+        console.log("JSON array detected")
        
         
         const content = parseMessageContent(message.content.toString());
         if (Array.isArray(content) && content.length > 0 && content[0].text && content[0].mimeType != "image/png") {
-          //console.log("JSON array detected and text field exists");
+         console.log("JSON array detected and text field exists");
           message.content = content.map(block => block.text).join("\n");
         } else if (Array.isArray(content) && content.length > 0 && content[0].mimeType == "image/png")  {
-          //console.log("Message content is not a JSON array or does not have a 'text' field. It is an image", content);
+          console.log("Message content is not a JSON array or does not have a 'text' field. It is an image", content);
           const block: ExtendedBlock = {
             id: message.id,
-            text: content[0].text || '', // Use the content if available
+            text: content[0].text.replace(/\\"/g, '"') || '', // Use the content if available
             historical: false,
             streamingUrl: `https://api.steamship.com/api/v1/block/${content[0].id}/raw`,
             messageType: MessageTypes.IMAGE,

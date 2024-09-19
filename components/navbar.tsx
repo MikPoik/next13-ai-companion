@@ -11,9 +11,11 @@ import { useProModal } from "@/hooks/use-pro-modal";
 const font = Poppins({ weight: "600", subsets: ["latin"] });
 interface NavbarProps {
     isPro: boolean;
+    tier: string;
 }
 export const Navbar = ({
-    isPro
+    isPro,
+    tier
 }: NavbarProps) => {
     const proModal = useProModal();
       const { isSignedIn, user } = useUser();
@@ -37,7 +39,7 @@ export const Navbar = ({
                 {isPro && (
                     <Link href="/settings">
                         <Button size="sm" variant="premium">
-                            Pro plan
+                            {tier === "pro" ? "Pro plan" : "Unlimited plan"}
                         </Button>
                     </Link>
                 )}

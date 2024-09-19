@@ -16,6 +16,7 @@ export async function POST(req: Request) {
     const signature = headers().get("Stripe-Signature") as string
 
     let event: Stripe.Event
+    let tier = 'pro'
 
     try {
         event = stripe.webhooks.constructEvent(
@@ -24,6 +25,7 @@ export async function POST(req: Request) {
             process.env.STRIPE_WEBHOOK_SECRET!
         )
     } catch (error: any) {
+        console.log("Webhook error:", error.message)
         return new NextResponse(`Webhook Error: ${error.message}`, { status: 400 })
     }
     console.log("[STRIPE EVENT]");
@@ -40,20 +42,67 @@ export async function POST(req: Request) {
             )
 
             if (!session?.metadata?.userId) {
+                console.log("No userId found in metadata checkoutsession")
                 return new NextResponse("User id is required", { status: 400 });
             }
-            console.log("[STRIPE CREATE SUBSCRIPTION]");
-            var user_sub = await prismadb.userSubscription.create({
-                data: {
-                    userId: session?.metadata?.userId,
+            if (session.metadata.tier) {
+                tier = session.metadata.tier as 'pro' | 'unlimited';
+                //console.log(`[STRIPE SUBSCRIPTION] Tier: ${tier}`);
+            }
+            
+            
+            // Check if this is an upgrade
+            const isUpgrade = session?.metadata?.upgrade === 'true';
+            if (isUpgrade) {
+              console.log("Processing subscription upgrade");
+
+              try {
+                // Find existing subscription in the database
+                const existingSubscription = await prismadb.userSubscription.findUnique({
+                  where: { userId: session?.metadata?.userId },
+                });
+                if (existingSubscription && existingSubscription.stripeSubscriptionId) {
+                  // Cancel the existing subscription in Stripe
+                  await stripe.subscriptions.cancel(existingSubscription.stripeSubscriptionId);
+                  console.log(`Cancelled existing subscription: ${existingSubscription.stripeSubscriptionId}`);
+                }
+                // Update the subscription in the database
+                var user_sub = await prismadb.userSubscription.update({
+                  where: { userId: session?.metadata?.userId },
+                  data: {
                     stripeSubscriptionId: subscription.id,
                     stripeCustomerId: subscription.customer as string,
                     stripePriceId: subscription.items.data[0].price.id,
-                    stripeCurrentPeriodEnd: new Date(
-                        subscription.current_period_end * 1000
-                    ),
+                    stripeCurrentPeriodEnd: new Date(subscription.current_period_end * 1000),
+                    tier: tier,
+                  },
+                });
+                console.log("Subscription upgraded successfully");
+              } catch (error) {
+                console.error("Error processing subscription upgrade:", error);
+                throw error; // or handle the error appropriately
+              }
+            } else {
+              // Handle new subscription or renewal
+              var user_sub = await prismadb.userSubscription.upsert({
+                where: { userId: session?.metadata?.userId },
+                update: {
+                  stripeSubscriptionId: subscription.id,
+                  stripeCustomerId: subscription.customer as string,
+                  stripePriceId: subscription.items.data[0].price.id,
+                  stripeCurrentPeriodEnd: new Date(subscription.current_period_end * 1000),
+                  tier: tier,
                 },
-            });
+                create: {
+                  userId: session?.metadata?.userId,
+                  stripeSubscriptionId: subscription.id,
+                  stripeCustomerId: subscription.customer as string,
+                  stripePriceId: subscription.items.data[0].price.id,
+                  stripeCurrentPeriodEnd: new Date(subscription.current_period_end * 1000),
+                  tier: tier,
+                },
+              });
+            }
             console.log("[STRIPE CREATE SUBSCRIPTION END, UPDATE BALANCE]");
 
             await prismadb.userBalance.upsert({
@@ -102,6 +151,7 @@ export async function POST(req: Request) {
             // Check for one-time top-up based on SKU or calltime
             const userId = session.metadata?.userId;
             if (!userId) {
+                console.log("No userId found in topup")
                 return new NextResponse("Metadata with user id is required for top-up", { status: 400 });
             }
             if (session?.metadata?.tokens === 'tokens-topup-50000') {
@@ -131,6 +181,7 @@ export async function POST(req: Request) {
         console.log("[INVOICE]");
         // Check if the invoice has a subscription ID
         if (!invoice.subscription) {
+            console.log("[STRIPE INVOICE PAYMENT, NO SUBSCRIPTION]");
             return new NextResponse("Subscription id is required", { status: 400 });
         }
 
@@ -147,7 +198,7 @@ export async function POST(req: Request) {
         });
         
         if (existingSub) {
-            console.log(existingSub)
+            //console.log(existingSub)
             const sub = await prismadb.userSubscription.update({
                 where: {
                     stripeSubscriptionId: subscription.id,
@@ -193,6 +244,7 @@ export async function POST(req: Request) {
             const subscription = await stripe.subscriptions.retrieve(
                 session.subscription as string
             )
+            //console.log(subscription)
 
         } else {
             console.log('session.subscription is undefined, retrieve event.')
@@ -214,32 +266,35 @@ export async function POST(req: Request) {
             else {
                 console.log("[STRIPE UNHANDLED SUB EVENT]");
                 const subscriptionUpdateData = event.data.object as Stripe.Subscription;
-                
+                //console.log(subscriptionUpdateData)
                 if (subscriptionUpdateData.status === 'active') {
                     // Your logic here to renew the subscription in your database
                     // For example, update the `stripeCurrentPeriodEnd` field and other relevant fields
-                    const user = await currentUser();
-                    if (!user) {
-                        return new NextResponse("User id is required", { status: 400 });
-                    }
-                    const updatedSub = await prismadb.userSubscription.upsert({
-                        where: {
-                            stripeSubscriptionId: subscriptionUpdateData.id,
-                        },
-                        create: {
-                            userId: user.id, 
-                            stripeSubscriptionId: subscriptionUpdateData.id,
-                            stripeCustomerId: subscriptionUpdateData.customer as string,
-                            stripePriceId: subscriptionUpdateData.items.data[0].price.id,
-                            stripeCurrentPeriodEnd: new Date(subscriptionUpdateData.current_period_end * 1000),
-                            // ... other fields you need to include during creation
-                        },
-                        update: {
-                            stripeCurrentPeriodEnd: new Date(subscriptionUpdateData.current_period_end * 1000),
-                            // ... other fields you need to update
-                        },
-                    });
-                    console.log("[STRIPE SUB RENEWED]");
+                      try {
+                        // Find the existing subscription in the database
+                        const existingSubscription = await prismadb.userSubscription.findUnique({
+                          where: { stripeSubscriptionId: subscriptionUpdateData.id },
+                        });
+                        if (existingSubscription) {
+                            console.log("Existing sub upgrade")
+                            const updatedSub = await prismadb.userSubscription.update({
+                                where: {
+                                    stripeSubscriptionId: subscriptionUpdateData.id,
+                                },
+                                data: {
+                                    stripeCurrentPeriodEnd: new Date(subscriptionUpdateData.current_period_end * 1000),
+                                    //tier: tier
+                                    // ... other fields you need to include during update
+                                    // ... other fields you need to update
+                                },
+                            });
+                            console.log("[STRIPE SUB RENEWED]");
+                        }
+                        } catch (error) {
+                          console.error("Error processing subscription update:", error);
+                          return new NextResponse("Error processing subscription update", { status: 500 });
+                        }
+
                     // Perform any additional logic you might need after renewing the subscription
                     // For example: logging, notifying the user, etc.
                 } else {

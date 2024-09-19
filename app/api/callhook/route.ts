@@ -5,6 +5,7 @@ import { UserButton } from "@clerk/nextjs"
 import { Steamship as SteamshipV2 } from 'steamship-client-v2';
 import {Role } from "@prisma/client";
 export const maxDuration = 60;
+import { checkSubscription } from "@/lib/subscription";
 
 export async function POST(req: Request) {
     try {
@@ -20,7 +21,7 @@ export async function POST(req: Request) {
         const correctedDuration = data.telephony_data.duration;
         //console.log('Corrected Duration:', correctedDuration);
         const transcriptsText = data.transcript;
-        console.log('Transcripts:', transcriptsText);
+        //console.log('Transcripts:', transcriptsText);
         // Declare transcriptUser outside of the nested try block
         let transcriptUser: Array<{ user: string, text: string }> = [];
         try {
@@ -35,8 +36,8 @@ export async function POST(req: Request) {
             }).filter(Boolean);
             //console.log('Transcript User:', transcriptUser);
         } catch (transcriptError: any) {
-            console.error('Error processing transcripts:', transcriptError);
-            return new NextResponse(`Transcript Processing Error: ${transcriptError.message}`, { status: 400 });
+            console.error('Error processing transcripts');
+            //return new NextResponse(`Transcript Processing Error: ${transcriptError.message}`, { status: 400 });
         }
         //console.log("find callLog");
         const call_sender = await prismadb.callLog.findUnique({
@@ -78,7 +79,7 @@ export async function POST(req: Request) {
                 // Fallback to current time if parsing fails
                 createdAt = new Date();
             }
-            console.log(createdAt)
+            //console.log(createdAt)
             const message = {
                 companionId: companionId,
                 userId: userId,
@@ -105,6 +106,8 @@ export async function POST(req: Request) {
         }
         //console.log('update_history', update_history);
         // Update user balance
+        //const { isSubscribed, tier } = await checkSubscription();
+
         const userBalance = await prismadb.userBalance.update({
             where: {
                 userId: userId
@@ -128,6 +131,7 @@ export async function POST(req: Request) {
                 }
             });
         }
+        
         const companion = await prismadb.companion.findUnique({
           where: { id: companionId },
           include: { 
@@ -156,17 +160,20 @@ export async function POST(req: Request) {
         let agent_version = process.env.AGENT_VERSION || "";
           const packageName = process.env.STEAMSHIP_PACKAGE || "ai-adventure-test";
         //console.log("apped history to steamship")
-        console.log(companion.steamshipAgent[0].instanceHandle, companion.steamshipAgent[0].workspaceHandle)
+        //console.log(companion.steamshipAgent[0].instanceHandle, companion.steamshipAgent[0].workspaceHandle)
         const client = await SteamshipV2.use(packageName, companion.steamshipAgent[0].instanceHandle, {}, companion.steamshipAgent[0].version, true, companion.steamshipAgent[0].workspaceHandle);
         
         await client.invoke("append_history", {
             prompt: json_messages
         });
-          
+          return new NextResponse(JSON.stringify({ message: 'Webhook processed successfully' }), { 
+              status: 200,
+              headers: { 'Content-Type': 'application/json' }
+          });
 
     } catch (error: any) {
         console.error('Error while processing webhook:', error);
         return new NextResponse(`Webhook Error: ${error.message}\n\n`, { status: 400 });
     }
-    return new NextResponse(null, { status: 200 });
+    
 }

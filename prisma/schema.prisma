@@ -116,6 +116,7 @@ model UserSubscription {
   stripeSubscriptionId   String?   @unique @map("stripe_subscription_id")
   stripePriceId          String?   @map("stripe_price_id")
   stripeCurrentPeriodEnd DateTime? @map("stripe_current_period_end")
+  tier                   String @default("pro")
 }
 
 model UserBalance {

@@ -21,7 +21,7 @@ const RootPage = async ({
     searchParams
 }: RootPageProps) => {
     const user = await currentUser();
-    const isPro = await checkSubscription();
+    //const isPro = await checkSubscription();
     let user_id = user?.id || "public";
 
 
