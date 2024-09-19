@@ -76,7 +76,7 @@ const RootPage = async ({
     }
     //console.log(nsfw)
 
-
+/*
     if (isMyCompanionsCategorySelected) {
         companions = await prismadb.companion.findMany({
             where: {
@@ -152,6 +152,7 @@ const RootPage = async ({
         };
         companions = await prismadb.companion.findMany(queryObject);
     }
+    
     if (selectedTagIds.length > 0) {
         companions = companions.filter(companion => {
             // Convert companion tags to tag IDs for easier comparison
@@ -168,7 +169,7 @@ const RootPage = async ({
 
     // Sort the companions by message count using the _count property
     companions.sort((a, b) => (b._count.messages || 0) - (a._count.messages || 0));
-
+*/
     //const categories = await prismadb.category.findMany();
     // You may add "My Companions" to the categories list if needed
 
