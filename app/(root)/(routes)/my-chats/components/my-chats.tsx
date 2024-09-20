@@ -1,9 +1,11 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef,useCallback } from "react";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import { BotAvatar } from "@/components/bot-avatar";
+import { MoonLoader } from "react-spinners";
+import { useTheme } from "next-themes";
 
 interface ChatCompanion {
   id: string;
@@ -23,43 +25,59 @@ export const MyChats = () => {
   const [activeCards, setActiveCards] = useState<number[]>([]);
   const router = useRouter();
   const observerTarget = useRef(null);
-
-  const fetchChats = async () => {
+  const [isLoading, setIsLoading] = useState(false);
+  const { theme } = useTheme();
+  
+  const fetchChats = useCallback(async () => {
+    if (isLoading) return; // Prevent multiple simultaneous requests
+    setIsLoading(true);
     try {
-      const response = await axios.get(`/api/my-chats?page=${page}`);
+      const response = await axios.get<{
+        chats: ChatCompanion[];
+        currentPage: number;
+        totalPages: number;
+      }>(`/api/my-chats?page=${page}`);
       const newChats = response.data.chats;
-      setChats((prevChats) => [...prevChats, ...newChats]);
+      setChats((prevChats) => {
+        const uniqueNewChats = newChats.filter(
+          (newChat: ChatCompanion) => !prevChats.some((prevChat) => prevChat.id === newChat.id)
+        );
+        return [...prevChats, ...uniqueNewChats];
+      });
       setPage((prevPage) => prevPage + 1);
       setHasMore(response.data.currentPage < response.data.totalPages);
     } catch (error) {
       console.error("Error fetching chats:", error);
+    } finally {
+      setIsLoading(false);
     }
-  };
-
+  }, [page, isLoading]);
+  
   useEffect(() => {
+    setPage(1);
+    setChats([]);
     fetchChats();
   }, []);
 
   useEffect(() => {
+    const currentObserverTarget = observerTarget.current;
     const observer = new IntersectionObserver(
       (entries) => {
-        if (entries[0].isIntersecting && hasMore) {
+        if (entries[0].isIntersecting && hasMore && !isLoading) {
           fetchChats();
         }
       },
       { threshold: 1.0 }
     );
-
-    if (observerTarget.current) {
-      observer.observe(observerTarget.current);
+    if (currentObserverTarget) {
+      observer.observe(currentObserverTarget);
     }
-
     return () => {
-      if (observerTarget.current) {
-        observer.unobserve(observerTarget.current);
+      if (currentObserverTarget) {
+        observer.unobserve(currentObserverTarget);
       }
     };
-  }, [hasMore]);
+  }, [hasMore, fetchChats, isLoading]);
 
   useEffect(() => {
     const observer = new IntersectionObserver((entries) => {
@@ -116,6 +134,11 @@ export const MyChats = () => {
           </div>
         </div>
       ))}
+      {isLoading && (
+        <div className="flex justify-center items-center p-4">
+          <MoonLoader size={20} color={theme === 'light' ? 'black' : 'white'} />
+        </div>
+      )}
       {hasMore && <div ref={observerTarget} style={{ height: '10px' }}></div>}
     </div>
   );

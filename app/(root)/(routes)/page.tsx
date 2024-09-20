@@ -177,7 +177,7 @@ const RootPage = async ({
         <div className="h-full p-4 space-y-2">
             <SearchInput tags={tags} selectedTags={selectedTagIds} nsfw={nsfw.toString()} />
             <Categories data={[]} />
-            <Companions data={companions} />
+            <Companions initialCompanions={[]} />
         </div>
     );
 };

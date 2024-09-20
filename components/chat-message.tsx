@@ -12,6 +12,7 @@ import { responseToChatBlocks } from "@/components/ChatBlock";
 import { chatMessagesJsonlToBlocks } from "@/components/parse-blocks-from-message";
 import { MessageTypes, validTypes } from "@/components/block-chat-types";
 import { StreamContent } from "@/components/stream-content"; 
+import Image from 'next/image';
 
 import useStreamStore from "@/lib/use-stream-store";
 const { v4: uuidv4 } = require('uuid');
@@ -136,10 +137,13 @@ export const ChatMessage = ({
                 className={`image-placeholder-wrapper ${imageLoaded ? 'loaded' : ''}`}
                 style={imageStyles.wrapper}
               >
-                <img 
+                <Image 
                   src={block.streamingUrl} 
                   alt={block.src} 
-                  style={imageStyles.img}
+                  layout="responsive"
+                  width={512}
+                  height={683}
+                  objectFit="contain"
                   onLoad={(e) => handleImageLoad(e.currentTarget.parentElement as HTMLDivElement, e.currentTarget)}
                 />
               </div>

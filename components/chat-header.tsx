@@ -17,7 +17,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { CallModal } from "./call-modal"; // Import CallModal component
 import { useProModal } from "@/hooks/use-pro-modal";
 import React, { useState } from "react"; // Import useState for managing CallModal visibility
-
+import {MobileSidebar} from "@/components/mobile-sidebar";
 
 interface ChatHeaderProps {
     isPro: boolean
@@ -81,12 +81,10 @@ export const ChatHeader = ({
     };
     
     return (
-        <div className="flex w-full justify-between items-center border-b border-primary/10 pb-0">
-            
+        <div className="flex w-full justify-between items-center border-b border-primary/10 pb-1 py-1">
+            <MobileSidebar isPro={isPro} />
             <div className="flex gap-x-2 items-center">
-                    <Button onClick={() => router.push(preserveQueryParams("/"))} size="icon" variant="ghost">
-                    <ChevronLeft className="h-8 w-8" />
-                </Button>
+
                 <BotAvatar src={companion.src} />
                 <div className="flex flex-col gap-y-1">
                     <div className="flex items-center gap-x-2">

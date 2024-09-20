@@ -2,7 +2,7 @@
 
 import { Home, Plus, Settings, HelpCircle, Component } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
-import { MessageSquare } from "lucide-react";
+import { MessagesSquare } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useProModal } from "@/hooks/use-pro-modal";
 
@@ -39,9 +39,9 @@ export const Sidebar = ({
             pro: false,
         },
         {
-        icon: MessageSquare,
+        icon: MessagesSquare,
         href: '/my-chats',
-        label: "My Chats",
+        label: "My chats",
         pro: false,
         },
         {

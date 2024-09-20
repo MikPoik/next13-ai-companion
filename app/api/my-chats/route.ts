@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth, currentUser } from "@clerk/nextjs/server";
 import prismadb from "@/lib/prismadb";
-
+export const dynamic = 'force-dynamic';
 export async function GET(req: Request) {
   try {
     const user = await currentUser();
@@ -12,6 +12,7 @@ export async function GET(req: Request) {
     const { searchParams } = new URL(req.url);
     const page = parseInt(searchParams.get('page') || '1');
     const pageSize = 10;
+    const skip = (page - 1) * pageSize;
 
     const chats = await prismadb.companion.findMany({
       where: {
@@ -56,7 +57,7 @@ export async function GET(req: Request) {
           _count: "desc"
         }
       },
-      skip: (page - 1) * pageSize,
+      skip: skip,
       take: pageSize,
     });
 

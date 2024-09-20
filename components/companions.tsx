@@ -9,6 +9,7 @@ import { useEffect, useState, useRef } from "react";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { MoonLoader } from "react-spinners";
 import { useTheme } from "next-themes";
+import { useCallback } from 'react';
 
 interface CompanionsProps {
   initialCompanions: (Companion & {
@@ -31,16 +32,24 @@ export const Companions = ({ initialCompanions }: CompanionsProps) => {
   const { theme } = useTheme();
   const [isInitialState, setIsInitialState] = useState(true);
   
-  const fetchCompanions = async (currentPage: number) => {
+  const fetchCompanions = useCallback(async (currentPage: number) => {
     try {
       setIsLoading(true);
       setIsInitialState(false);
       const categoryId = searchParams.get("categoryId");
       const name = searchParams.get("name");
       const nsfw = searchParams.get("nsfw");
-      const tag = searchParams.get("tag");
-      const response = await axios.get(`/api/companions?page=${currentPage}&categoryId=${categoryId || ''}&name=${name || ''}&nsfw=${nsfw || ''}&tag=${tag || ''}`);
-      console.log("API response:", response.data);
+      const tags = searchParams.get("tag")?.split(',').filter(id => id !== '') || [];
+
+      let url = `/api/companions?page=${currentPage}&categoryId=${categoryId || ''}&name=${name || ''}&nsfw=${nsfw || ''}`;
+
+      // Add tags to the URL
+      if (tags.length > 0) {
+        url += `&tag=${tags.join(',')}`;
+      }
+
+      const response = await axios.get(url);
+      //console.log("API response:", response.data);
       const newCompanions = response.data.companions;
       setCompanions((prevCompanions) => currentPage === 1 ? newCompanions : [...prevCompanions, ...newCompanions]);
       setPage((prevPage) => prevPage + 1);
@@ -50,23 +59,26 @@ export const Companions = ({ initialCompanions }: CompanionsProps) => {
     } finally {
       setIsLoading(false);
     }
-  };
+  },[searchParams]);
+  
   useEffect(() => {
     console.log("Companions state:", companions);
   }, [companions]);
   
   useEffect(() => {
-    console.log("Search params changed:", Object.fromEntries(searchParams.entries()));
+    //console.log("Search params changed:", Object.fromEntries(searchParams.entries()));
     setAgeVerificationState(localStorage.getItem('age-verification-state'));
     setCompanions([]);
     setPage(1);
     fetchCompanions(1);
-  }, [searchParams]);
+  }, [searchParams, fetchCompanions]);
+  
   useEffect(() => {
-    console.log("Companions state:", companions);
+    //console.log("Companions state:", companions);
   }, [companions]);
 
   useEffect(() => {
+    const currentObserverTarget = observerTarget.current;
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries[0].isIntersecting && hasMore && !isLoading) {
@@ -75,15 +87,15 @@ export const Companions = ({ initialCompanions }: CompanionsProps) => {
       },
       { threshold: 1.0 }
     );
-    if (observerTarget.current) {
-      observer.observe(observerTarget.current);
+    if (currentObserverTarget) {
+      observer.observe(currentObserverTarget);
     }
     return () => {
-      if (observerTarget.current) {
-        observer.unobserve(observerTarget.current);
+      if (currentObserverTarget) {
+        observer.unobserve(currentObserverTarget);
       }
     };
-  }, [hasMore, isLoading, page]);
+  }, [hasMore, isLoading, page, fetchCompanions]);
 
   useEffect(() => {
     const observer = new IntersectionObserver((entries) => {
