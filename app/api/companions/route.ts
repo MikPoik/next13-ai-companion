@@ -16,10 +16,11 @@ export async function GET(req: Request) {
     let user_id = user?.id || "public";
 
     let whereClause: any = {
-      name: { contains: name || undefined, mode: 'insensitive' },
-      ...(nsfw === false ? { nsfw: false } : {}),
-    };
-
+      name: { contains: name || undefined, mode: 'insensitive' }};
+    
+    if (nsfw !== true) {
+      whereClause.nsfw = false;
+    }
     if (tagIds.length > 0) {
       whereClause.tags = {
         some: {
