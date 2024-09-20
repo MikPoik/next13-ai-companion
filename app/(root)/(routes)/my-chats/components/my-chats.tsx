@@ -18,66 +18,65 @@ interface ChatCompanion {
   _count: { messages: number };
 }
 
-export const MyChats = () => {
-  const [chats, setChats] = useState<ChatCompanion[]>([]);
-  const [page, setPage] = useState(1);
-  const [hasMore, setHasMore] = useState(true);
-  const [activeCards, setActiveCards] = useState<number[]>([]);
-  const router = useRouter();
-  const observerTarget = useRef(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const { theme } = useTheme();
-  
-  const fetchChats = useCallback(async () => {
-    if (isLoading) return; // Prevent multiple simultaneous requests
-    setIsLoading(true);
-    try {
-      const response = await axios.get<{
-        chats: ChatCompanion[];
-        currentPage: number;
-        totalPages: number;
-      }>(`/api/my-chats?page=${page}`);
-      const newChats = response.data.chats;
-      setChats((prevChats) => {
-        const uniqueNewChats = newChats.filter(
-          (newChat: ChatCompanion) => !prevChats.some((prevChat) => prevChat.id === newChat.id)
-        );
-        return [...prevChats, ...uniqueNewChats];
-      });
-      setPage((prevPage) => prevPage + 1);
-      setHasMore(response.data.currentPage < response.data.totalPages);
-    } catch (error) {
-      console.error("Error fetching chats:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [page, isLoading]);
-  
-  useEffect(() => {
-    setPage(1);
-    setChats([]);
-    fetchChats();
-  }, []);
-
-  useEffect(() => {
-    const currentObserverTarget = observerTarget.current;
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting && hasMore && !isLoading) {
-          fetchChats();
-        }
-      },
-      { threshold: 1.0 }
-    );
-    if (currentObserverTarget) {
-      observer.observe(currentObserverTarget);
-    }
-    return () => {
-      if (currentObserverTarget) {
-        observer.unobserve(currentObserverTarget);
+  export const MyChats = () => {
+    const [chats, setChats] = useState<ChatCompanion[]>([]);
+    const [page, setPage] = useState(1);
+    const [hasMore, setHasMore] = useState(true);
+    const [activeCards, setActiveCards] = useState<number[]>([]);
+    const router = useRouter();
+    const observerTarget = useRef(null);
+    const [isLoading, setIsLoading] = useState(false);
+    const { theme } = useTheme();
+    const initialFetchMade = useRef(false);
+    const fetchChats = useCallback(async () => {
+      if (isLoading || !hasMore) return;
+      setIsLoading(true);
+      try {
+        const response = await axios.get<{
+          chats: ChatCompanion[];
+          currentPage: number;
+          totalPages: number;
+        }>(`/api/my-chats?page=${page}`);
+        const newChats = response.data.chats;
+        setChats((prevChats) => {
+          const uniqueNewChats = newChats.filter(
+            (newChat: ChatCompanion) => !prevChats.some((prevChat) => prevChat.id === newChat.id)
+          );
+          return [...prevChats, ...uniqueNewChats];
+        });
+        setPage((prevPage) => prevPage + 1);
+        setHasMore(response.data.currentPage < response.data.totalPages);
+      } catch (error) {
+        console.error("Error fetching chats:", error);
+      } finally {
+        setIsLoading(false);
       }
-    };
-  }, [hasMore, fetchChats, isLoading]);
+    }, [isLoading, hasMore, page]);
+    useEffect(() => {
+      if (!initialFetchMade.current) {
+        fetchChats();
+        initialFetchMade.current = true;
+      }
+    }, [fetchChats]);
+    useEffect(() => {
+      const currentObserverTarget = observerTarget.current;
+      const observer = new IntersectionObserver(
+        (entries) => {
+          if (entries[0].isIntersecting && hasMore && !isLoading && initialFetchMade.current) {
+            fetchChats();
+          }
+        },
+        { threshold: 1.0 }
+      );
+      if (currentObserverTarget) {
+        observer.observe(currentObserverTarget);
+      }
+      return () => {
+        if (currentObserverTarget) {
+          observer.unobserve(currentObserverTarget);
+        }
+      };
+    }, [fetchChats, hasMore, isLoading]);
 
   useEffect(() => {
     const observer = new IntersectionObserver((entries) => {
