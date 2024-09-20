@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef,useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
 import { ChatClient } from "./components/client";
@@ -20,9 +20,8 @@ const ChatIdPage = ({ params }: { params: { chatId: string } }) => {
 
   //console.log("Rendering ChatIdPage component");
 
-  const initializeCompanion = async () => {
+  const initializeCompanion = useCallback(async () => {
     if (initializingRef.current || initializedRef.current) {
-      //console.log("Initialization already in progress or completed, skipping...");
       return;
     }
 
@@ -47,11 +46,11 @@ const ChatIdPage = ({ params }: { params: { chatId: string } }) => {
       initializingRef.current = false;
       setIsLoading(false);
     }
-  };
+  }, [params.chatId, router]);
 
   useEffect(() => {
     initializeCompanion();
-  }, [params.chatId, router]);
+  }, [initializeCompanion]);
 
   if (isLoading) {
     return (

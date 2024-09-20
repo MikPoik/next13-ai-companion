@@ -2,13 +2,17 @@ import { Avatar, AvatarImage } from "@/components/ui/avatar"
 
 interface BotAvatarProps {
   src: string;
+  height?: string;
+  width?: string;
 };
 
 export const BotAvatar = ({
-  src
+  src,
+  height = "h-12",
+  width = "w-12"
 }: BotAvatarProps) => {
   return (
-    <Avatar className="h-12 w-12">
+    <Avatar className={`${height} ${width}`}>
       <AvatarImage src={src} />
     </Avatar>
   );

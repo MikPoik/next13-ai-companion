@@ -30,6 +30,7 @@ export const ImageUpload = ({
     useEffect(() => {
         setNewImageUrl(src);       // sets the newImageUrl when src changes
         onChange(newImageUrl);     // notifies the FormField component about the change
+
     }, [src]);  // Dependency array changed to src
     useEffect(() => {
     onChange(src);

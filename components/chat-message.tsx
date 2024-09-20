@@ -82,7 +82,7 @@ export const ChatMessage = ({
   const handleImageLoad = (wrapperElement: HTMLDivElement, imgElement: HTMLImageElement) => {
     setImageLoaded(true);
     applyLoadedStyles(wrapperElement, imgElement);
-    
+
   };
 
   if (isLoading || (streamState === 'started' && !streamedContent)) {

@@ -16,7 +16,8 @@
   import { Button } from "@/components/ui/button";
   import useStreamStore from "@/lib/use-stream-store";
   import {parseImageFromBlocks} from "@/lib/utils";
- import { useIsMobile } from '@/lib/is-mobile';
+  import { useIsMobile } from '@/lib/is-mobile';
+  import { Sidebar } from "@/components/sidebar";
 
   interface ChatClientProps {
     isPro: boolean;
@@ -383,7 +384,11 @@
     }, [messages, streamContent, isLoading]);
     
     return (
-      <div className="flex flex-col h-full">
+      <div className="flex h-full">
+        <div className="hidden md:flex  h-full w-20 flex-col fixed inset-y-0">
+        <Sidebar isPro={isPro} />
+        </div>
+        <div className="flex flex-col h-full flex-grow md:pl-20">
         <ChatHeader isPro={isPro} companion={companion} />
         <div ref={scrollRef} style={scrollContainerStyle} className="flex-1 overflow-y-auto py-2 pb-5 pl-1">
           {transformedMessages.map((message, index) => (
@@ -426,6 +431,7 @@
             </Button>
           )}
         </form>
+      </div>
       </div>
     );
   };

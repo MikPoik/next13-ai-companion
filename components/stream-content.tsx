@@ -6,7 +6,6 @@ import useStreamStore from "@/lib/use-stream-store";
 interface StreamContentProps {
   blockId: string;
   onContentUpdate?: (newContent: string) => void;
-  
 }
 
 const formatText = (text: string): (string | JSX.Element)[] => {
@@ -25,19 +24,47 @@ const formatText = (text: string): (string | JSX.Element)[] => {
 };
 
 export const StreamContent: React.FC<StreamContentProps> = ({ blockId, onContentUpdate }) => {
-  const { content, setContent } = useStreamStore((state) => state);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const { content: streamContent, setContent: setContentStore } = useStreamStore();
-  
-  const debouncedOnContentUpdate = useCallback(
-    debounce((updatedContent: string) => {
+
+  const debouncedOnContentUpdate = useCallback((updatedContent: string) => {
+    const debouncedUpdate = debounce((content: string) => {
       if (onContentUpdate) {
-        onContentUpdate(updatedContent);
+        onContentUpdate(content);
       }
-    }, 300),
-    [onContentUpdate]
-  );
+    }, 300);
+    debouncedUpdate(updatedContent);
+  }, [onContentUpdate]);
+
+  const streamData = useCallback(async () => {
+    const controller = new AbortController();
+    const { signal } = controller;
+    try {
+      const response = await fetch(`/api/block/${blockId}`, { signal });
+      if (!response.body) throw new Error('No response body');
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let accumulatedContent = '';
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        accumulatedContent += decoder.decode(value, { stream: true });
+        const plainTextUpdate = accumulatedContent;
+        setContentStore(accumulatedContent);
+        debouncedOnContentUpdate(plainTextUpdate);
+      }
+    } catch (err) {
+      if (signal.aborted) {
+        console.log('Fetch aborted due to unmount or navigation');
+      } else {
+        console.error('Error during fetching:', err);
+        setError(err instanceof Error ? err.message : 'An unknown error occurred');
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  }, [blockId, setContentStore, debouncedOnContentUpdate]);
 
   useEffect(() => {
     setIsLoading(true);
@@ -45,43 +72,7 @@ export const StreamContent: React.FC<StreamContentProps> = ({ blockId, onContent
     const controller = new AbortController();
     const { signal } = controller;
 
-    const streamData = async () => {
-      try {
-        const response = await fetch(`/api/block/${blockId}`, { signal });
-        if (!response.body) throw new Error('No response body');
-        const reader = response.body.getReader();
-        const decoder = new TextDecoder();
-        let accumulatedContent = '';
-
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-          accumulatedContent += decoder.decode(value, { stream: true });
-          
-
-          // Update to set content in chunks as received without waiting for the entire message.
-          const plainTextUpdate = accumulatedContent;
-          
-          
-          setContentStore(accumulatedContent);
-          //console.log("Updated store with:", plainTextUpdate); // Add this log
-          debouncedOnContentUpdate(plainTextUpdate); // Notify parent component of new content
-        }
-        //console.log('Stream content finished, final content: ', accumulatedContent);
-      } catch (err) {
-        if (signal.aborted) {
-          console.log('Fetch aborted due to unmount or navigation');
-        } else {
-          console.error('Error during fetching:', err);
-          setError(err instanceof Error ? err.message : 'An unknown error occurred');
-        }
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
     if (signal.aborted) {
-      // If the signal is already aborted, just log and return
       console.log('Fetch aborted, not initiating due to signal already aborted');
       return;
     }
@@ -91,14 +82,12 @@ export const StreamContent: React.FC<StreamContentProps> = ({ blockId, onContent
     }
 
     return () => controller.abort();
-  }, [blockId, setContent, debouncedOnContentUpdate]);
+  }, [blockId, streamData]);
 
-  //if (isLoading) {
-  //  return <div>Loading...</div>;
-  //}
   if (error) {
     return <div>Error: {error}</div>;
   }
+
   const formattedContent = formatText(streamContent);
   return <div>{formattedContent}</div>;
 };
