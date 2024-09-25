@@ -61,9 +61,6 @@ export const Companions = ({ initialCompanions }: CompanionsProps) => {
     }
   },[searchParams]);
   
-  useEffect(() => {
-    console.log("Companions state:", companions);
-  }, [companions]);
   
   useEffect(() => {
     //console.log("Search params changed:", Object.fromEntries(searchParams.entries()));

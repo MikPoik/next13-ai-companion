@@ -45,12 +45,12 @@ export function chatMessageJsonlToBlock(
     // Check if message content is a JSON array and parse the "text" field to message.content for previous message format
     try {
       if (message.content.startsWith("[") && message.content.endsWith("]")){
-        console.log("JSON array detected")
+        //console.log("JSON array detected")
        
         
         const content = parseMessageContent(message.content.toString());
         if (Array.isArray(content) && content.length > 0 && content[0].text && content[0].mimeType != "image/png") {
-         console.log("JSON array detected and text field exists");
+         //console.log("JSON array detected and text field exists");
           message.content = content.map(block => block.text).join("\n");
         } else if (Array.isArray(content) && content.length > 0 && content[0].mimeType == "image/png")  {
           //console.log("Message content is not a JSON array or does not have a 'text' field. It is an image", content);

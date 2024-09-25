@@ -18,7 +18,7 @@ const { v4: uuidv4 } = require('uuid');
 
 export interface ChatMessageProps {
   id: string;
-  role: "system" | "user" | "function" | "assistant";
+  role: "system" | "user" | "function" | "assistant" | "data" | "tool";
   content?: React.ReactNode | string | any[];
   isLoading?: boolean;
   src?: string;
