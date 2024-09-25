@@ -137,6 +137,8 @@ enum Role {
   system
   assistant
   function
+  data
+  tool
 }
 
 model CallLog {

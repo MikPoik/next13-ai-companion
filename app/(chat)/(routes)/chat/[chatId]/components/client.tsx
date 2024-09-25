@@ -296,20 +296,17 @@
       setIsDeleting(false);
     };
     
-    const submitWithRetry = async (input: string, maxRetries = 3, delay = 1000) => {
-      for (let i = 0; i < maxRetries; i++) {
-        try {
-          await append({ role: 'user', content: input });
-          return true; // Successful submission
-        } catch (error) {
-          console.error(`Submission attempt ${i + 1} failed:`, error);
-          if (i < maxRetries - 1) {
-            await new Promise(resolve => setTimeout(resolve, delay));
-          }
-        }
+ 
+    useEffect(() => {
+      if (error) {
+        console.error("Chat error detected:", error);
+        toast({
+          description: "An error occurred. Please try sending your message again.",
+          variant: "destructive",
+        });
+        setIsSubmitting(false);
       }
-      return false; // All attempts failed
-    };
+    }, [error, toast]);
     
     const onSubmit = async (e: FormEvent<HTMLFormElement>) => {
       e.preventDefault();
@@ -320,7 +317,6 @@
         });
         return;
       }
-
       const { status, message } = await checkBalance(companion.id);
       if (status === 'error' && message) {
         toast({
@@ -336,18 +332,20 @@
         });
         return;
       }
-      setIsSubmitting(true);
-      const success = await submitWithRetry(input);
 
-      if (success) {
-        setInput(""); // Clear input on successful submission
-      } else {
-        if (inputRef.current) {
-          setTimeout(() => {
-          }, 1000);
-        }
+      setIsSubmitting(true);
+      try {
+        await append({ role: 'user', content: input });
+        setInput("");
+      } catch (error) {
+        console.error("Error submitting message:", error);
+        toast({
+          description: "Failed to send message. Please try again.",
+          variant: "destructive",
+        });
+      } finally {
+        setIsSubmitting(false);
       }
-     
     };
 
     const transformedMessages: ChatMessageProps[] = messages.map((message) => ({
