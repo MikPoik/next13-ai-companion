@@ -119,33 +119,24 @@
       body: {
         chatId: `${companion.id}`,
       },
-      onResponse(response) {
-        //console.log(response)
-        const lastUserMessage = messagesRef.current[messagesRef.current.length - 1];
-        //console.log(lastUserMessage)
-
-        fetch(`/api/chat/${companion.id}/save-prompt`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ prompt: lastUserMessage.content, id: lastUserMessage.id })
-        }); 
-        //console.log(messagesRef)
-        //console.log(messages)
-        
+      onResponse(response) {     
         bottomRef.current?.scrollIntoView({ behavior: "smooth" });
       },
       onFinish(message){
         const finalStreamedContent = useStreamStore.getState().content;
         //console.log("Streamed content from Zustand:", finalStreamedContent);
       
-
-
         const lastUserMessage = messagesRef.current[messagesRef.current.length - 2];
         const lastAssistantMessage = messagesRef.current[messagesRef.current.length - 1];
         //console.log(lastUserMessage)
         //console.log(lastAssistantMessage)
         setInput("");
         if (!lastAssistantMessage.content.includes("I'm sorry, I had an error when generating response")){
+          fetch(`/api/chat/${companion.id}/save-prompt`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ prompt: lastUserMessage.content, id: lastUserMessage.id })
+          }); 
           fetch(`/api/chat/${companion.id}/save-response`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -335,8 +326,7 @@
 
       setIsSubmitting(true);
       try {
-        await append({ role: 'user', content: input });
-        setInput("");
+        handleSubmit(e as React.FormEvent<HTMLFormElement>, {});
       } catch (error) {
         console.error("Error submitting message:", error);
         toast({
