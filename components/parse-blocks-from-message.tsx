@@ -135,7 +135,7 @@ export function chatMessageJsonlToBlock(
           return block;
         } catch (e) {
           console.error(
-            `Error parsing block: ${e}. Block str was: ${blockStr}. Message was: ${message.content}`
+            `Error parsing block: ${e}.`
           );
           // In case of error, return null and filter it out later
           return null;

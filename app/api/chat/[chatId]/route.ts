@@ -121,26 +121,36 @@ export async function POST(
                 context_id: user.id
             },
         })
-        let stream;
-        try {
-            stream = await SteamshipStream(response, steamship, {
-                streamTimeoutSeconds: 60,
-                format: "json-no-inner-stream"
-            });
-        } catch (streamError) {
-            const error = streamError as any;
-            if (error.code === 'ERR_INVALID_STATE') {
-                console.error('Steamship stream error:', error.message);
-                return new NextResponse("Stream error occurred. Please try again.", { status: 500 });
+        
+        const maxRetries = 3;
+        let retryCount = 0;
+        while (retryCount < maxRetries) {
+            try {
+                const stream = await SteamshipStream(response, steamship, {
+                    streamTimeoutSeconds: 60,
+                    format: "json-no-inner-stream"
+                });
+                return new Response(stream);
+            } catch (streamError: any) {
+                if (streamError.code === 'ERR_INVALID_STATE') {
+                    console.error(`Steamship stream error (attempt ${retryCount + 1}/${maxRetries}):`, streamError.message);
+                    retryCount++;
+                    if (retryCount >= maxRetries) {
+                        return new NextResponse("Stream error occurred after multiple attempts. Please try again.", { status: 500 });
+                    }
+                    // Wait for a short time before retrying
+                    await new Promise(resolve => setTimeout(resolve, 1000*retryCount));
+                } else {
+                    // If it's not an ERR_INVALID_STATE error, rethrow it
+                    console.log("Stream error:", streamError)
+                    throw streamError;
+                }
             }
-            throw streamError; // Re-throw if it's not the specific error we're handling
         }
-
-        return new Response(stream);
 
 
     } catch (error) {
-        console.log(error)
+        console.error('Chat route error:', error);
         return NextResponse.json("I'm sorry, I had an error when generating response.(This message is not saved)");
         //return new NextResponse("Internal Error", { status: 500 });
     }
