@@ -596,9 +596,7 @@ export const CompanionForm = ({
                                             <SelectItem key="lizpreciatior/lzlv_70b_fp16_hf" value="lizpreciatior/lzlv_70b_fp16_hf">Lzlv 70B</SelectItem>
                                             <SelectItem key="Sao10K/L3.1-70B-Euryale-v2.2" value="Sao10K/L3.1-70B-Euryale-v2.2">Euryale L3.1 70B</SelectItem>
                                             <SelectItem key="Sao10K/L3-70B-Euryale-v2.1" value="Sao10K/L3-70B-Euryale-v2.1">Euryale L3 70B</SelectItem>
-                                            <SelectItem key="NousResearch/Nous-Hermes-2-Yi-34B" value="NousResearch/Nous-Hermes-2-Yi-34B">Nous-Hermes-2-Yi-34B</SelectItem>
                                             <SelectItem key="NousResearch/Nous-Hermes-2-Mixtral-8x7B-DPO" value="NousResearch/Nous-Hermes-2-Mixtral-8x7B-DPO">Mixtral 8x7B DPO</SelectItem>
-                                            <SelectItem key="Austism/chronos-hermes-13b-v2" value="Austism/chronos-hermes-13b-v2">Chronos Hermes 13B</SelectItem>  
                                             <SelectItem key="Gryphe/MythoMax-L2-13b" value="Gryphe/MythoMax-L2-13b">MythoMax 13B</SelectItem>       
                                             <SelectItem key="mistralai/Mistral-Nemo-Instruct-2407" value="mistralai/Mistral-Nemo-Instruct-2407">Mistral Nemo 12B</SelectItem>      
                                             <SelectItem key="meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo" value="meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo">Meta Llama 3.1 8B Turbo (SFW)</SelectItem>

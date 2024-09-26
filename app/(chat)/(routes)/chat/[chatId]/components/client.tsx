@@ -120,6 +120,9 @@
         chatId: `${companion.id}`,
       },
       onResponse(response) {     
+        if (!response.ok) {
+          console.log("Error on response: ",response.status );
+        }
         bottomRef.current?.scrollIntoView({ behavior: "smooth" });
       },
       onFinish(message){
@@ -176,7 +179,13 @@
         setIsSubmitting(false);
       },
       onError(error) {
-        console.error(error);
+        console.error("Chat error detected:", error);
+        toast({
+          description: "Failed to send message. Please try again.",
+          variant: "destructive",
+          duration: 3000,
+        });
+        setIsSubmitting(false);
       },
       sendExtraMessageFields: true,
     });
@@ -192,11 +201,7 @@
       );
     }, [messages, companion.id]);
 
-    useEffect(() => {
-      if (error) {
-        console.error(error.message);
-      }
-    }, [error]);
+
 
     const checkBalance = async (companionId: string) => {
       try {
@@ -224,6 +229,7 @@
         toast({
           description: message,
           variant: 'destructive',
+          duration: 3000,
         });
         setIsReloading(false);
         return;
@@ -232,6 +238,7 @@
         toast({
           description: "Not enough balance, top up your balance.",
           variant: "destructive",
+          duration: 3000,
         });
         setIsReloading(false);
         return;
@@ -241,6 +248,7 @@
         toast({
           description: "Legacy chat history format, delete chat history to use updated feature",
           variant: "destructive",
+          duration: 3000,
         });
         setIsReloading(false);
         return;
@@ -254,6 +262,7 @@
         toast({
           description: 'Failed to reload chat.',
           variant: 'destructive',
+          duration: 3000,
         });
       });
       reload();
@@ -266,6 +275,7 @@
         toast({
           description: "Legacy chat history format, delete chat history to use updated feature",
           variant: "destructive",
+          duration: 3000,
         });
         return;
       }
@@ -279,6 +289,7 @@
         toast({
           description: 'Failed to delete message.',
           variant: 'destructive',
+          duration: 3000,
         });
         setIsDeleting(false);
       });
@@ -287,24 +298,17 @@
       setIsDeleting(false);
     };
     
- 
-    useEffect(() => {
-      if (error) {
-        console.error("Chat error detected:", error);
-        toast({
-          description: "An error occurred. Please try sending your message again.",
-          variant: "destructive",
-        });
-        setIsSubmitting(false);
-      }
-    }, [error, toast]);
+
     
     const onSubmit = async (e: FormEvent<HTMLFormElement>) => {
       e.preventDefault();
+      setIsSubmitting(true);
+      
       if (!input) {
         toast({
           description: "Input cannot be empty.",
           variant: "destructive",
+          duration: 3000,
         });
         return;
       }
@@ -313,6 +317,7 @@
         toast({
           description: message,
           variant: 'destructive',
+          duration: 3000,
         });
         return;
       }
@@ -320,24 +325,17 @@
         toast({
           description: "Not enough balance, top up your balance.",
           variant: "destructive",
+          duration: 3000,
         });
         return;
       }
+      
 
-      setIsSubmitting(true);
-      try {
-        handleSubmit(e as React.FormEvent<HTMLFormElement>, {});
-      } catch (error) {
-        console.error("Error submitting message:", error);
-        toast({
-          description: "Failed to send message. Please try again.",
-          variant: "destructive",
-        });
-      } finally {
-        setIsSubmitting(false);
-      }
+      handleSubmit(e as React.FormEvent<HTMLFormElement>, {});
+
+      setIsSubmitting(false);
+      
     };
-
     const transformedMessages: ChatMessageProps[] = messages.map((message) => ({
       id: message.id,
       role: message.role,
@@ -414,7 +412,7 @@
                 )}
           </Button>
           {transformedMessages.length >= 2 && (
-            <Button onClick={handleReload} disabled={isReloading} variant="ghost">
+            <Button onClick={handleReload} disabled={isLoading || isReloading} variant="ghost">
               <RotateCcw className="w-4 h-4" />
             </Button>
           )}
