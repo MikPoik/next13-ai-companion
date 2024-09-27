@@ -119,13 +119,14 @@
       body: {
         chatId: `${companion.id}`,
       },
-      onResponse(response) {     
+      onResponse: response => {    
         if (!response.ok) {
           console.log("Error on response: ",response.status );
         }
         bottomRef.current?.scrollIntoView({ behavior: "smooth" });
       },
-      onFinish(message){
+      onFinish: (message) => {
+        
         const finalStreamedContent = useStreamStore.getState().content;
         //console.log("Streamed content from Zustand:", finalStreamedContent);
       
@@ -178,7 +179,7 @@
         },50); 
         setIsSubmitting(false);
       },
-      onError(error) {
+      onError: error => {
         console.error("Chat error detected:", error);
         toast({
           description: "Failed to send message. Please try again.",
