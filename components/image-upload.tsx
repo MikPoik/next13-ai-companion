@@ -42,7 +42,7 @@ export const ImageUpload = ({
   return (
     <div className="space-y-4 w-full flex flex-col justify-center items-center">
       
-      <CldUploadButton options={{ maxFiles: 1 }} onUpload={(result: any) => onChange(result.info.secure_url)} uploadPreset={upload_preset}>
+      <CldUploadButton options={{ maxFiles: 1 }} onSuccess={(result: any) => onChange(result.info.secure_url)} uploadPreset={upload_preset}>
         <div 
           className="
             p-4 
