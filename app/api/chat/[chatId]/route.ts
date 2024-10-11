@@ -23,7 +23,12 @@ function roughTokenCount(text: string): number {
     const tokens = text.match(/\b\w+\b|[.,!?;]/g);
     return tokens ? tokens.length : 0;
 }
-
+//for testing api errors
+function simulateRandomError() {
+  if (Math.random() < 0.5) {
+    throw new Error("Simulated random error");
+  }
+}
 async function getCompanionRecord(chatId: string, userId: string) {
     const DATABASE_URL = process.env['DATABASE_URL'] ||""
     const sql = neon(DATABASE_URL);
@@ -65,7 +70,9 @@ export async function POST(
     request: Request,
     { params }: { params: { chatId: string } }
 ) {
-
+    const maxRetries = 3;
+    let retryCount = 0;
+    while (retryCount < maxRetries) {
     try {
 
         
@@ -108,9 +115,7 @@ export async function POST(
         })
         .catch(err => console.error(err));
 
-        //console.log(agentUrl);
-        //console.log(agentWorkspace);
-        //console.log(agentInstanceHandle)
+
         const steamship = new Steamship({ apiKey: process.env.STEAMSHIP_API_KEY })
         const base_url=process.env.STEAMSHIP_BASE_URL + agentWorkspace+"/"+agentInstanceHandle+"/";
         console.log(base_url);
@@ -122,36 +127,20 @@ export async function POST(
             },
         })
         
-        const maxRetries = 3;
-        let retryCount = 0;
-        while (retryCount < maxRetries) {
-            try {
-                const stream = await SteamshipStream(response, steamship, {
-                    streamTimeoutSeconds: 60,
-                    format: "json-no-inner-stream"
-                });
-                return new Response(stream);
-            } catch (streamError: any) {
-                if (streamError.code === 'ERR_INVALID_STATE') {
-                    console.error(`Steamship stream error (attempt ${retryCount + 1}/${maxRetries}):`, streamError.message);
-                    retryCount++;
-                    if (retryCount >= maxRetries) {
-                        return new NextResponse("Stream error occurred after multiple attempts. Please try again.", { status: 500 });
-                    }
-                    // Wait for a short time before retrying
-                    await new Promise(resolve => setTimeout(resolve, 1000*retryCount));
-                } else {
-                    // If it's not an ERR_INVALID_STATE error, rethrow it
-                    console.log("Stream error:", streamError)
-                    throw streamError;
-                }
-            }
+        const stream = await SteamshipStream(response, steamship, {
+            streamTimeoutSeconds: 60,
+            format: "json-no-inner-stream"
+        });
+        return new Response(stream);
+        } catch (error: any) {
+        console.error(`Error in chat route (attempt ${retryCount + 1}/${maxRetries}):`, error);
+        retryCount++;
+        if (retryCount >= maxRetries) {
+            return new NextResponse("Failed to process request after multiple attempts. Please try again.", { status: 500 });
+        }
+        // Wait for a short time before retrying
+        await new Promise(resolve => setTimeout(resolve, 1000 * retryCount));
         }
 
-
-    } catch (error) {
-        console.error('Chat route error:', error);
-        return NextResponse.json("I'm sorry, I had an error when generating response.(This message is not saved)");
-        //return new NextResponse("Internal Error", { status: 500 });
     }
 };

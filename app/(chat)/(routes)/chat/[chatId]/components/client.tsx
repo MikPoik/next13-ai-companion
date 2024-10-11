@@ -77,6 +77,9 @@
     const inputRef = useRef<HTMLInputElement>(null);
     const isMobile = useIsMobile();
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [showInputMsg, setShowInputMsg] = useState("");
+    const retryCountRef = useRef(0);
+    const maxRetries = 3;
     
     const initialMessages: PrismaMessage[] = [
       {
@@ -182,12 +185,20 @@
       },
       onError: error => {
         console.error("Chat error detected:", error);
-        toast({
-          description: "Failed to send message. Please try again.",
-          variant: "destructive",
-          duration: 3000,
-        });
-        setIsSubmitting(false);
+        if (retryCountRef.current < maxRetries) {
+          retryCountRef.current += 1;
+          setIsSubmitting(true);
+          setTimeout(() => {
+            handleRetry();
+          }, 1000 * retryCountRef.current);
+        } else {
+          setIsSubmitting(false);
+          toast({
+            description: "Failed to send message after multiple attempts. Please try again.",
+            variant: "destructive",
+            duration: 3000,
+          });
+        }
       },
       sendExtraMessageFields: true,
     });
@@ -302,10 +313,14 @@
     
 
     
+    const handleRetry = () => {
+      console.log(`Retrying... Attempt ${retryCountRef.current}`);
+      setIsSubmitting(true);
+      handleSubmit(new Event('submit') as any, {});
+    };
     const onSubmit = async (e: FormEvent<HTMLFormElement>) => {
       e.preventDefault();
-      setIsSubmitting(true);
-      
+      useStreamStore.getState().setContent("");
       if (!input) {
         toast({
           description: "Input cannot be empty.",
@@ -331,13 +346,13 @@
         });
         return;
       }
-      
 
-      handleSubmit(e as React.FormEvent<HTMLFormElement>, {});
-
-      setIsSubmitting(false);
-      
+      setIsSubmitting(true);
+      retryCountRef.current = 0;
+      setShowInputMsg(input)
+      handleSubmit(e as any, {});
     };
+
     const transformedMessages: ChatMessageProps[] = messages.map((message) => ({
       id: message.id,
       role: message.role,
@@ -399,7 +414,20 @@
               )}
               
             </div>
+        
           ))}
+          {error && retryCountRef.current > 0 && isSubmitting && (
+            <>
+              <div className="flex-1 mr-4 space-y-2 py-2">
+                <span className="text-sm text-gray-500">
+                  {"You"}:
+                </span>
+                <div className="leading-6 text-sm">
+                  {showInputMsg}
+                </div>
+              </div>
+            </>
+          )}
           <div ref={bottomRef} />
 
           
@@ -414,7 +442,7 @@
                 )}
           </Button>
           {transformedMessages.length >= 2 && (
-            <Button onClick={handleReload} disabled={isLoading || isReloading} variant="ghost">
+            <Button onClick={handleReload} disabled={isLoading || isReloading || isSubmitting} variant="ghost">
               <RotateCcw className="w-4 h-4" />
             </Button>
           )}
