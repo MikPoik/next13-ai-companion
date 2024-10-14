@@ -170,7 +170,6 @@
         setMessages(updatedMessages as unknown as ChatMessageType[]);
         //console.log(messages)
         //console.log(messagesRef)
-        // Clear the streaming message ID when the response is finished
 
         // Clear the content in the store
         useStreamStore.getState().setContent("");
