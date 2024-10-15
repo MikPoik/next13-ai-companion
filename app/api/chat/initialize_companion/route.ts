@@ -20,6 +20,7 @@ async function updateAgent(name: string, description: string, personality: strin
         true,
         workspace_name
       );
+      //console.log(client)
       //console.log("Patch server settings")
       const settings = await client.invoke("patch_server_settings", {
         chat_mode: true,
@@ -27,6 +28,7 @@ async function updateAgent(name: string, description: string, personality: strin
         default_story_model: llm_model,
         image_theme_by_model: image_model,
       });
+      //console.log(settings)
       const typedSettings = settings as { data: any };
       //console.log(typedSettings.data)
 
@@ -192,7 +194,7 @@ export async function POST(req: NextRequest) {
       create: {
         id: chatId,
         userId: userId,
-        agentUrl: `${process.env.STEAMSHIP_BASE_URL}.steamship.run/${workspace_name}/${instance_handle}/`,
+        agentUrl: `${process.env.STEAMSHIP_BASE_URL}${workspace_name}/${instance_handle}/`,
         instanceHandle: instance_handle,
         workspaceHandle: workspace_name,
         companionId: chatId,
@@ -203,7 +205,7 @@ export async function POST(req: NextRequest) {
       update: {
         id: chatId,
         userId: userId,
-        agentUrl: `${process.env.STEAMSHIP_BASE_URL}.steamship.run/${workspace_name}/${instance_handle}/`,
+        agentUrl: `${process.env.STEAMSHIP_BASE_URL}${workspace_name}/${instance_handle}/`,
         createdAt: new Date(Date.now() + 1000),
         version: agent_version,
         instanceHandle: instance_handle,
