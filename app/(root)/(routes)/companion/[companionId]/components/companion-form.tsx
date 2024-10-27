@@ -596,7 +596,9 @@ export const CompanionForm = ({
                                             <SelectItem key="Sao10K/L3-70B-Euryale-v2.1" value="Sao10K/L3-70B-Euryale-v2.1">Euryale L3 70B</SelectItem>
                                             <SelectItem key="NousResearch/Nous-Hermes-2-Mixtral-8x7B-DPO" value="NousResearch/Nous-Hermes-2-Mixtral-8x7B-DPO">Mixtral 8x7B DPO</SelectItem>
                                             <SelectItem key="Gryphe/MythoMax-L2-13b" value="Gryphe/MythoMax-L2-13b">MythoMax 13B</SelectItem>       
-                                            <SelectItem key="mistralai/Mistral-Nemo-Instruct-2407" value="mistralai/Mistral-Nemo-Instruct-2407">Mistral Nemo 12B</SelectItem>      
+                                            <SelectItem key="istralai/Mistral-Nemo-Instruct-2407" value="istralai/Mistral-Nemo-Instruct-2407">Mistral Nemo 12B</SelectItem>      
+                                            <SelectItem key="nvidia/Llama-3.1-Nemotron-70B-Instruct" value="nvidia/Llama-3.1-Nemotron-70B-Instruct">Nvidia Nemotron 70B</SelectItem>      
+                                            <SelectItem key="meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo" value="meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo">Meta Llama 3.1 70B Turbo (SFW)</SelectItem>
                                             <SelectItem key="meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo" value="meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo">Meta Llama 3.1 8B Turbo (SFW)</SelectItem>
                                             <SelectItem key="gpt-4o-mini" value="gpt-4o-mini">GPT-4o-mini (SFW)</SelectItem>
                                         </SelectContent>

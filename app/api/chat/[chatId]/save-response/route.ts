@@ -102,6 +102,14 @@ export async function POST(
              }
          });
         
+        await prismadb.companion.update({
+            where: { id: params.chatId },
+            data: {
+                messageCount: {
+                    increment: 1
+                }
+            }
+        });
         
         if (tier !="unlimited") {            
             const balance = await prismadb.userBalance.findUnique({

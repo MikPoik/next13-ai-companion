@@ -175,9 +175,10 @@ export async function POST(req: Request) {
 
         let voice_agent_id = companion.voiceAgentId;
 
+
         const create_bolna_agent_json = getBolnaAgentJson(companion.name,phoneVoice.bolnaVoice,phoneVoice.bolnaProvider,phoneVoice.bolnaVoiceId,phoneVoice.bolnaModel,phoneVoice.bolnaElevenlabTurbo,phoneVoice.bolnaPollyEngine,phoneVoice.bolnaPollyLanguage)
 
-        if (!companion.voiceAgentId) {
+        if (!companion.voiceAgentId || companion.voiceAgentId === "") {
             console.log("companion voice agent id not set")
 
             const response = await fetch('https://api.bolna.dev/agent', {

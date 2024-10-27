@@ -59,7 +59,8 @@
         "typescript": "5.1.6",
         "uuid": "^9.0.1",
         "zod": "^3.21.4",
-        "zustand": "^4.5.5"
+        "zustand": "^4.5.5",
+        "sharp": "^0.33.5"
     },
     "devDependencies": {
         "@flydotio/dockerfile": "^0.4.8",

@@ -13,6 +13,9 @@ const formatText = (text: string): (string | JSX.Element)[] => {
     if (part.startsWith('*') && part.endsWith('*')) {
       return <i key={index} style={{ color: 'rgba(255,255,255,0.6)' }}>{part.slice(1, -1)}</i>;
     }
+    if (part.startsWith('(') && part.endsWith(')')) {
+      return <i key={index} style={{ color: 'rgba(255,255,255,0.6)' }}>{part.slice(1, -1)}</i>;
+    }
     if (part.startsWith('[') && part.endsWith(']')) {
       return <i key={index} style={{ color: 'rgba(255,255,255,0.6)' }}>{part.slice(1, -1)}</i>;
     }

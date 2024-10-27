@@ -35,7 +35,14 @@ export async function POST(
                  companionId: params.chatId
              }
          });
-
+         await prismadb.companion.update({
+             where: { id: params.chatId },
+             data: {
+                 messageCount: {
+                     increment: 1
+                 }
+             }
+         });
          return NextResponse.json("prompt saved")
      }
     

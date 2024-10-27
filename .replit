@@ -1,5 +1,6 @@
 run = "npm run dev"
 hidden = [".config", "package-lock.json", "tsconfig.json"]
+modules = ["nodejs-20", "web", "nix"]
 
 [packager]
 language = "nodejs"
