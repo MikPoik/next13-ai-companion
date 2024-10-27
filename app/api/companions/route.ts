@@ -57,7 +57,7 @@ export async function GET(req: Request) {
         tags: true,
       },
       orderBy: {
-        messages: { _count: 'desc' },
+        messageCount: 'desc',
       },
       skip: (page - 1) * pageSize,
       take: pageSize,

@@ -178,11 +178,11 @@ export const Companions = ({ initialCompanions }: CompanionsProps) => {
                   </div>
                   <div className="flex items-center justify-center gap-2 my-1">
                     <span title="Total messages"><MessagesSquare size={15} /></span>
-                    <span className="text-xs font-normal mr-2">{item._count.messages ?? 0}</span>
+                    <span className="text-xs font-normal mr-2">{item.messageCount ?? 0}</span>
                     {!item.isPublic && (<span title="Bot is private"><EyeOff size={16} /></span>)}
                     {item.createImages ? (<span title="Image generation enabled"><ImagePlus size={16} /></span>) : (<span title="Image generation disabled"><ImageOff size={16} /></span>)}
                   </div>
-                  <div className="text-white text-xs text-center">{item.model.split('/').pop()?.toLowerCase().replace('nous-', '') ?? ''}</div>
+                  {/*<div className="text-white text-xs text-center">{item.model.split('/').pop()?.toLowerCase().replace('nous-', '') ?? ''}</div>*/}
                 </div>
               </Link>
             </Card>
