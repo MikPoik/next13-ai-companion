@@ -89,32 +89,7 @@ export async function POST(req: Request) {
 
         // Combine existing tags with newly created tags for final update
         const finalTags = [...existingTags, ...createdTags];
-        /*
-        const client = await SteamshipV2.use(env_packageName, instance_handle, { llm_model: llm_model, create_images: String(createImages) }, undefined, true, workspace_name);
-        
-        if (backstory != null) {
-            const indexTextResponse = await indexTextSteamship(
-                'index_text',
-                backstory,
-                user.id,
-                env_packageName,
-                instance_handle,
-                workspace_name,
-                personality_string,
-                name,
-                description_string,
-                behaviour_string,
-                selfiePre,
-                selfiePost,
-                seed,
-                llm_model,
-                imageModel,
-                createImages,
-                voiceId);
-            const indexTextResponseBlocks = JSON.parse(indexTextResponse);
-            console.log(indexTextResponseBlocks);
-        }
-        */
+
 
 
         //create Bolna client

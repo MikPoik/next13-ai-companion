@@ -53,7 +53,6 @@ export async function GET(req: Request) {
     const companions = await prismadb.companion.findMany({
       where: whereClause,
       include: {
-        _count: { select: { messages: true } },
         tags: true,
       },
       orderBy: {

@@ -18,9 +18,12 @@
   import {parseImageFromBlocks} from "@/lib/utils";
   import { useIsMobile } from '@/lib/is-mobile';
   import { Sidebar } from "@/components/sidebar";
+  import { Dictionary } from "lodash";
+  const { v4: uuidv4 } = require('uuid');
 
   interface ChatClientProps {
     isPro: boolean;
+    chat_history?: { role: string; content: string; }[]; 
     companion: Companion & {
       messages: PrismaMessage[];
       _count: {
@@ -52,7 +55,7 @@
     companionId: string
   ): PrismaMessage => {
     return {
-      id: message.id,
+      id: uuidv4(),//message.id,
       role: message.role as Role,
       content: message.content,
       createdAt: message.createdAt ?? new Date(),
@@ -62,7 +65,7 @@
     };
   };
 
-  export const ChatClient = ({ isPro, companion }: ChatClientProps) => {
+  export const ChatClient = ({ isPro, companion,chat_history }: ChatClientProps) => {
     const { toast } = useToast(); 
     const [messageId, setMessageId] = useState<string | null>(null);
     const { theme } = useTheme();
@@ -80,29 +83,31 @@
     const [showInputMsg, setShowInputMsg] = useState("");
     const retryCountRef = useRef(0);
     const maxRetries = 3;
-    
+    const [autoMessageSent, setAutoMessageSent] = useState(false);
+    const initializingRef = useRef(false);
+    const initializedRef = useRef(false);
     const initialMessages: PrismaMessage[] = [
-      {
-        id: "seed",
-        role: Role.assistant,
-        content: companion.seed,
-        createdAt: new Date(),
+
+        ...(chat_history || []).map((message,index) => ({
+        ...message,
+        id: index.toString(), // Generate a unique ID here
+        role: message.role as Role,
         updatedAt: new Date(),
+        createdAt: new Date(),
         companionId: companion.id,
         userId: "",
-      },
-      ...companion.messages.map((message) => ({
-        ...message,
-        role: message.role,
-        updatedAt: message.updatedAt ?? new Date(),
-        companionId: message.companionId ?? companion.id,
-        userId: message.userId ?? "",
       })),
     ];
+
+    
     useEffect(() => {
 
       bottomRef.current?.scrollIntoView({ behavior: "smooth" });
     }, []);
+
+
+
+
     
     const {
       messages, 
@@ -117,8 +122,9 @@
       stop,
       reload,
     } = useChat({
+      streamProtocol: "text",
       api: `/api/chat/${companion.id}`,
-      initialMessages: initialMessages as unknown as ChatMessageType[], 
+      initialMessages: Array.isArray(initialMessages) ? initialMessages : [], 
       body: {
         chatId: `${companion.id}`,
       },
@@ -131,13 +137,14 @@
       onFinish: (message) => {
         
         const finalStreamedContent = useStreamStore.getState().content;
-        //console.log("Streamed content from Zustand:", finalStreamedContent);
+        
       
         const lastUserMessage = messagesRef.current[messagesRef.current.length - 2];
         const lastAssistantMessage = messagesRef.current[messagesRef.current.length - 1];
-        //console.log(lastUserMessage)
-        //console.log(lastAssistantMessage)
+        //console.log("last user message",lastUserMessage)
+        //console.log("last assistant message",lastAssistantMessage)
         setInput("");
+        /*
         if (!lastAssistantMessage.content.includes("I'm sorry, I had an error when generating response")){
           fetch(`/api/chat/${companion.id}/save-prompt`, {
             method: 'POST',
@@ -147,27 +154,30 @@
           fetch(`/api/chat/${companion.id}/save-response`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ prompt: finalStreamedContent, id: lastAssistantMessage.id, blockList: lastAssistantMessage.content })
+            body: JSON.stringify({ prompt: lastAssistantMessage, id: lastAssistantMessage.id, blockList: lastAssistantMessage.content })
           }); 
         }
+        */
         //console.log(messages)
         //console.log(messagesRef)
         bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-        const parsedContent = parseImageFromBlocks(lastAssistantMessage.content,finalStreamedContent)
+        //const parsedContent = parseImageFromBlocks(lastAssistantMessage.content,finalStreamedContent)
         //Loop messages here, check for last message and set the finalStreamedContent to the last message.content
+        
         const updatedMessages = (prevMessages: ChatMessageType[]): ChatMessageType[] => {
           const updatedMessages = [...prevMessages];
           if (updatedMessages.length > 0) {
             const lastIndex = updatedMessages.length - 1;
             updatedMessages[lastIndex] = {
               ...updatedMessages[lastIndex],
-              content: parsedContent
+              content: lastAssistantMessage.content
             };
           }
           return updatedMessages;
         };
         //console.log(updatedMessages)
         setMessages(updatedMessages as unknown as ChatMessageType[]);
+
         //console.log(messages)
         //console.log(messagesRef)
 
@@ -201,16 +211,62 @@
       sendExtraMessageFields: true,
     });
 
-    const messagesRef = useRef<PrismaMessage[]>(initialMessages);
-
+    const messagesRef = useRef<ChatMessageType[]>(Array.isArray(messages) ? messages : []);
+    
+    // Use refs to prevent double initialization
     useEffect(() => {
-      messagesRef.current = messages.map(message => ({
+      if (initializingRef.current || initializedRef.current) {
+        return;
+      }
+      const autoSubmit = async () => {
+        try {
+          initializingRef.current = true;
+
+          if (messages.length <= 1) {
+            await append({
+              content: `As ${companion.name}, narrate the scene for me in this chat.
+Narrative Guidelines:
+• Format spoken dialogue in quotation marks in first person.
+• Show actions between asterisks in third person.
+• Express internal thoughts in parentheses.
+• Include emotional states and reactions.
+• Describe environment and atmosphere when relevant.
+• Use third-person narration.
+
+Companion Narration Instructions:
+• Narrate ${companion.name}'s perspective in third person.
+• Keep responses concise and engaging
+• Balance character dialogue, action, and internal monologue
+• Use environmental details to enhance immersion
+• Maintain consistent character voice and perspective
+
+Start ${companion.name}'s response with a brief description of the setting or an action.`,
+              role: "user",
+            }, {
+              options: {
+                body: {
+                  chatId: companion.id
+                }
+              }
+            });
+          }
+
+          initializedRef.current = true;
+        } finally {
+          initializingRef.current = false;
+        }
+      };
+      autoSubmit();
+    }, [messages, append, companion.id]);
+    
+    useEffect(() => {
+      messagesRef.current = Array.isArray(messages) ? messages.map(message => ({
         ...message,
         createdAt: new Date(message.createdAt || Date.now())
       })).map(message =>
         transformChatMessageToPrismaMessage(message, companion.id)
-      );
-    }, [messages, companion.id]);
+      ) : [];
+    }, [messages]);
 
 
 
@@ -255,15 +311,7 @@
         return;
       }
       const lastAssistantMessage = messagesRef.current[messagesRef.current.length - 1];
-      if (lastAssistantMessage.id.length > 7) {
-        toast({
-          description: "Legacy chat history format, delete chat history to use updated feature",
-          variant: "destructive",
-          duration: 3000,
-        });
-        setIsReloading(false);
-        return;
-      }
+
       await fetch(`/api/chat/${companion.id}/delete-message`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -282,14 +330,7 @@
 
     const handleDelete = async (id: string, id2:string) => {
       setIsDeleting(true);
-      if (id.length > 7) {
-        toast({
-          description: "Legacy chat history format, delete chat history to use updated feature",
-          variant: "destructive",
-          duration: 3000,
-        });
-        return;
-      }
+      console.log("message id",id,id2)
 
       await fetch(`/api/chat/${companion.id}/delete-message`, {
         method: 'POST',
@@ -327,6 +368,13 @@
         });
         return;
       }
+      
+      // Check if messagesRef.current is a valid array
+      if (!Array.isArray(messagesRef.current)) {
+        console.error('Error: messagesRef.current is not a valid array');
+        messagesRef.current = []; // Initialize it as an empty array if not
+      }
+      
       const { status, message } = await checkBalance(companion.id);
       if (status === 'error' && message) {
         toast({
@@ -348,11 +396,26 @@
       setIsSubmitting(true);
       retryCountRef.current = 0;
       setShowInputMsg(input)
-      handleSubmit(e as any, {});
-    };
 
-    const transformedMessages: ChatMessageProps[] = messages.map((message) => ({
-      id: message.id,
+      try {
+        handleSubmit(e as any, {});
+      }
+      catch (error) {
+        console.error('An error occurred:', error);
+        setIsSubmitting(false);
+        toast({
+          description: 'An unexpected error occurred.',
+          variant: 'destructive',
+          duration: 3000,
+        });
+  
+    };
+    }
+
+    const transformedMessages: ChatMessageProps[] = messages.slice(1).map((message) => (
+      {
+
+      id: message.id || uuidv4(),
       role: message.role,
       content: chatMessagesJsonlToBlocks([message], ""), 
       isLoading: false,
@@ -383,6 +446,8 @@
         if (scrollInterval) clearInterval(scrollInterval);
       };
     }, [messages, streamContent, isLoading]);
+
+
     
     return (
       <div className="flex h-full">

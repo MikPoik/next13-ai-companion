@@ -135,8 +135,6 @@ export async function POST(req: Request) {
         const companion = await prismadb.companion.findUnique({
           where: { id: companionId },
           include: { 
-            messages: { orderBy: { createdAt: "asc" }, where: { userId } },
-            _count: { select: { messages: true } },
             steamshipAgent: {
               take: 1, // Limit the number of records to 1
               orderBy: { createdAt: "desc" },

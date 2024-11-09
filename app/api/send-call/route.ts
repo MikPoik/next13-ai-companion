@@ -8,6 +8,7 @@ import { appendHistorySteamship, } from "@/components/SteamshipAppendHistory";
 import { Steamship } from '@steamship/client';
 import { format } from "path";
 import {getBolnaAgentJson} from "@/lib/bolna";
+import { call_modal_agent } from "@/lib/utils";
 
 export const maxDuration = 60;
 
@@ -84,17 +85,13 @@ export async function POST(req: Request) {
             where: {
                 id: companionId
             },
-            include: {
-                messages: {
-                    take: 10,
-                    orderBy: {
-                        createdAt: "desc"
-                    },
-                    where: {
-                        userId: user.id,
-                    },
-                },
+            include: {                
                 tags: true,
+                steamshipAgent: {
+                    take: 1, // Limit the number of records to 1
+                    orderBy: { createdAt: "desc" },
+                    where: { userId: user.id }
+                },
             }
         });
         if (!companion) {
@@ -109,12 +106,18 @@ export async function POST(req: Request) {
         if (!phoneVoice) {
             return new NextResponse("No phone voice found", { status: 404 });
         }
-
+        const agent_config = {
+            "workspace_id": companion.steamshipAgent[0].workspaceHandle,
+            "context_id": "default",
+            "agent_id": companion.steamshipAgent[0].instanceHandle,
+        };
+        const chat_history = await call_modal_agent("get_chat_history",agent_config);
+        const chat_history_json = await chat_history.json()
         let formattedMessages = ''
 
         const EMOJI_PATTERN = /([\u{1F1E0}-\u{1F1FF}|\u{1F300}-\u{1F5FF}|\u{1F600}-\u{1F64F}|\u{1F680}-\u{1F6FF}|\u{1F700}-\u{1F77F}|\u{1F780}-\u{1F7FF}|\u{1F800}-\u{1F8FF}|\u{1F900}-\u{1F9FF}|\u{1FA00}-\u{1FA6F}|\u{1FA70}-\u{1FAFF}|\u{2702}-\u{27B0}])/gu;
 
-        companion.messages.forEach((message) => {
+            chat_history_json.forEach((message) => {
             const role = message.role;
             let text;
             try {

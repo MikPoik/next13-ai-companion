@@ -30,8 +30,6 @@ export async function DELETE(
       const companion = await prismadb.companion.findUnique({
         where: { id: params.companionId }, // Changed to params.companionId for consistency
         include: { 
-          messages: { orderBy: { createdAt: "asc" }, where: { userId: user.id } },
-          _count: { select: { messages: true } },
           steamshipAgent: {
             take: 1, // Limit the number of records to 1
             orderBy: {
@@ -50,13 +48,27 @@ export async function DELETE(
       if (companion.steamshipAgent.length === 0) {
         return new NextResponse("companion not initialized", { status: 404 });
       }
-      const steamshipPackage = process.env.STEAMSHIP_PACKAGE;
-      if (!steamshipPackage) {
-        throw new Error("STEAMSHIP_PACKAGE environment variable is not set");
-      }
-      const instance = await SteamshipV2.use(steamshipPackage, companion.steamshipAgent[0].instanceHandle, {}, companion.steamshipAgent[0].version, true, companion.steamshipAgent[0].workspaceHandle);
+      const url = "https://mikpoik--modal-agent-fastapi-app-dev.modal.run/delete_chat_history";
+      const headers = {
+          Authorization: `Bearer ${process.env.MODAL_AUTH_TOKEN}`,
+          "Content-Type": "application/json"
+      };
+      const agentConfig = {
+          // Populate with necessary fields
+          context_id: "default",
+          agent_id: companion.steamshipAgent[0].instanceHandle,
+          workspace_id: companion.steamshipAgent[0].workspaceHandle,
+          // Add other configuration parameters as needed
+      };
+      //console.log(agentConfig)
+      const response = await fetch(url, {
+          method: "POST",
+          headers: headers,
+          body: JSON.stringify(agentConfig)
+      });
+      console.log(response)
       const context_id = user.id;
-      const response = await instance.invoke('clear_history', {});
+
 
       return NextResponse.json({ message: "Chat history deleted successfully." });
     } catch (error) {
