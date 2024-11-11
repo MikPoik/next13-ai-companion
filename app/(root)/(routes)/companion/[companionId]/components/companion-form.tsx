@@ -140,23 +140,26 @@ export const CompanionForm = ({
 
 
         const data = { // Preparing data to be sent with POST request 
-            "prompt": characterAppearance,
-            "image_model": imageModel,
+            prompt: characterAppearance,
+            agent_id : "avatar-gen",
+            context_id : "avatar-gen",
+            workspace_id: "avatars",
+            image_config: { 
+                image_model: imageModel,
+                image_size: '{ "width":512,"height":768}',
+                image_width: "512",
+                image_height: "768",
+                image_api_path: imageModel.includes("flux") ? "fal-ai/flux-general" : "fal-ai/lora"
+            }
+            
         };
 
         // Sending POST request 
-
-        axios.post(process.env.NEXT_PUBLIC_IMG_BOT_URL || STEAMSHIP_IMG_BOT_URL, data, {
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': ''
-            }
-        }).then((response: AxiosResponse) => {
+        //console.log("image submit details", data)
+        axios.post("/api/generate-avatar", data)            
+        .then((response: AxiosResponse) => {
             //console.log('Response:', response);
-            const responseBlocks = JSON.stringify(response.data);
-            const parsedResponseBlocks = JSON.parse(responseBlocks);
-            const imgBlockId = parsedResponseBlocks[0].id;
-            const imgSrc = `https://api.steamship.com/api/v1/block/${imgBlockId}/raw`;
+            const imgSrc = response.data;
             //console.log(imgSrc);
 
             setImageUrl(imgSrc);
@@ -200,7 +203,7 @@ export const CompanionForm = ({
             behaviour: "",
             selfiePre: "",
             selfiePost: "",
-            model: "meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo",
+            model: "meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo",
             createImages: false,
             imageModel: "flux-general-with-lora",
             voiceId: 'none',
@@ -353,7 +356,7 @@ export const CompanionForm = ({
                                     }} disabled={isLoading} />
                                 </FormControl>
                                 <FormDescription>
-                                    Generate character avatar below or click/tap blank image to upload your own.
+                                    Generate character avatar below.
                                 </FormDescription>
                                 <FormMessage />
                             </FormItem>
@@ -398,11 +401,11 @@ export const CompanionForm = ({
                                                 <SelectItem key="mo-di-diffusion" value="mo-di-diffusion">Modern Disney Diffusion</SelectItem>
                                                 <SelectItem key="synthwave-punk-v2" value="synthwave-punk-v2">Synthwave Punk V2</SelectItem>
                                                 <SelectItem key="dream-shaper-v8" value="dream-shaper-v8">Dream Shaper V8</SelectItem>
-                                                <SelectItem key="https://civitai.com/api/download/models/708635?type=Model&format=SafeTensor&size=pruned&fp=fp16" value="https://civitai.com/api/download/models/708635?type=Model&format=SafeTensor&size=pruned&fp=fp16">Lustify (SDXL) Realistic</SelectItem>
-                                                <SelectItem key="https://civitai.com/api/download/models/400093?type=Model&format=SafeTensor&size=pruned&fp=fp16" value="https://civitai.com/api/download/models/400093?type=Model&format=SafeTensor&size=pruned&fp=fp16">Suzannes Mix (SDXL) Realistic</SelectItem>
-                                                <SelectItem key="https://civitai.com/api/download/models/294706" value="https://civitai.com/api/download/models/294706">iNiverseMix (SDXL) Realistic</SelectItem>
+                                                <SelectItem key="https://civitai.com/api/download/models/926965?type=Model&format=SafeTensor&size=pruned&fp=fp16" value="https://civitai.com/api/download/models/926965?type=Model&format=SafeTensor&size=pruned&fp=fp16">Lustify (SDXL) Realistic</SelectItem>
+                                                <SelectItem key="https://civitai.com/api/download/models/981979?type=Model&format=SafeTensor&size=pruned&fp=fp16" value="https://civitai.com/api/download/models/981979?type=Model&format=SafeTensor&size=pruned&fp=fp16">Suzannes Mix (SDXL) Realistic</SelectItem>
+                                                <SelectItem key="https://civitai.com/api/download/models/608842?type=Model&format=SafeTensor&size=full&fp=fp16" value="https://civitai.com/api/download/models/608842?type=Model&format=SafeTensor&size=full&fp=fp16">iNiverseMix (SDXL) Realistic</SelectItem>
                                                 <SelectItem key="https://civitai.com/api/download/models/228559?type=Model&format=SafeTensor&size=pruned&fp=fp16" value="https://civitai.com/api/download/models/228559?type=Model&format=SafeTensor&size=pruned&fp=fp16">Omnigen XL (SDXL) Realistic/Anime</SelectItem>
-                                                <SelectItem key="https://civitai.com/api/download/models/281176?type=Model&format=SafeTensor&size=pruned&fp=fp16" value="https://civitai.com/api/download/models/281176?type=Model&format=SafeTensor&size=pruned&fp=fp16">Albedo (SDXL) Realistic</SelectItem>
+                                                <SelectItem key="https://civitai.com/api/download/models/892880?type=Model&format=SafeTensor&size=pruned&fp=fp16" value="https://civitai.com/api/download/models/892880?type=Model&format=SafeTensor&size=pruned&fp=fp16">Albedo (SDXL) Realistic</SelectItem>
                                                 <SelectItem key="https://civitai.com/api/download/models/384264?type=Model&format=SafeTensor&size=full&fp=fp16" value="https://civitai.com/api/download/models/384264?type=Model&format=SafeTensor&size=full&fp=fp16">AnythingXL (SDXL) Anime</SelectItem>
                                                 <SelectItem key="https://civitai.com/api/download/models/293564?type=Model&format=SafeTensor&size=full&fp=fp32" value="https://civitai.com/api/download/models/293564?type=Model&format=SafeTensor&size=full&fp=fp32">Animagine (SDXL) Anime</SelectItem>
                                                 <SelectItem key="https://civitai.com/api/download/models/156375" value="https://civitai.com/api/download/models/156375">Clearhung Anime (SDXL)</SelectItem>
@@ -459,7 +462,7 @@ export const CompanionForm = ({
                                             </FormLabel>
                                         </FormControl>
                                         <FormDescription>
-                                            Companion can send selfies based on appearance. Generated images cost extra tokens.
+                                            Companion can send images based on appearance. Generated images cost extra tokens.
                                         </FormDescription>
                                         <FormMessage />
                                     </FormItem>
@@ -513,33 +516,7 @@ export const CompanionForm = ({
                             )}
 
                         />
-                        {/*
-                        <FormField
-                            control={form.control}
-                            name="categoryId"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Category</FormLabel>
-                                    <Select disabled={isLoading} onValueChange={field.onChange} defaultValue={field.value}>
-                                        <FormControl>
-                                            <SelectTrigger className="bg-background">
-                                                <SelectValue defaultValue={field.value} placeholder="Select a category" />
-                                            </SelectTrigger>
-                                        </FormControl>
-                                        <SelectContent>
-                                            {categories.map((category) => (
-                                                <SelectItem key={category.id} value={category.id}>{category.name}</SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
-                                    <FormDescription>
-                                        Select a category for your AI
-                                    </FormDescription>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                        */}
+
                     <FormField
                         name="tags"
                         control={form.control}
@@ -593,15 +570,17 @@ export const CompanionForm = ({
                                         </FormControl>
                                         <SelectContent>
 
-                                            <SelectItem key="lizpreciatior/lzlv_70b_fp16_hf" value="lizpreciatior/lzlv_70b_fp16_hf">Lzlv 70B</SelectItem>
+                                            <SelectItem key="NousResearch/Hermes-3-Llama-3.1-405B" value="NousResearch/Hermes-3-Llama-3.1-405B">Hermes-3-Llama-3.1-405B</SelectItem>
+
                                             <SelectItem key="Sao10K/L3.1-70B-Euryale-v2.2" value="Sao10K/L3.1-70B-Euryale-v2.2">Euryale L3.1 70B</SelectItem>
-                                            <SelectItem key="Sao10K/L3-70B-Euryale-v2.1" value="Sao10K/L3-70B-Euryale-v2.1">Euryale L3 70B</SelectItem>
+                                            
                                             <SelectItem key="NousResearch/Nous-Hermes-2-Mixtral-8x7B-DPO" value="NousResearch/Nous-Hermes-2-Mixtral-8x7B-DPO">Mixtral 8x7B DPO</SelectItem>
-                                            <SelectItem key="Gryphe/MythoMax-L2-13b" value="Gryphe/MythoMax-L2-13b">MythoMax 13B</SelectItem>       
+
                                             <SelectItem key="istralai/Mistral-Nemo-Instruct-2407" value="istralai/Mistral-Nemo-Instruct-2407">Mistral Nemo 12B</SelectItem>      
                                             <SelectItem key="nvidia/Llama-3.1-Nemotron-70B-Instruct" value="nvidia/Llama-3.1-Nemotron-70B-Instruct">Nvidia Nemotron 70B</SelectItem>      
                                             <SelectItem key="meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo" value="meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo">Meta Llama 3.1 70B Turbo (SFW)</SelectItem>
-                                            <SelectItem key="meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo" value="meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo">Meta Llama 3.1 8B Turbo (SFW)</SelectItem>
+                                            <SelectItem key="meta-llama/Meta-Llama-3.1-405B-Instruct" value="meta-llama/Meta-Llama-3.1-405B-Instruct">Meta-Llama-3.1-405B (SFW)</SelectItem>
+                                            <SelectItem key="gpt-4o" value="gpt-4o">GPT-4o (SFW)</SelectItem>
 
                                             <SelectItem key="gpt-4o-mini" value="gpt-4o-mini">GPT-4o-mini (SFW)</SelectItem>
                                         </SelectContent>

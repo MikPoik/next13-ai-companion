@@ -16,7 +16,7 @@ export async function GET(req: Request) {
 
     const chats = await prismadb.companion.findMany({
       where: {
-        messages: {
+        steamshipAgent: {
           some: {
             userId: user.id
           }
@@ -28,49 +28,22 @@ export async function GET(req: Request) {
         userName: true,
         name: true,
         description: true,
-        src: true,
-        messages: {
-          where: {
-            userId: user.id
-          },
-          orderBy: {
-            createdAt: "desc"
-          },
-          take: 1,
-          select: {
-            id: true,
-            createdAt: true
-          }
-        },
-        _count: {
-          select: {
-            messages: {
-              where: {
-                userId: user.id
-              }
-            }
-          }
-        }
+        src: true
+
+
       },
       orderBy: {
-        messages: {
-          _count: "desc"
-        }
+        createdAt: 'desc'
       },
       skip: skip,
       take: pageSize,
     });
 
-    // Sort the chats based on the most recent message
-    chats.sort((a, b) => {
-      const dateA = a.messages[0]?.createdAt ?? new Date(0);
-      const dateB = b.messages[0]?.createdAt ?? new Date(0);
-      return new Date(dateB).getTime() - new Date(dateA).getTime();
-    });
+
 
     const totalCount = await prismadb.companion.count({
       where: {
-        messages: {
+        steamshipAgent: {
           some: {
             userId: user.id
           }

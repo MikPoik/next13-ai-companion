@@ -2,15 +2,15 @@
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import { Steamship, SteamshipStream, } from '@steamship/client';
-import { UndoIcon } from "lucide-react";
-import axios, { AxiosError } from 'axios';
 import { neon } from '@neondatabase/serverless';
-
+import {call_modal_agent} from "../../../../lib/utils";
 import { StreamingTextResponse } from "ai";
 
 export const maxDuration = 60; //2 minute timeout
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
+
+
 
 interface Message {
   role: string;
@@ -95,8 +95,6 @@ export async function POST(
             
             return new NextResponse("Unauthorized", { status: 401 });
         }
-        
- 
         // Sample usage
         let agentUrl = ""
         let agentWorkspace = ""
@@ -114,24 +112,31 @@ export async function POST(
             }
         })
         .catch(err => console.error(err));
+        // Setup headers
+        const headers = {
+            "Authorization": `Bearer ${process.env['MODAL_AUTH_TOKEN'] ||""}`,
+            "Content-Type": "application/json"
+        };
+        // Setup data payload
+        const agent_config = {
+            "prompt": prompt,
+            "workspace_id": agentWorkspace,
+            "context_id": "default",
+            "agent_id": agentInstanceHandle
+        };
 
 
-        const steamship = new Steamship({ apiKey: process.env.STEAMSHIP_API_KEY })
-        const base_url=process.env.STEAMSHIP_BASE_URL + agentWorkspace+"/"+agentInstanceHandle+"/";
-        console.log(base_url);
-        const response = await steamship.agent.respondAsync({            
-            url: base_url,
-            input: {
-                prompt,
-                context_id: user.id
-            },
-        })
+        const response = await call_modal_agent("prompt",agent_config)
+        if (!response.body) {
+            return new NextResponse("No response body", { status: 500 });
+        }
         
-        const stream = await SteamshipStream(response, steamship, {
-            streamTimeoutSeconds: 60,
-            format: "json-no-inner-stream"
+        // Streaming the response back to the client
+        return new Response(response.body, {
+            headers: { "Content-Type": "text/plain; charset=utf-8" },
+            status: response.status
         });
-        return new Response(stream);
+
         } catch (error: any) {
         console.error(`Error in chat route (attempt ${retryCount + 1}/${maxRetries}):`, error);
         retryCount++;

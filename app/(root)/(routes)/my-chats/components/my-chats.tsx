@@ -14,8 +14,6 @@ interface ChatCompanion {
   name: string;
   description: string;
   src: string;
-  messages: { id: string; createdAt: string }[];
-  _count: { messages: number };
 }
 
   export const MyChats = () => {
@@ -120,14 +118,8 @@ interface ChatCompanion {
             <BotAvatar src={chat.src} />
             <div className="flex-grow">
               <h3 className="text-lg font-semibold">{chat.name}</h3>
-              <p className="text-sm text-gray-500">{chat.description}</p>
-              {chat.messages.length > 0 && (
-                <p className="text-xs text-gray-400 mt-1">
-                  Last message: {new Date(chat.messages[0].createdAt).toLocaleString()}
-                </p>
-              )}
+              <p className="text-sm text-gray-500">{chat.description}</p> 
               <p className="text-xs text-gray-400">
-                Total messages: {chat._count.messages}
               </p>
             </div>
           </div>

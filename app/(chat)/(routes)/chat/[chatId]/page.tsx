@@ -13,7 +13,7 @@ const ChatIdPage = ({ params }: { params: { chatId: string } }) => {
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
   const { theme } = useTheme();
-
+  const [chatHistory, setChatHistory] = useState([]);
   // Ref to track initialization
   const initializingRef = useRef(false);
   const initializedRef = useRef(false);
@@ -30,7 +30,9 @@ const ChatIdPage = ({ params }: { params: { chatId: string } }) => {
 
     try {
       const response = await axios.post('/api/chat/initialize_companion', { chatId: params.chatId });
-
+      const chat_history = await response.data.chat_history_json.slice(1) || []; // Access chat_history from response.data
+      
+      setChatHistory(chat_history);
       if (response.status === 200) {
         const { companion, isPro } = response.data;
         setCompanion(companion);
@@ -72,7 +74,7 @@ const ChatIdPage = ({ params }: { params: { chatId: string } }) => {
   }
 
   return (
-    <ChatClient isPro={isPro} companion={companion} />
+    <ChatClient isPro={isPro} companion={companion} chat_history={chatHistory} />
   );
 };
 

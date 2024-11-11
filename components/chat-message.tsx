@@ -8,7 +8,6 @@ import { BotAvatar } from "@/components/bot-avatar";
 import { UserAvatar } from "@/components/user-avatar";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
-import { responseToChatBlocks } from "@/components/ChatBlock";
 import { chatMessagesJsonlToBlocks } from "@/components/parse-blocks-from-message";
 import { MessageTypes, validTypes } from "@/components/block-chat-types";
 import { StreamContent } from "@/components/stream-content"; 
@@ -31,7 +30,7 @@ export interface ChatMessageProps {
 const imageStyles = {
   wrapper: {
     backgroundColor: "rgb(50, 50, 50)",
-    maxWidth: "512px",
+    maxWidth: "768px",
     aspectRatio: "3 / 4",
     transition: "background-color 0.5s ease-in-out",
     animation: "fadeInOut 2s infinite",
@@ -53,6 +52,15 @@ const imageStyles = {
     opacity: 1,
   },
 };
+
+export const messageStyles = {
+  other: "text-white-200", // default text
+  action: "italic text-yellow-500 dark:text-yellow-500", // *actions*
+  internal: "text-gray-300 dark:text-gray-300", // (thoughts)
+  emphasis: "text-blue-400 dark:text-blue-400", // for other emphasized text
+  speech: "text-white-200 dark:text-white-200", // for other text
+};
+
 
 function applyLoadedStyles(wrapperElement: HTMLDivElement, imgElement: HTMLImageElement) {
   Object.assign(wrapperElement.style, imageStyles.loadedWrapper);
@@ -80,6 +88,7 @@ export const ChatMessage = ({
   }, [streamedContent]);
 
   const handleImageLoad = (wrapperElement: HTMLDivElement, imgElement: HTMLImageElement) => {
+
     setImageLoaded(true);
     applyLoadedStyles(wrapperElement, imgElement);
 
@@ -90,20 +99,42 @@ export const ChatMessage = ({
   }
 
   const formatText = (text: string) => {
-    return text.split(/([*[\]].*?[*\[\]])/).map((part, index) => {
-      if (part.startsWith('*') && part.endsWith('*')) {
-        return <i key={index} style={{ color: "rgba(255,255,255,0.6)" }}>{part.slice(1, -1)}</i>;
+
+    const patterns = {
+        actions: /(\*[^*]+\*)/g,         // Matches *actions*
+        quotes: /"([^"]+)"/g,            // Matches "quotes"
+        internal: /\(([^)]+)\)/g,        // Matches (internal thoughts)
+        emphasis: /_([^_]+)_/g           // Matches _emphasis_
+    };
+    const parts = text.split(/((?:\*[^*]+\*)|(?:"[^"]+")|\([^)]+\)|(?:_[^_]+_))/g);
+    return parts.map((part, index) => {
+      if (part && part.startsWith('*') && part.endsWith('*')) {
+        let remaining_part = part.slice(1, -1);
+        if (remaining_part.length > 0) {
+          return <i key={index} className={messageStyles.action}>{part.slice(1, -1)}</i>;
+        }
       }
-      if (part.startsWith('(') && part.endsWith(')')) {
-        return <i key={index} style={{ color: 'rgba(255,255,255,0.6)' }}>{part.slice(1, -1)}</i>;
+
+      if (part && part.startsWith('(') && part.endsWith(')')) {
+        let remaining_part = part.slice(1, -1);
+        if (remaining_part.length > 0) {
+          return <span key={index} className={messageStyles.internal}>{part}</span>;
+        }
+
       }
-      if (part.startsWith('[') && part.endsWith(']')) {
-        return <i key={index} style={{ color: 'rgba(255,255,255,0.6)' }}>{part.slice(1, -1)}</i>;
+      if (part && part.startsWith('[') && part.endsWith(']')) {
+        let remaining_part = part.slice(1, -1);
+        if (remaining_part.length > 0) {
+          return <i key={index} className={messageStyles.action}>{part.slice(1, -1)}</i>;
+        }
       }
-      if (part.startsWith('"') && part.endsWith('"')) {
-        return <i key={index} style={{ color: "rgba(255,255,255,1)" }}>{part.slice(1, -1)}</i>;
+      if (part && part.startsWith('"') && part.endsWith('"')) {
+        let remaining_part = part.slice(1, -1);
+        if (remaining_part.length > 0) {
+          return <span key={index} className={messageStyles.speech}>{part}</span>;
+        }
       }
-      return part;
+      return <span key={index} className={messageStyles.other}>{part}</span>;
     });
   };
 
@@ -118,33 +149,68 @@ export const ChatMessage = ({
   };
 
   const renderContent = () => {
+
     if (streamState === 'started' && streamedContent) {
       return <div>{streamedContent}</div>;
     }
     if (Array.isArray(content)) {
       return content.map((block, index) => {
-        if ('text' in block && typeof block.text === 'string' && validTypes.includes(block.messageType!) && block.messageType === MessageTypes.TEXT && (block.role === 'user' || block.role === 'assistant' || block.role === 'system')) {
+        if (!block.id) {
+          block.id = uuidv4();
+        }
+        if ('text' in block && typeof block.text === 'string' && validTypes.includes(block.messageType!) && block.messageType === MessageTypes.TEXT && (block.role === 'user' || block.role === 'assistant' || block.role === 'system') && !/!\[.*?\]\(.*?\)/.test(block.text)) {
+          //console.log("Text block detected:", block)
           return <p key={block.id}>{formatText(block.text)}</p>;
         }
         if (block.streamState === 'started' && block.messageType !== MessageTypes.IMAGE && block.mimeType != "image/png") {
+          //console.log("Stream block detected:", block)
            return <StreamContent blockId={block.id} onContentUpdate={accumulatedContentRef?.current ? (newContent: string) => accumulatedContentRef.current = newContent : undefined} key={block.id} />;
         }
-        if (block.messageType === MessageTypes.IMAGE || block.mimeType == "image/png") {
+        if (block.messageType === MessageTypes.IMAGE) {
+          //console.log("Image block detected:", block.text)
+          const parseImageUrlFromMarkdown = (text: string) => {
+            // Extract URL
+            const regex = /\!\[.*?\]\((.*?)\)/;
+            const matches = text.match(regex);
+
+            // Strip markdown image syntax from text
+            const strippedText = text.replace(/\!\[.*?\]\(.*?\)/g, '').trim();
+
+
+            // Return both URL and cleaned text
+            return {
+              imageUrl: matches ? matches[1] : null,
+              cleanText: strippedText
+            };
+          };
+          const { imageUrl, cleanText } = parseImageUrlFromMarkdown(block.text);
+          
+          //console.log("Parsed image url: ", imageUrl)
           return  (
             <div key={block.id}>
-              {block.text && block.text !== "" && (
-                <p className="mb-2">{formatText(block.text)}</p>
+              {cleanText && cleanText !== "" && (
+                <p className="mb-2">{formatText(cleanText)}</p>
               )}
               <div
                 className={`image-placeholder-wrapper ${imageLoaded ? 'loaded' : ''}`}
                 style={imageStyles.wrapper}
               >
-                <img 
-                  src={block.streamingUrl} 
-                  alt={block.src} 
+                {imageUrl && (<img 
+                  src={imageUrl} 
+                  alt="image"
                   style={imageStyles.img}
                   onLoad={(e) => handleImageLoad(e.currentTarget.parentElement as HTMLDivElement, e.currentTarget)}
-                />
+                  onError={(e) => {
+                    const imgElement = e.currentTarget;
+                    //Hacky way to trigger image reload before the url is ready
+                    setTimeout(() => {
+                      //console.log(`Retrying image load for blockId ${imageUrl}`);
+                      const newImageUrl = imageUrl;
+                      imgElement.src = newImageUrl; // Directly set the src on the img element
+                    }, 2000);
+                    
+                  }}
+                />)}
               </div>
             </div>
           );

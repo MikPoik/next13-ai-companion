@@ -95,15 +95,7 @@ export async function POST(req: Request) {
         // Use createMany to insert all at once
         //console.log("update_history")
         let update_history;
-        try {
-            update_history = await prismadb.message.createMany({
-                data: messagesToCreate
-            });
-            //console.log('update_history successful', update_history);
-        } catch (error: any) {
-            console.error('Error with update_history:', error);
-            throw new Error(`Error creating messages: ${error.message}`);
-        }
+
         //console.log('update_history', update_history);
         // Update user balance
         //const { isSubscribed, tier } = await checkSubscription();
@@ -135,8 +127,6 @@ export async function POST(req: Request) {
         const companion = await prismadb.companion.findUnique({
           where: { id: companionId },
           include: { 
-            messages: { orderBy: { createdAt: "asc" }, where: { userId } },
-            _count: { select: { messages: true } },
             steamshipAgent: {
               take: 1, // Limit the number of records to 1
               orderBy: { createdAt: "desc" },
@@ -157,15 +147,7 @@ export async function POST(req: Request) {
         if (!companion.steamshipAgent.length) {
             return new NextResponse(`No companion found}`, { status: 400 });
         }
-        let agent_version = process.env.AGENT_VERSION || "";
-          const packageName = process.env.STEAMSHIP_PACKAGE || "ai-adventure-test";
-        //console.log("apped history to steamship")
-        //console.log(companion.steamshipAgent[0].instanceHandle, companion.steamshipAgent[0].workspaceHandle)
-        const client = await SteamshipV2.use(packageName, companion.steamshipAgent[0].instanceHandle, {}, companion.steamshipAgent[0].version, true, companion.steamshipAgent[0].workspaceHandle);
-        
-        await client.invoke("append_history", {
-            prompt: json_messages
-        });
+        //TODO append chat_history
           return new NextResponse(JSON.stringify({ message: 'Webhook processed successfully' }), { 
               status: 200,
               headers: { 'Content-Type': 'application/json' }

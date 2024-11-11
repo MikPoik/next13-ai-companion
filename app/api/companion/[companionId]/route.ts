@@ -49,8 +49,7 @@ export async function PATCH(
         const companion = await prismadb.companion.findUnique({
           where: { id: params.companionId },
           include: { 
-            messages: { orderBy: { createdAt: "asc" }, where: { userId: user.id } },
-            _count: { select: { messages: true } },
+
             steamshipAgent: {
               take: 1, // Limit the number of records to 1
               orderBy: {

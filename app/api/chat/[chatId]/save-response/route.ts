@@ -38,8 +38,8 @@ async function parseAndSaveImages(blockListStr: string, userId: string, chatId: 
     }
     return null; // No image block found
   } catch (error) {
-    console.error("Error parsing or saving image block ids:", error);
-    console.error("Block list string causing error:", blockListStr);
+    console.error("SaveResponse,Error parsing or saving image block ids:", error);
+    console.error("SaveResponse,Block list string causing error:", blockListStr);
     return null; // In case of error, return null
   }
 }
@@ -52,7 +52,7 @@ export async function POST(
 
         
         const { prompt,id,blockList } = await request.json();
-        //console.log("Save-Response, prompt received:", prompt);
+        console.log("Save-Response, prompt received:", prompt);
 
         //console.log("Message id ",id)
         //console.log("Block List ",blockList)
@@ -72,7 +72,7 @@ export async function POST(
         var hasAudio = 0;
         responseText = prompt;
         
-        const image_url = await parseAndSaveImages(blockList,user.id,params.chatId,id);
+        const image_url = "";// await parseAndSaveImages(blockList,user.id,params.chatId,id);
         let finalContent = prompt
         if (image_url) {
             //escape double quotes from prompt:
@@ -86,7 +86,7 @@ export async function POST(
              },
              create: {
                  id: id,
-                 content: finalContent,
+                 content: finalContent.content,
                  role: "assistant",
                  userId: user.id,
                  companionId: params.chatId,
@@ -94,7 +94,7 @@ export async function POST(
              },
              update: {
                  id: id,
-                 content: finalContent,
+                 content: finalContent.content,
                  role: "assistant",
                  userId: user.id,
                  companionId: params.chatId,
@@ -123,7 +123,7 @@ export async function POST(
                     return NextResponse.json("No balance");
                 }
             }
-            const tokenCost = roughTokenCount(responseText) + imageTokens + voiceTokens;
+            const tokenCost = roughTokenCount(prompt.content) + imageTokens + voiceTokens;
             //console.log("Token Cost: ", tokenCost);
             const currentDateTime = new Date().toISOString();
     

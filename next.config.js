@@ -9,6 +9,11 @@ const nextConfig = {
             },
             {
                 protocol: 'https',
+                hostname: "storage.googleapis.com",
+                port: ''
+            },
+            {
+                protocol: 'https',
                 hostname: "api.steamship.com",
                 port: ''
             },

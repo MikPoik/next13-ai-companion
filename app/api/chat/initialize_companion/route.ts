@@ -4,80 +4,58 @@ import prismadb from "@/lib/prismadb";
 import { auth } from "@clerk/nextjs/server";
 import { checkSubscription } from "@/lib/subscription";
 const { v4: uuidv4 } = require('uuid');
+import { call_modal_agent } from "@/lib/utils";
 
 async function updateAgent(name: string, description: string, personality: string, appearance: string, background: string, seed: string, workspace_name: string, instance_handle: string, agent_version: string, create_images: boolean, llm_model: string, image_model: string,tags:string, update_version: boolean = false) {
   let retryCount = 0;
   const maxRetries = 3;
-  const packageName = process.env.STEAMSHIP_PACKAGE || "ai-adventure-test";
+
 
   while (retryCount < maxRetries) {
     try {
-      const client = await SteamshipV2.use(
-        packageName,
-        instance_handle,
-        {},
-        agent_version,
-        true,
-        workspace_name
-      );
-      //console.log(client)
-      //console.log("Patch server settings")
-      const settings = await client.invoke("patch_server_settings", {
-        chat_mode: true,
-        enable_images_in_chat: create_images,
-        default_story_model: llm_model,
-        image_theme_by_model: image_model,
-      });
-      //console.log(settings)
-      const typedSettings = settings as { data: any };
-      //console.log(typedSettings.data)
 
-      if (!update_version) {
-        console.log("Init companion chat")
-        await client.invoke("init_companion_chat", {
-          name: name,
-          description: description,
-          personality: personality,
-          appearance: appearance,
-          background: background,
-          seed: seed,
-          tags:tags
-        });
+      
+      const headers = {
+          Authorization: `Bearer ${process.env.MODAL_AUTH_TOKEN}`,
+          "Content-Type": "application/json"
+      };
+    
+      const agentConfig = {
+          // Populate with necessary fields
+          context_id: "default",
+          agent_id: instance_handle,
+          workspace_id: workspace_name,
+          enable_image_generation: create_images,
+          character: {
+              name: name,
+              background: background,
+              appearance: appearance,
+              personality: personality,
+              description: description,
+              seed_message: seed
+          },
+        llm_config: {
+          model: llm_model,
+          provider: llm_model.toLowerCase().includes("gpt") ? "openai" : "deepinfra"
+        },
+        image_config: {
+          image_model: image_model,
+          image_api_path: image_model.includes("flux") ? "fal-ai/flux-general" : "fal-ai/lora"
+        }
+          // Add other configuration parameters as needed
+      };
+      //console.log(agentConfig)
+      const response = await call_modal_agent("init_agent", agentConfig, "POST");
+      //console.log(await response)
+      if (response.ok) {
+          console.log("Agent initialized or updated successfully");
+          const jsonResponse = await response.json();
+          console.log(JSON.stringify(jsonResponse, null, 4));
+
       } else {
-        console.log("Update companion chat")
-        await client.invoke("update_companion_chat", {
-          name: name,
-          description: description,
-          personality: personality,
-          appearance: appearance,
-          background: background,
-          seed: seed,
-          tags:tags
-        });
+          console.log("Failed to initialize or update the agent");
+          console.log(response.status, response.statusText);
       }
-      
-      //todo finish up vector memory
-      if (background.length  > 3 && background != "N/A") {        
-
-        const reset_index_response = await client.invoke("reset_index");
-        const index_text = await client.invoke("index_text", {
-          text: background
-        })
-        
-      }
-      
-
-      const game_state = await client.invoke("game_state", {
-        name: name,
-        description: description,
-        personality: personality,
-        appearance: appearance,
-        background: background,
-        seed: seed,
-        tags: tags
-      });
-      const typedGameState = game_state as { data: any };
-      //console.log(typedGameState.data)
       
       console.log("Agent initialized successfully");
       break; // Exit the loop if the request is successful
@@ -111,8 +89,6 @@ export async function POST(req: NextRequest) {
     const companion = await prismadb.companion.findUnique({
       where: { id: chatId },
       include: { 
-        messages: { orderBy: { createdAt: "asc" }, where: { userId } },
-        _count: { select: { messages: true } },
         steamshipAgent: {
           take: 1, // Limit the number of records to 1
           orderBy: { createdAt: "desc" },
@@ -213,9 +189,18 @@ export async function POST(req: NextRequest) {
         revision: companion.revision,
       }
     });
-
-    console.log("Steamship companion initialized");
-    return NextResponse.json({ companion, isSubscribed }, { status: 200 });
+    const data = {
+        "workspace_id": workspace_name,
+        "context_id": "default",
+        "agent_id": instance_handle,
+    };
+    console.log(data)
+    //retrieve history in format [{"role": "user", "content": "message"},... , {"role": "assistant", "content": "message"}]
+    const chat_history = await call_modal_agent("get_chat_history",data);
+    const chat_history_json = await chat_history.json()
+    //console.log("Raw response:", chat_history_json); // Log the raw response first
+    console.log("Companion initialized succesfully");
+    return NextResponse.json({ companion, isSubscribed,chat_history_json }, { status: 200 });
 
   } catch (error) {
     console.error(error);

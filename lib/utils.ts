@@ -45,8 +45,34 @@ export function parseImageFromBlocks(
     }
     return prompt; // No image block found
   } catch (error) {
-    console.error("Error parsing or saving image block ids:", error);
-    console.error("Block list string causing error:", blockListStr);
+    console.error("Utils: Error parsing or saving image block ids:", error);
+    console.error("Utils: Block list string causing error:", blockListStr);
     return prompt; // In case of error, return prompt
   }
+}
+
+
+export async function call_modal_agent(
+  func: string,
+  config: Record<string, any>,
+  method: string = "POST",
+): Promise<Response> {
+  const headers = {
+      "Authorization": `Bearer ${process.env['MODAL_AUTH_TOKEN'] || ""}`,
+      "Content-Type": "application/json"
+  };
+
+  const url = process.env.MODAL_AGENT_BASE_URL+func
+  
+  if (!process.env.MODAL_AGENT_BASE_URL?.endsWith("/")) {
+    console.log("Invalid modal agent url :",url)
+  }
+  
+  console.log(url)
+  const response = await fetch(url, {
+      method: method,
+      headers: headers,
+      body: JSON.stringify(config)
+  });
+  return response;
 }

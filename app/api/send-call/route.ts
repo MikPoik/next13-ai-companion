@@ -8,6 +8,7 @@ import { appendHistorySteamship, } from "@/components/SteamshipAppendHistory";
 import { Steamship } from '@steamship/client';
 import { format } from "path";
 import {getBolnaAgentJson} from "@/lib/bolna";
+import { call_modal_agent } from "@/lib/utils";
 
 export const maxDuration = 60;
 
@@ -84,17 +85,13 @@ export async function POST(req: Request) {
             where: {
                 id: companionId
             },
-            include: {
-                messages: {
-                    take: 10,
-                    orderBy: {
-                        createdAt: "desc"
-                    },
-                    where: {
-                        userId: user.id,
-                    },
-                },
+            include: {                
                 tags: true,
+                steamshipAgent: {
+                    take: 1, // Limit the number of records to 1
+                    orderBy: { createdAt: "desc" },
+                    where: { userId: user.id }
+                },
             }
         });
         if (!companion) {
@@ -109,47 +106,65 @@ export async function POST(req: Request) {
         if (!phoneVoice) {
             return new NextResponse("No phone voice found", { status: 404 });
         }
+        const agent_config = {
+            "workspace_id": companion.steamshipAgent[0].workspaceHandle,
+            "context_id": "default",
+            "agent_id": companion.steamshipAgent[0].instanceHandle,
+        };
+        const chat_history = await call_modal_agent("get_chat_history",agent_config);
+        const chat_history_json = await chat_history.json()
 
+
+        interface ChatHistoryEntry {
+          role: string;
+          content: string;
+          tag: string;
+        }
+        
 
         let formattedMessages = ''
 
         const EMOJI_PATTERN = /([\u{1F1E0}-\u{1F1FF}|\u{1F300}-\u{1F5FF}|\u{1F600}-\u{1F64F}|\u{1F680}-\u{1F6FF}|\u{1F700}-\u{1F77F}|\u{1F780}-\u{1F7FF}|\u{1F800}-\u{1F8FF}|\u{1F900}-\u{1F9FF}|\u{1FA00}-\u{1FA6F}|\u{1FA70}-\u{1FAFF}|\u{2702}-\u{27B0}])/gu;
 
-        companion.messages.forEach((message) => {
-            const role = message.role;
-            let text;
-            try {
-                if (typeof message.content === 'string') {
-                    const textMatch = message.content.match(/"text":"((?:[^"\\]|\\.)*)"/);
-                    if (textMatch && textMatch[1]) {
-                        text = textMatch[1];
-                        text = text.replace(/\\(.)/g, "$1");
-                    } else {
-                        text = message.content;
-                    }
-                } else {
-                    console.error("Unexpected message content type:", typeof message.content);
-                    text = String(message.content);
-                }
-                text = text.replace(EMOJI_PATTERN, '');
-                text = text.replace(/\[.*?\]/g, '');
 
-                text = text.replace(/\*.*?\*/g, '');
+            chat_history_json.forEach((entry: ChatHistoryEntry) => {
+          try {
+            // Get the role, defaulting to user if not assistant/system
+            const roleText = entry.role === 'assistant' ? 'assistant' : 'user';
 
-                text = text.trim();
-            } catch (error) {
-                console.error('Error processing message');
-                text = String(message.content);
+            // Process the content
+            let text = '';
+            if (typeof entry.content === 'string') {
+                
+              text = entry.content;
+            } else {
+              text = String(entry.content);
+
             }
-            let roleText = role === 'system' || role === 'assistant' ? 'assistant' : 'user';
-            text = text.replace(/\n/g, ". ");
-            formattedMessages += `${roleText}: ${text}\n`;
-        });
-
-        if (!formattedMessages.includes("assistant:")) {
-            formattedMessages += `assistant:  ${companion.seed.replace(EMOJI_PATTERN, '')}\n` + formattedMessages;
+              // Clean the text
+              text = text
+                .replace(EMOJI_PATTERN, '')
+                .replace(/\[.*?\]/g, '')
+                .replace(/\*.*?\*/g, '')
+                .replace(/\n/g, '. ')
+                .trim();
+              // Add to formatted messages
+              if (
+                entry.role !== 'system' && 
+                !(entry.role === 'assistant' && entry.tag === 'image') &&
+                !(entry.role === 'user' && text.includes("Narrative Guidelines"))
+              ) {
+                formattedMessages += `${roleText}: ${text}\n`;
+              }
+              } catch (error) {
+                  console.error('Error processing message:', error);
+                }
+              });
+        // Add seed message if no assistant messages exist
+        if (!formattedMessages.includes('assistant:')) {
+          formattedMessages = `assistant: ${companion.seed.replace(EMOJI_PATTERN, '')}\n${formattedMessages}`;
         }
-
+        console.log(formattedMessages)
         // Create dynamic environment variables
         const now = new Date();
         const day = now.toLocaleString("en-US", { weekday: "long" });

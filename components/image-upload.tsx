@@ -42,24 +42,8 @@ export const ImageUpload = ({
   return (
     <div className="space-y-4 w-full flex flex-col justify-center items-center">
       
-      <CldUploadButton options={{ maxFiles: 1 }} onUpload={(result: any) => onChange(result.info.secure_url)} uploadPreset={upload_preset}>
-        <div 
-          className="
-            p-4 
-            border-4 
-            border-dashed
-            border-primary/10 
-            rounded-lg 
-            hover:opacity-75 
-            transition 
-            flex 
-            flex-col 
-            space-y-2 
-            items-center 
-            justify-center
-          "
-        >
-          <div className="relative h-40 w-40">
+
+          <div className="relative h-60 w-40">
             <Image
               fill
               alt="Upload"
@@ -67,8 +51,8 @@ export const ImageUpload = ({
               className="rounded-lg object-cover"
             />
           </div>
-        </div>
-      </CldUploadButton>
+
+
     </div>
   );
 };

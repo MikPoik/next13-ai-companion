@@ -49,11 +49,11 @@ export function chatMessageJsonlToBlock(
        
         
         const content = parseMessageContent(message.content.toString());
-        if (Array.isArray(content) && content.length > 0 && content[0].text && content[0].mimeType != "image/png") {
-         //console.log("JSON array detected and text field exists");
+        if (Array.isArray(content) && content.length > 0 && content[0].text && !/!\[.*?\]\(.*?\)/.test(content[0].text)) {
+         console.log("JSON array detected and text field exists");
           message.content = content.map(block => block.text).join("\n");
-        } else if (Array.isArray(content) && content.length > 0 && content[0].mimeType == "image/png")  {
-          //console.log("Message content is not a JSON array or does not have a 'text' field. It is an image", content);
+        } else if (Array.isArray(content) && content.length > 0 && /!\[.*?\]\(.*?\)/.test(content[0].text))  {
+          console.log("Message content is not a JSON array or does not have a 'text' field. It is an image", content);
           const block: ExtendedBlock = {
             id: message.id,
             text: content[0].text.replace(/\\"/g, '"') || '', // Use the content if available
@@ -84,12 +84,20 @@ export function chatMessageJsonlToBlock(
       // Handle error case
       //message.content = '';
     }
+
+    let messageType: "TEXT" | "IMAGE" = MessageTypes.TEXT;
+    if (/!\[.*?\]\(.*?\)/.test(message.content)) {
+      
+      messageType = MessageTypes.IMAGE
+      
+    }
+      
     const block: ExtendedBlock = {
       id: message.id,
       text: message.content,
       historical: false,
       streamingUrl: `https://api.steamship.com/api/v1/block/null/raw`,
-      messageType: MessageTypes.TEXT,//getMessageType(message.role),
+      messageType: messageType,//MessageTypes.TEXT,//getMessageType(message.role),
       isVisibleInChat: validTypes.includes("TEXT"),
       isInputElement: false,
       role: message.role,

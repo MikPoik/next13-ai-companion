@@ -3,18 +3,24 @@
 import * as React from "react"
 import * as DialogPrimitive from "@radix-ui/react-dialog"
 import { X } from "lucide-react"
-
+import { DialogPortalProps as PrimitiveDialogPortalProps } from "@radix-ui/react-dialog"
 import { cn } from "@/lib/utils"
+
+// Extend the DialogPortalProps to include className
+interface DialogPortalProps extends PrimitiveDialogPortalProps {
+  className?: string;
+}
 
 const Dialog = DialogPrimitive.Root
 
 const DialogTrigger = DialogPrimitive.Trigger
 
-const DialogPortal = ({
-  className,
-  ...props
-}: DialogPrimitive.DialogPortalProps) => (
-  <DialogPrimitive.Portal className={cn(className)} {...props} />
+const DialogPortal = ({ className, children, ...props }: DialogPortalProps) => (
+  <DialogPrimitive.Portal {...props}>
+    <div className={cn(className)}>
+      {children}
+    </div>
+  </DialogPrimitive.Portal>
 )
 DialogPortal.displayName = DialogPrimitive.Portal.displayName
 
@@ -47,6 +53,9 @@ const DialogContent = React.forwardRef<
       )}
       {...props}
     >
+      <div className="sr-only">
+        <DialogPrimitive.Title>Dialog</DialogPrimitive.Title>
+      </div>
       {children}
       <DialogPrimitive.Close className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground">
         <X className="h-4 w-4" />

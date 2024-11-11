@@ -2,6 +2,7 @@ import prismadb from "@/lib/prismadb";
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import { Steamship as SteamshipV2 } from 'steamship-client-v2';
+import { call_modal_agent} from "@/lib/utils";
 export async function POST(
   request: Request,
   { params }: { params: { chatId: string } }
@@ -28,8 +29,6 @@ export async function POST(
       const companion = await prismadb.companion.findUnique({
         where: { id: params.chatId },
         include: { 
-          messages: { orderBy: { createdAt: "asc" }, where: { userId: user.id } },
-          _count: { select: { messages: true } },
           steamshipAgent: {
             take: 1, // Limit the number of records to 1
             orderBy: {
@@ -43,12 +42,17 @@ export async function POST(
     if (!companion) {
       return new NextResponse("Chat history not found or could not be deleted.", { status: 404 });
     }
-    const packageName = process.env.STEAMSHIP_PACKAGE || "ai-adventure-test";
-    const instance = await SteamshipV2.use(packageName, companion.steamshipAgent[0].instanceHandle, {}, companion.steamshipAgent[0].version, true, companion.steamshipAgent[0].workspaceHandle);
-    const context_id = user.id;
-    const response = await (instance.invoke('delete_messages', {
-      context_id
-    }));
+
+    const payload = {
+      context_id: "default",
+      workspace_id: companion.steamshipAgent[0].workspaceHandle,
+      agent_id: companion.steamshipAgent[0].instanceHandle,
+      kwargs: {
+        num_pairs: 1
+      }
+  }
+    const response = await call_modal_agent("delete_message_pairs",payload)
+    console.log(response)    
     
     return NextResponse.json("message deleted")
   }
