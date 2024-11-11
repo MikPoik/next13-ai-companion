@@ -9,7 +9,7 @@ interface BotAvatarProps {
 export const BotAvatar = ({
   src,
   height = "h-12",
-  width = "w-12"
+  width = "w-8"
 }: BotAvatarProps) => {
   return (
     <Avatar className={`${height} ${width}`}>

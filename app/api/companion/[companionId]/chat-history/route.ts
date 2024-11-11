@@ -66,7 +66,7 @@ export async function DELETE(
           headers: headers,
           body: JSON.stringify(agentConfig)
       });
-      console.log(response)
+      //console.log(response)
       const context_id = user.id;
 
 

@@ -85,7 +85,7 @@ export const ChatHeader = ({
             <MobileSidebar isPro={isPro} />
             <div className="flex gap-x-2 items-center">
 
-                <BotAvatar src={companion.src} />
+               
                 <div className="flex flex-col gap-y-1">
                     <div className="flex items-center gap-x-2">
                         <p className="font-bold">{companion.name}</p>

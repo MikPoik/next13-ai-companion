@@ -43,7 +43,7 @@ export const ImageUpload = ({
     <div className="space-y-4 w-full flex flex-col justify-center items-center">
       
 
-          <div className="relative h-40 w-40">
+          <div className="relative h-60 w-40">
             <Image
               fill
               alt="Upload"

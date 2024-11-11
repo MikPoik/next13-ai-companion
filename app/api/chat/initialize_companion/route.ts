@@ -43,11 +43,11 @@ async function updateAgent(name: string, description: string, personality: strin
         }
           // Add other configuration parameters as needed
       };
-      console.log(agentConfig)
+      //console.log(agentConfig)
       const response = await call_modal_agent("init_agent", agentConfig, "POST");
-      console.log(await response)
+      //console.log(await response)
       if (response.ok) {
-          console.log("Agent initialized or updated successfully",response);
+          console.log("Agent initialized or updated successfully");
           const jsonResponse = await response.json();
           console.log(JSON.stringify(jsonResponse, null, 4));
       } else {

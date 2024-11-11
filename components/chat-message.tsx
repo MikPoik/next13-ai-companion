@@ -8,7 +8,6 @@ import { BotAvatar } from "@/components/bot-avatar";
 import { UserAvatar } from "@/components/user-avatar";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
-import { responseToChatBlocks } from "@/components/ChatBlock";
 import { chatMessagesJsonlToBlocks } from "@/components/parse-blocks-from-message";
 import { MessageTypes, validTypes } from "@/components/block-chat-types";
 import { StreamContent } from "@/components/stream-content"; 
@@ -57,7 +56,7 @@ const imageStyles = {
 export const messageStyles = {
   other: "text-white-200", // default text
   action: "italic text-yellow-500 dark:text-yellow-500", // *actions*
-  internal: "italic text-purple-400 dark:text-purple-400", // (thoughts)
+  internal: "text-gray-300 dark:text-gray-300", // (thoughts)
   emphasis: "text-blue-400 dark:text-blue-400", // for other emphasized text
   speech: "text-white-200 dark:text-white-200", // for other text
 };
@@ -118,7 +117,7 @@ export const ChatMessage = ({
       if (part && part.startsWith('(') && part.endsWith(')')) {
         let remaining_part = part.slice(1, -1);
         if (remaining_part.length > 0) {
-          return <i key={index} className={messageStyles.action}>{part.slice(1, -1)}</i>;
+          return <span key={index} className={messageStyles.internal}>{part}</span>;
         }
       }
       if (part && part.startsWith('[') && part.endsWith(']')) {
@@ -130,7 +129,7 @@ export const ChatMessage = ({
       if (part && part.startsWith('"') && part.endsWith('"')) {
         let remaining_part = part.slice(1, -1);
         if (remaining_part.length > 0) {
-          return <i key={index} className={messageStyles.speech}>{part}</i>;
+          return <span key={index} className={messageStyles.speech}>{part}</span>;
         }
       }
       return <span key={index} className={messageStyles.other}>{part}</span>;

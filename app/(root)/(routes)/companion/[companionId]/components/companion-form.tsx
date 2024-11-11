@@ -146,7 +146,9 @@ export const CompanionForm = ({
             workspace_id: "avatars",
             image_config: { 
                 image_model: imageModel,
-                image_size: "square",
+                image_size: '{ "width":512,"height":768}',
+                image_width: "512",
+                image_height: "768",
                 image_api_path: imageModel.includes("flux") ? "fal-ai/flux-general" : "fal-ai/lora"
             }
             
@@ -398,11 +400,11 @@ export const CompanionForm = ({
                                                 <SelectItem key="mo-di-diffusion" value="mo-di-diffusion">Modern Disney Diffusion</SelectItem>
                                                 <SelectItem key="synthwave-punk-v2" value="synthwave-punk-v2">Synthwave Punk V2</SelectItem>
                                                 <SelectItem key="dream-shaper-v8" value="dream-shaper-v8">Dream Shaper V8</SelectItem>
-                                                <SelectItem key="https://civitai.com/api/download/models/708635?type=Model&format=SafeTensor&size=pruned&fp=fp16" value="https://civitai.com/api/download/models/708635?type=Model&format=SafeTensor&size=pruned&fp=fp16">Lustify (SDXL) Realistic</SelectItem>
-                                                <SelectItem key="https://civitai.com/api/download/models/400093?type=Model&format=SafeTensor&size=pruned&fp=fp16" value="https://civitai.com/api/download/models/400093?type=Model&format=SafeTensor&size=pruned&fp=fp16">Suzannes Mix (SDXL) Realistic</SelectItem>
-                                                <SelectItem key="https://civitai.com/api/download/models/294706" value="https://civitai.com/api/download/models/294706">iNiverseMix (SDXL) Realistic</SelectItem>
+                                                <SelectItem key="https://civitai.com/api/download/models/926965?type=Model&format=SafeTensor&size=pruned&fp=fp16" value="https://civitai.com/api/download/models/926965?type=Model&format=SafeTensor&size=pruned&fp=fp16">Lustify (SDXL) Realistic</SelectItem>
+                                                <SelectItem key="https://civitai.com/api/download/models/981979?type=Model&format=SafeTensor&size=pruned&fp=fp16" value="https://civitai.com/api/download/models/981979?type=Model&format=SafeTensor&size=pruned&fp=fp16">Suzannes Mix (SDXL) Realistic</SelectItem>
+                                                <SelectItem key="https://civitai.com/api/download/models/608842?type=Model&format=SafeTensor&size=full&fp=fp16" value="https://civitai.com/api/download/models/608842?type=Model&format=SafeTensor&size=full&fp=fp16">iNiverseMix (SDXL) Realistic</SelectItem>
                                                 <SelectItem key="https://civitai.com/api/download/models/228559?type=Model&format=SafeTensor&size=pruned&fp=fp16" value="https://civitai.com/api/download/models/228559?type=Model&format=SafeTensor&size=pruned&fp=fp16">Omnigen XL (SDXL) Realistic/Anime</SelectItem>
-                                                <SelectItem key="https://civitai.com/api/download/models/281176?type=Model&format=SafeTensor&size=pruned&fp=fp16" value="https://civitai.com/api/download/models/281176?type=Model&format=SafeTensor&size=pruned&fp=fp16">Albedo (SDXL) Realistic</SelectItem>
+                                                <SelectItem key="https://civitai.com/api/download/models/892880?type=Model&format=SafeTensor&size=pruned&fp=fp16" value="https://civitai.com/api/download/models/892880?type=Model&format=SafeTensor&size=pruned&fp=fp16">Albedo (SDXL) Realistic</SelectItem>
                                                 <SelectItem key="https://civitai.com/api/download/models/384264?type=Model&format=SafeTensor&size=full&fp=fp16" value="https://civitai.com/api/download/models/384264?type=Model&format=SafeTensor&size=full&fp=fp16">AnythingXL (SDXL) Anime</SelectItem>
                                                 <SelectItem key="https://civitai.com/api/download/models/293564?type=Model&format=SafeTensor&size=full&fp=fp32" value="https://civitai.com/api/download/models/293564?type=Model&format=SafeTensor&size=full&fp=fp32">Animagine (SDXL) Anime</SelectItem>
                                                 <SelectItem key="https://civitai.com/api/download/models/156375" value="https://civitai.com/api/download/models/156375">Clearhung Anime (SDXL)</SelectItem>
