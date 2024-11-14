@@ -2,7 +2,6 @@ import { headers } from "next/headers"
 import { NextResponse } from "next/server"
 import prismadb from "@/lib/prismadb"
 import { UserButton } from "@clerk/nextjs"
-import { Steamship as SteamshipV2 } from 'steamship-client-v2';
 import {Role } from "@prisma/client";
 export const maxDuration = 60;
 import { checkSubscription } from "@/lib/subscription";

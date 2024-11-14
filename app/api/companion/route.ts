@@ -1,12 +1,10 @@
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
-//import { Steamship } from '@steamship/client';
-import { Steamship as SteamshipV2 } from 'steamship-client-v2';
 import prismadb from "@/lib/prismadb";
 import { checkSubscription } from "@/lib/subscription";
-import dotenv from "dotenv";
-//import { generateAvatarSteamship } from "@/components/SteamshipGenerateAvatar";
-import { indexTextSteamship, } from "@/components/SteamshipIndexText";
+
+
+
 import {getBolnaAgentJson} from "@/lib/bolna";
 
 export const maxDuration = 60; //2 minute timeout

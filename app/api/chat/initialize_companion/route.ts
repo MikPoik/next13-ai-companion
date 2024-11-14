@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { Steamship as SteamshipV2 } from 'steamship-client-v2';
 import prismadb from "@/lib/prismadb";
 import { auth } from "@clerk/nextjs/server";
 import { checkSubscription } from "@/lib/subscription";
@@ -35,11 +34,11 @@ async function updateAgent(name: string, description: string, personality: strin
           },
         llm_config: {
           model: llm_model,
-          provider: llm_model.toLowerCase().includes("gpt") ? "openai" : "deepinfra"
+          provider: llm_model.toLowerCase().includes("gpt") ? "openai" : "deepinfra" // final provider determined on backend
         },
         image_config: {
           image_model: image_model,
-          image_api_path: image_model.includes("flux") ? "fal-ai/flux-general" : "fal-ai/lora"
+          image_api_path: image_model.includes("flux") ? "fal-ai/flux/dev" : "fal-ai/lora"
         }
           // Add other configuration parameters as needed
       };
@@ -49,10 +48,8 @@ async function updateAgent(name: string, description: string, personality: strin
       if (response.ok) {
           console.log("Agent initialized or updated successfully");
           const jsonResponse = await response.json();
-          console.log(JSON.stringify(jsonResponse, null, 4));
       } else {
           console.log("Failed to initialize or update the agent");
-          console.log(response.status, response.statusText);
       }
       
       console.log("Agent initialized successfully");
@@ -192,7 +189,7 @@ export async function POST(req: NextRequest) {
         "context_id": "default",
         "agent_id": instance_handle,
     };
-    console.log(data)
+
     //retrieve history in format [{"role": "user", "content": "message"},... , {"role": "assistant", "content": "message"}]
     const chat_history = await call_modal_agent("get_chat_history",data);
     const chat_history_json = await chat_history.json()

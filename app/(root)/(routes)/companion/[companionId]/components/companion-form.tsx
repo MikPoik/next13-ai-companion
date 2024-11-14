@@ -43,7 +43,7 @@ const formSchema = z.object({
         message: "Personality require at least 200 characters."
     }),
     seed: z.string().min(1, {
-        message: "Seed requires at least 200 characters."
+        message: "Seed requires at least 1 characters."
     }),
     src: z.string().min(1, { message: "image is required" }),
     packageName: z.string().optional(),
@@ -149,7 +149,7 @@ export const CompanionForm = ({
                 image_size: '{ "width":512,"height":768}',
                 image_width: "512",
                 image_height: "768",
-                image_api_path: imageModel.includes("flux") ? "fal-ai/flux-general" : "fal-ai/lora"
+                image_api_path: imageModel.includes("flux") ? "fal-ai/flux/dev" : "fal-ai/lora"
             }
             
         };
@@ -205,7 +205,7 @@ export const CompanionForm = ({
             selfiePost: "",
             model: "meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo",
             createImages: false,
-            imageModel: "flux-general-with-lora",
+            imageModel: "fal-ai/flux/dev",
             voiceId: 'none',
             backstory: "",
             regenerateImage: false,
@@ -391,27 +391,24 @@ export const CompanionForm = ({
                                                 </SelectTrigger>
                                             </FormControl>
                                             <SelectContent style={dropdownStyle}>
+                                                <SelectItem key="SG161222/Realistic_Vision_V6.0_B1_noVAE" value="SG161222/Realistic_Vision_V6.0_B1_noVAE">Realistic-Vision-v6</SelectItem>
                                                 <SelectItem key="realistic-vision-v3" value="realistic-vision-v3">Realistic-Vision-v3</SelectItem>
                                                 <SelectItem key="dark-sushi-mix-v2-25" value="dark-sushi-mix-v2-25">Dark-Sushi-mix-v2-25</SelectItem>
                                                 <SelectItem key="absolute-reality-v1-8-1" value="absolute-reality-v1-8-1">Absolute-Reality-v1-8-1</SelectItem>
-                                                <SelectItem key="arcane-diffusion" value="arcane-diffusion">Arcane-Diffusion</SelectItem>
-                                                <SelectItem key="van-gogh-diffusion" value="van-gogh-diffusion">Van Gogh Diffusion</SelectItem>
-                                                <SelectItem key="neverending-dream" value="neverending-dream">Neverending Dream</SelectItem>
-                                                <SelectItem key="mo-di-diffusion" value="mo-di-diffusion">Modern Disney Diffusion</SelectItem>
-                                                <SelectItem key="synthwave-punk-v2" value="synthwave-punk-v2">Synthwave Punk V2</SelectItem>
                                                 <SelectItem key="dream-shaper-v8" value="dream-shaper-v8">Dream Shaper V8</SelectItem>
                                                 <SelectItem key="https://civitai.com/api/download/models/926965?type=Model&format=SafeTensor&size=pruned&fp=fp16" value="https://civitai.com/api/download/models/926965?type=Model&format=SafeTensor&size=pruned&fp=fp16">Lustify (SDXL) Realistic</SelectItem>
+                                                <SelectItem key="https://civitai.com/api/download/models/233092?type=Model&format=SafeTensor&size=full&fp=fp16" value="https://civitai.com/api/download/models/233092?type=Model&format=SafeTensor&size=full&fp=fp16">Better Than Words (SDXL) Realistic</SelectItem>
                                                 <SelectItem key="https://civitai.com/api/download/models/981979?type=Model&format=SafeTensor&size=pruned&fp=fp16" value="https://civitai.com/api/download/models/981979?type=Model&format=SafeTensor&size=pruned&fp=fp16">Suzannes Mix (SDXL) Realistic</SelectItem>
                                                 <SelectItem key="https://civitai.com/api/download/models/608842?type=Model&format=SafeTensor&size=full&fp=fp16" value="https://civitai.com/api/download/models/608842?type=Model&format=SafeTensor&size=full&fp=fp16">iNiverseMix (SDXL) Realistic</SelectItem>
                                                 <SelectItem key="https://civitai.com/api/download/models/228559?type=Model&format=SafeTensor&size=pruned&fp=fp16" value="https://civitai.com/api/download/models/228559?type=Model&format=SafeTensor&size=pruned&fp=fp16">Omnigen XL (SDXL) Realistic/Anime</SelectItem>
                                                 <SelectItem key="https://civitai.com/api/download/models/892880?type=Model&format=SafeTensor&size=pruned&fp=fp16" value="https://civitai.com/api/download/models/892880?type=Model&format=SafeTensor&size=pruned&fp=fp16">Albedo (SDXL) Realistic</SelectItem>
-                                                <SelectItem key="https://civitai.com/api/download/models/384264?type=Model&format=SafeTensor&size=full&fp=fp16" value="https://civitai.com/api/download/models/384264?type=Model&format=SafeTensor&size=full&fp=fp16">AnythingXL (SDXL) Anime</SelectItem>
+                                                <SelectItem key="https://civitai.com/api/download/models/384264?type=Model&format=SafeTensor&size=full&fp=fp16" value="https://civitai.com/api/download/models/384264?type=Model&format=SafeTensor&size=full&fp=fp16">AnythingXL (SDXL) Realistic/Anime</SelectItem>
                                                 <SelectItem key="https://civitai.com/api/download/models/293564?type=Model&format=SafeTensor&size=full&fp=fp32" value="https://civitai.com/api/download/models/293564?type=Model&format=SafeTensor&size=full&fp=fp32">Animagine (SDXL) Anime</SelectItem>
                                                 <SelectItem key="https://civitai.com/api/download/models/156375" value="https://civitai.com/api/download/models/156375">Clearhung Anime (SDXL)</SelectItem>
                                                 <SelectItem key="https://civitai.com/api/download/models/378499" value="https://civitai.com/api/download/models/378499">Hassaku (SDXL) Anime</SelectItem>
                                                 <SelectItem key="https://civitai.com/api/download/models/303526?type=Model&format=SafeTensor&size=full&fp=fp16" value="https://civitai.com/api/download/models/303526?type=Model&format=SafeTensor&size=full&fp=fp16">Animemix (SDXL)</SelectItem>
                                                 <SelectItem key="https://civitai.com/api/download/models/286821" value="https://civitai.com/api/download/models/286821">Deephentai (SDXL)</SelectItem>
-                                                <SelectItem key="flux-general-with-lora" value="flux-general-with-lora">FLUX.1 (SFW)</SelectItem>
+                                                <SelectItem key="fal-ai/flux/dev" value="fal-ai/flux/dev">FLUX.1 (SFW)</SelectItem>
                                                 <SelectItem key="stabilityai/stable-diffusion-xl-base-1.0" value="stabilityai/stable-diffusion-xl-base-1.0">StableDiffusion 1.0 XL (SFW)</SelectItem>
 
 
@@ -572,7 +569,7 @@ export const CompanionForm = ({
                                             <SelectItem key="Sao10K/L3.1-70B-Euryale-v2.2" value="Sao10K/L3.1-70B-Euryale-v2.2">Euryale L3.1 70B</SelectItem>
                                             
                                             <SelectItem key="NousResearch/Nous-Hermes-2-Mixtral-8x7B-DPO" value="NousResearch/Nous-Hermes-2-Mixtral-8x7B-DPO">Mixtral 8x7B DPO</SelectItem>
-                                            <SelectItem key="istralai/Mistral-Nemo-Instruct-2407" value="istralai/Mistral-Nemo-Instruct-2407">Mistral Nemo 12B</SelectItem>      
+                                            <SelectItem key="mistralai/Mistral-Nemo-Instruct-2407" value="mistralai/Mistral-Nemo-Instruct-2407">Mistral Nemo 12B</SelectItem>      
                                             <SelectItem key="nvidia/Llama-3.1-Nemotron-70B-Instruct" value="nvidia/Llama-3.1-Nemotron-70B-Instruct">Nvidia Nemotron 70B</SelectItem>      
                                             <SelectItem key="meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo" value="meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo">Meta Llama 3.1 70B Turbo (SFW)</SelectItem>
                                             <SelectItem key="meta-llama/Meta-Llama-3.1-405B-Instruct" value="meta-llama/Meta-Llama-3.1-405B-Instruct">Meta-Llama-3.1-405B (SFW)</SelectItem>
@@ -629,7 +626,7 @@ export const CompanionForm = ({
                             <FormItem>
                                 <FormLabel>Personality</FormLabel>
                                 <FormControl>
-                                    <Textarea disabled={isLoading} rows={4} className="bg-background resize-none" placeholder={PREAMBLE} {...field} />
+                                    <Textarea disabled={isLoading} rows={6} className="bg-background resize-none" placeholder={PREAMBLE} {...field} />
                                 </FormControl>
                                 <FormDescription>
                                     Describe in detail your companion&apos;s personality and relevant details.

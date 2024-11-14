@@ -1,10 +1,8 @@
-
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
-import { Steamship, SteamshipStream, } from '@steamship/client';
 import { neon } from '@neondatabase/serverless';
 import {call_modal_agent} from "../../../../lib/utils";
-import { StreamingTextResponse } from "ai";
+
 
 export const maxDuration = 60; //2 minute timeout
 export const runtime = 'nodejs';
@@ -46,6 +44,7 @@ async function getCompanionRecord(chatId: string, userId: string) {
                 "createdAt" AS "steamshipAgent_createdAt"
               FROM "SteamshipAgent"
               WHERE "userId" = ${userId}
+                AND "companionId" = ${chatId}
               ORDER BY "createdAt" DESC
               LIMIT 1
             )
@@ -54,18 +53,22 @@ async function getCompanionRecord(chatId: string, userId: string) {
               sa.*
             FROM 
               "Companion" c
-            LEFT JOIN 
+            INNER JOIN 
               SteamshipAgents sa ON c."id" = sa."steamshipAgent_companionId"
             WHERE 
-              c."id" = ${chatId};
+              c."id" = ${chatId}
         `;
+
+        if (!companions.length) {
+            throw new Error("No companion record found with associated agent");
+        }
+
         return companions;
     } catch (err) {
         console.error('Query error:', err);
         throw err;
     }
 }
-
 export async function POST(
     request: Request,
     { params }: { params: { chatId: string } }
@@ -103,12 +106,20 @@ export async function POST(
         .then(records => {
             if (records.length > 0) {
                 const record = records[0]; // Assuming you're interested in the first record
+                // Validate required fields
+                if (!record.steamshipAgent_agentUrl || 
+                    !record.steamshipAgent_workspaceHandle || 
+                    !record.steamshipAgent_instanceHandle) {
+                    console.log("Missing required fields in the record")
+                }
+
                 agentUrl = record.steamshipAgent_agentUrl; // Access the steamshipAgent_agentUrl column
                 agentWorkspace = record.steamshipAgent_workspaceHandle;
                 agentInstanceHandle = record.steamshipAgent_instanceHandle;
 
             } else {
                 console.log('No records found.');
+                return new NextResponse("No AgentFound", { status: 401 });
             }
         })
         .catch(err => console.error(err));
@@ -117,11 +128,12 @@ export async function POST(
             "Authorization": `Bearer ${process.env['MODAL_AUTH_TOKEN'] ||""}`,
             "Content-Type": "application/json"
         };
+
         // Setup data payload
         const agent_config = {
             "prompt": prompt,
             "workspace_id": agentWorkspace,
-            "context_id": "default",
+            "context_id": agentInstanceHandle+user.id,
             "agent_id": agentInstanceHandle
         };
 

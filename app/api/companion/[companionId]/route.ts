@@ -1,10 +1,7 @@
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
-import { Steamship as SteamshipV2 } from 'steamship-client-v2';
 import prismadb from "@/lib/prismadb";
 import { checkSubscription } from "@/lib/subscription";
-//import { generateAvatarSteamship } from "@/components/SteamshipGenerateAvatar";
-import { indexTextSteamship, } from "@/components/SteamshipIndexText";
 import dotenv from "dotenv";
 import { create } from "domain";
 import {getBolnaAgentJson} from "@/lib/bolna";
@@ -210,15 +207,7 @@ export async function DELETE(
                 id: params.companionId
             }
         });
-        /*
-        const steamshipPackage = process.env.STEAMSHIP_PACKAGE;
-        if (!steamshipPackage) {
-          throw new Error("STEAMSHIP_PACKAGE environment variable is not set");
-        }
-        
-        const instance = await SteamshipV2.use(process.env.STEAMSHIP_PACKAGE, companion.instanceHandle, {}, undefined, true, companion.workspaceName);
-        instance.delete();
-        */
+
         return NextResponse.json("OK",{status: 200});
     } catch (error) {
         console.log("[COMPANION_DELETE]", error);

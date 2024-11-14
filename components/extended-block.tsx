@@ -1,4 +1,4 @@
-import { Block } from "@steamship/client";
+import { SteamshipBlock as Block } from "@/components/SteamShipBlock";
 
 export type ExtendedBlock = Block & {
   /**
@@ -28,4 +28,15 @@ export type ExtendedBlock = Block & {
   messageType?: string;
 
   role?: string;
+
+  createdAt?: string;
+  workspaceId?:string;
+  userId?: string;
+  contentURL: null,
+  uploadBytes: null,
+  uploadType: null,
+  mimeType: null,
+  url: null,
+  fileId: string | null,
+  index: number | null
 };

@@ -4,8 +4,6 @@ import { auth, currentUser } from "@clerk/nextjs/server";
 import prismadb from "@/lib/prismadb"
 import { UserButton } from "@clerk/nextjs"
 import { checkSubscription } from "@/lib/subscription";
-import { appendHistorySteamship, } from "@/components/SteamshipAppendHistory";
-import { Steamship } from '@steamship/client';
 import { format } from "path";
 import {getBolnaAgentJson} from "@/lib/bolna";
 import { call_modal_agent } from "@/lib/utils";
@@ -108,7 +106,7 @@ export async function POST(req: Request) {
         }
         const agent_config = {
             "workspace_id": companion.steamshipAgent[0].workspaceHandle,
-            "context_id": "default",
+            "context_id": companion.steamshipAgent[0].instanceHandle+user.id,
             "agent_id": companion.steamshipAgent[0].instanceHandle,
         };
         const chat_history = await call_modal_agent("get_chat_history",agent_config);

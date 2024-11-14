@@ -1,8 +1,8 @@
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
-import { Steamship as SteamshipV2 } from 'steamship-client-v2';
 import prismadb from "@/lib/prismadb";
 import { checkSubscription } from "@/lib/subscription";
+import { call_modal_agent } from "@/lib/utils";
 
 // DELETE route for deleting the chat history
 export async function DELETE(
@@ -48,7 +48,7 @@ export async function DELETE(
       if (companion.steamshipAgent.length === 0) {
         return new NextResponse("companion not initialized", { status: 404 });
       }
-      const url = "https://mikpoik--modal-agent-fastapi-app-dev.modal.run/delete_chat_history";
+
       const headers = {
           Authorization: `Bearer ${process.env.MODAL_AUTH_TOKEN}`,
           "Content-Type": "application/json"
@@ -61,13 +61,8 @@ export async function DELETE(
           // Add other configuration parameters as needed
       };
       //console.log(agentConfig)
-      const response = await fetch(url, {
-          method: "POST",
-          headers: headers,
-          body: JSON.stringify(agentConfig)
-      });
-      //console.log(response)
-      const context_id = user.id;
+      const response = await call_modal_agent("delete_chat_history",agentConfig, )
+      console.log(await response.json())
 
 
       return NextResponse.json({ message: "Chat history deleted successfully." });
