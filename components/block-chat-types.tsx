@@ -1,4 +1,4 @@
-import { Block } from '@steamship/client';
+import { SteamshipBlock as Block } from '@/components/SteamShipBlock';
 
 export const MessageTypes = {
   STATUS_MESSAGE: "STATUS_MESSAGE",

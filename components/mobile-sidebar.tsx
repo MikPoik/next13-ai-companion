@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import { Menu } from "lucide-react";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetTrigger,SheetTitle } from "@/components/ui/sheet";
 import { Sidebar } from "@/components/sidebar";
 
 export const MobileSidebar = ({
@@ -23,6 +23,7 @@ export const MobileSidebar = ({
         <Menu />
       </SheetTrigger>
       <SheetContent side="left" className="p-0 bg-secondary pt-10 w-32">
+        <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
         <Sidebar isPro={isPro} />
       </SheetContent>
       {isOpen && (

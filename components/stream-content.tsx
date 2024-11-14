@@ -28,26 +28,20 @@ const formatText = (text: string): (string | JSX.Element)[] => {
 export const StreamContent: React.FC<StreamContentProps> = ({ blockId, onContentUpdate }) => {
   const [error, setError] = useState<string | null>(null);
   const { content: streamContent } = useStreamStore();
-
-  const debouncedOnContentUpdate = useCallback(
-    debounce((content: string) => {
-      if (onContentUpdate) {
-        onContentUpdate(content);
-      }
-    }, 300),
-    [onContentUpdate]
-  );
-
+  // Change to inline function and add all dependencies
+  const debouncedOnContentUpdate = useCallback((content: string) => {
+    if (onContentUpdate) {
+      onContentUpdate(content);
+    }
+  }, [onContentUpdate]);
   useEffect(() => {
     if (streamContent) {
       debouncedOnContentUpdate(streamContent);
     }
   }, [streamContent, debouncedOnContentUpdate]);
-
   if (error) {
     return <div>Error: {error}</div>;
   }
-
   const formattedContent = formatText(streamContent);
   return <div>{formattedContent}</div>;
 };

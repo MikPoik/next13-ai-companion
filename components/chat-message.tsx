@@ -11,6 +11,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { chatMessagesJsonlToBlocks } from "@/components/parse-blocks-from-message";
 import { MessageTypes, validTypes } from "@/components/block-chat-types";
 import { StreamContent } from "@/components/stream-content"; 
+import Image from "next/image";
 
 import useStreamStore from "@/lib/use-stream-store";
 const { v4: uuidv4 } = require('uuid');
@@ -29,29 +30,27 @@ export interface ChatMessageProps {
 
 const imageStyles = {
   wrapper: {
-    backgroundColor: "rgb(50, 50, 50)",
+    position: "relative" as const,
+    backgroundColor: "#303030",
     maxWidth: "768px",
-    aspectRatio: "3 / 4",
-    transition: "background-color 0.5s ease-in-out",
-    animation: "fadeInOut 2s infinite",
-    overflow: "hidden"
-  },
-  img: {
-    maxWidth: "100%",
-    height: "auto",
-    display: "block",
-    opacity: 0,
-    transition: "opacity 0.5s ease-in-out",
-    objectFit: "contain" as 'contain',
+    aspectRatio: "3/4",
+    transition: "all 0.3s ease-in-out",
+    overflow: "hidden",
   },
   loadedWrapper: {
     backgroundColor: "transparent",
-    animation: "none",
   },
   loadedImg: {
     opacity: 1,
-  },
+    objectFit: "cover" as const,
+    width: "100%",
+    height: "100%",
+  }
 };
+function applyLoadedStyles(wrapperElement: HTMLDivElement, imgElement: HTMLImageElement) {
+  Object.assign(wrapperElement.style, imageStyles.loadedWrapper);
+  Object.assign(imgElement.style, imageStyles.loadedImg);
+}
 
 export const messageStyles = {
   other: "text-white-200", // default text
@@ -62,10 +61,6 @@ export const messageStyles = {
 };
 
 
-function applyLoadedStyles(wrapperElement: HTMLDivElement, imgElement: HTMLImageElement) {
-  Object.assign(wrapperElement.style, imageStyles.loadedWrapper);
-  Object.assign(imgElement.style, imageStyles.loadedImg);
-}
 
 export const ChatMessage = ({
   id,
@@ -80,8 +75,10 @@ export const ChatMessage = ({
 }: ChatMessageProps) => {
   const { toast } = useToast();
   const { theme } = useTheme();
+  const wrapperRef = useRef<HTMLDivElement>(null);
   const { content: streamedContent } = useStreamStore(); // Access streamed content from Zustand
   const [imageLoaded, setImageLoaded] = useState(false);
+  const maxRetries = 180;
 
   useEffect(() => {
     // Logging purpose or other side effects
@@ -195,22 +192,36 @@ export const ChatMessage = ({
                 className={`image-placeholder-wrapper ${imageLoaded ? 'loaded' : ''}`}
                 style={imageStyles.wrapper}
               >
-                {imageUrl && (<img 
-                  src={imageUrl} 
-                  alt="image"
-                  style={imageStyles.img}
-                  onLoad={(e) => handleImageLoad(e.currentTarget.parentElement as HTMLDivElement, e.currentTarget)}
-                  onError={(e) => {
-                    const imgElement = e.currentTarget;
-                    //Hacky way to trigger image reload before the url is ready
-                    setTimeout(() => {
-                      //console.log(`Retrying image load for blockId ${imageUrl}`);
-                      const newImageUrl = imageUrl;
-                      imgElement.src = newImageUrl; // Directly set the src on the img element
-                    }, 2000);
-                    
-                  }}
-                />)}
+                {imageUrl && (<div ref={wrapperRef} style={imageStyles.wrapper}>
+                               <Image
+                                 src={imageUrl}
+                                 alt="Generated Image"
+                                 fill={true}
+                                 onLoad={(event) => {
+                                   if (wrapperRef.current) {
+                                     handleImageLoad(wrapperRef.current, event.target as HTMLImageElement);
+                                   }
+                                 }}
+                                 onError={(event) => {
+                                    /*
+                                   const imgElement = event.target as HTMLImageElement;
+                                   const retryCount = parseInt(imgElement.dataset.retryCount || '0');
+
+                                   if (retryCount < maxRetries) {
+                                     imgElement.dataset.retryCount = (retryCount + 1).toString();
+                                     setTimeout(() => {
+                                       imgElement.src = imageUrl;
+                                     }, 2000);
+                                   } else {
+                                     console.error(`Failed to load image after ${maxRetries} attempts`);
+                                     imgElement.style.display = 'none';
+                                   }
+                                   */
+                                 }}
+                                 className="object-contain"
+                                 sizes="(max-width: 768px) 100vw, 768px"
+                               />
+                             </div>)}
               </div>
             </div>
           );
@@ -226,17 +237,28 @@ export const ChatMessage = ({
 
   return (
     <>
-      <style jsx>{`
+      <style jsx global>{`
         @keyframes fadeInOut {
           0%, 100% { opacity: 0.8; }
           50% { opacity: 0.6; }
         }
         .image-placeholder-wrapper {
+          position: relative;
+          background-color: rgb(50, 50, 50);
+          max-width: 768px;
+          aspect-ratio: 3/4;
+          transition: background-color 0.5s ease-in-out;
+          overflow: hidden;
+        }
+        .image-placeholder-wrapper:not(.loaded) {
           animation: fadeInOut 2s infinite;
         }
+        .image-placeholder-wrapper img {
+          opacity: 0;
+          transition: opacity 0.3s ease-in-out;
         }
-        .image-placeholder-wrapper {
-          animation: fadeInOut 2s infinite;
+        .image-placeholder-wrapper.loaded img {
+          opacity: 1;
         }
       `}</style>
       <div className={cn(

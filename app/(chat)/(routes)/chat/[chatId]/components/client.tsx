@@ -227,23 +227,7 @@
 
           if (messages.length <= 1) {
             await append({
-              content: `As ${companion.name}, narrate the scene for me in this chat.
-Narrative Guidelines:
-• Format spoken dialogue in quotation marks in first person.
-• Show actions between asterisks in third person.
-• Express internal thoughts in parentheses.
-• Include emotional states and reactions.
-• Describe environment and atmosphere when relevant.
-• Use third-person narration.
-
-Companion Narration Instructions:
-• Narrate ${companion.name}'s perspective in third person.
-• Keep responses concise and engaging
-• Balance character dialogue, action, and internal monologue
-• Use environmental details to enhance immersion
-• Maintain consistent character voice and perspective
-
-Start ${companion.name}'s response with a brief description of the setting or an action.`,
+              content: `As ${companion.name}. Narrate a brief scene introduction with me, showing ${companion.name}'s personality. Keep it concise but engaging. Begin!`,
               role: "user",
             }, {
               options: {
@@ -260,7 +244,7 @@ Start ${companion.name}'s response with a brief description of the setting or an
         }
       };
       autoSubmit();
-    }, [messages, append, companion.id]);
+    }, [messages, append, companion.id,companion.name]);
     
     useEffect(() => {
       messagesRef.current = Array.isArray(messages) ? messages.map(message => ({
@@ -269,7 +253,7 @@ Start ${companion.name}'s response with a brief description of the setting or an
       })).map(message =>
         transformChatMessageToPrismaMessage(message, companion.id)
       ) : [];
-    }, [messages]);
+    }, [messages,companion.id]);
 
 
 
@@ -333,7 +317,6 @@ Start ${companion.name}'s response with a brief description of the setting or an
 
     const handleDelete = async (id: string, id2:string) => {
       setIsDeleting(true);
-      console.log("message id",id,id2)
 
       await fetch(`/api/chat/${companion.id}/delete-message`, {
         method: 'POST',

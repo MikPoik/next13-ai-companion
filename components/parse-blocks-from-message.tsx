@@ -71,6 +71,12 @@ export function chatMessageJsonlToBlock(
             fileId: "default",
             index: 0,
             publicData: true,
+            contentURL: null,
+            uploadBytes: null,
+            uploadType: null,
+            mimeType: null,
+            url: null,
+
           };
 
           //console.log(block);
@@ -109,6 +115,11 @@ export function chatMessageJsonlToBlock(
       fileId: "default",
       index: 0,
       publicData: true,
+      contentURL: null,
+      uploadBytes: null,
+      uploadType: null,
+      mimeType: null,
+      url: null
     };
     //console.log(block)
     return [block];

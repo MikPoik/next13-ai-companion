@@ -15,27 +15,12 @@ export async function GET(req: Request) {
     const user = await currentUser();
     let user_id = user?.id || "public";
 
+    // Base where clause with name search
     let whereClause: any = {
-      name: { contains: name || undefined, mode: 'insensitive' }};
-    
-    if (nsfw !== true) {
-      whereClause.nsfw = false;
-    }
-    if (tagIds.length > 0) {
-      whereClause.tags = {
-        some: {
-          id: { in: tagIds }
-        }
-      };
+      name: { contains: name || undefined, mode: 'insensitive' }
+    };
 
-      // If there's more than one tag, ensure all selected tags are present
-      if (tagIds.length > 1) {
-        whereClause.AND = tagIds.map(tagId => ({
-          tags: { some: { id: tagId } }
-        }));
-      }
-    }
-
+    // First determine the category context
     if (categoryId === "my-companions") {
       whereClause.userId = user_id;
     } else if (categoryId === "suggested") {
@@ -47,13 +32,40 @@ export async function GET(req: Request) {
       whereClause.userId = { not: user_id }; 
     }
 
-    //console.log("Where clause:", JSON.stringify(whereClause, null, 2));
-    //console.log("Page:", page, "PageSize:", pageSize);
+    // Apply NSFW filter
+    if (nsfw) {
+      whereClause.nsfw = true;
+    } else {
+      whereClause.nsfw = false;
+    }
+
+    // Apply tag filtering within the established context
+    if (tagIds.length > 0) {
+      if (tagIds.length === 1) {
+        whereClause.tags = {
+          some: {
+            id: { in: tagIds }
+          }
+        };
+      } else {
+        // For multiple tags
+        whereClause.AND = tagIds.map(tagId => ({
+          tags: { some: { id: tagId } }
+        }));
+      }
+    }
 
     const companions = await prismadb.companion.findMany({
       where: whereClause,
-      include: {
+      select: {
+        id:true,
+        name: true,
+        description: true,
+        messageCount: true,
         tags: true,
+        createImages:true,
+        src:true,
+        isPublic:true
       },
       orderBy: {
         messageCount: 'desc',
@@ -62,9 +74,8 @@ export async function GET(req: Request) {
       take: pageSize,
     });
 
-    //console.log("Companions found:", companions.length);
-
     const totalCount = await prismadb.companion.count({ where: whereClause });
+
     return NextResponse.json({
       companions,
       totalPages: Math.ceil(totalCount / pageSize),
