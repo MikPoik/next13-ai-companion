@@ -1,37 +1,43 @@
 "use client";
 
-import { useState, useEffect, useRef,useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
 import { ChatClient } from "./components/client";
 import { MoonLoader } from "react-spinners";
 import { useTheme } from "next-themes";
 
-const ChatIdPage = ({ params }: { params: { chatId: string } }) => {
+interface ChatPageProps {
+  params: Promise<{ chatId: string }>;
+}
+
+const ChatIdPage = ({ params }: ChatPageProps) => {
   const [companion, setCompanion] = useState(null);
   const [isPro, setIsPro] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [chatHistory, setChatHistory] = useState([]);
   const router = useRouter();
   const { theme } = useTheme();
-  const [chatHistory, setChatHistory] = useState([]);
-  // Ref to track initialization
+
+  // Refs to track initialization
   const initializingRef = useRef(false);
   const initializedRef = useRef(false);
 
-  //console.log("Rendering ChatIdPage component");
+  // Unwrap params using React.use()
+  const unwrappedParams = React.use(params);
+  const chatId = unwrappedParams.chatId;
 
   const initializeCompanion = useCallback(async () => {
     if (initializingRef.current || initializedRef.current) {
       return;
     }
 
-    //console.log("Initializing companion...");
     initializingRef.current = true;
 
     try {
-      const response = await axios.post('/api/chat/initialize_companion', { chatId: params.chatId });
-      const chat_history = await response.data.chat_history_json.slice(1) || []; // Access chat_history from response.data
-      
+      const response = await axios.post('/api/chat/initialize_companion', { chatId });
+      const chat_history = await response.data.chat_history_json.slice(1) || [];
+
       setChatHistory(chat_history);
       if (response.status === 200) {
         const { companion, isPro } = response.data;
@@ -48,7 +54,7 @@ const ChatIdPage = ({ params }: { params: { chatId: string } }) => {
       initializingRef.current = false;
       setIsLoading(false);
     }
-  }, [params.chatId, router]);
+  }, [chatId, router]);
 
   useEffect(() => {
     initializeCompanion();
@@ -70,11 +76,15 @@ const ChatIdPage = ({ params }: { params: { chatId: string } }) => {
   }
 
   if (!companion) {
-    return null; // Fallback if companion is not set
+    return null;
   }
 
   return (
-    <ChatClient isPro={isPro} companion={companion} chat_history={chatHistory} />
+    <ChatClient 
+      isPro={isPro} 
+      companion={companion} 
+      chat_history={chatHistory} 
+    />
   );
 };
 

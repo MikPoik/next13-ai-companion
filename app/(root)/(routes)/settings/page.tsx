@@ -3,24 +3,22 @@ import { TopUpButton } from "@/components/topup-button";
 import { CallTopUpButton } from "@/components/call-topup-button";
 import { checkSubscription } from "@/lib/subscription";
 import prismadb from "@/lib/prismadb";
-import { auth, currentUser, } from "@clerk/nextjs/server";
+import { auth } from '@clerk/nextjs/server'
 import { Separator } from "@/components/ui/separator";
 
 const SettingsPage = async () => {
     const { isSubscribed, tier } = await checkSubscription();
-    const user = await currentUser();
+  const { userId, redirectToSignIn } = await auth()
 
-    if (!user) {
-        return auth().redirectToSignIn();
-    }
+   if (!userId) return redirectToSignIn()
     var tokens = 0;
     var token_limit = 10000;
     var proTokens = 0;
     var callTime = 0;
-    if (user) {
+    if (userId) {
         const balance = await prismadb.userBalance.findUnique({
             where: {
-                userId: user.id
+                userId: userId
             }
         });
         if (balance) {
@@ -33,7 +31,7 @@ const SettingsPage = async () => {
             const currentDateTime = new Date().toISOString();
             await prismadb.userBalance.create({
                 data: {
-                    userId: user.id,
+                    userId: userId,
                     tokenCount: 0,
                     messageCount: 1,
                     messageLimit: 1000,
@@ -58,7 +56,7 @@ const SettingsPage = async () => {
           const DAY_IN_MS = 86_400_000;
           const userSubscription = await prismadb.userSubscription.findUnique({
             where: {
-              userId: user.id,
+              userId: userId
             },
             select: {
               stripeCurrentPeriodEnd: true,

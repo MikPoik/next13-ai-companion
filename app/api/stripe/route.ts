@@ -18,7 +18,9 @@ export async function GET(req: Request) {
         const { searchParams } = new URL(req.url);
         const tier = searchParams.get('tier') as 'pro' | 'unlimited';
         const upgrade = searchParams.get('upgrade') === 'true';
-        const { userId } = auth();
+          const { userId, redirectToSignIn } = await auth()
+
+           if (!userId) return redirectToSignIn()
         const user = await currentUser();
 
         if (!userId || !user) {

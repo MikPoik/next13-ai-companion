@@ -7,17 +7,16 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { cn } from "@/lib/utils";
 
 interface CategoriesProps {
-  data: Category[]
+  data: Category[];
 }
-
 export const Categories = ({
   data
 }: CategoriesProps) => {
-  const router = useRouter();
   const searchParams = useSearchParams();
+  const router = useRouter();
 
-  const categoryId = searchParams.get("categoryId");
-
+  // Safely get categoryId
+  const categoryId = searchParams?.get("categoryId");
   const onClick = (id: string | undefined) => {
     const query = { categoryId: id };
 
@@ -25,7 +24,6 @@ export const Categories = ({
       url: window.location.href,
       query
     }, { skipNull: true });
-
     router.push(url);
   };
 
