@@ -14,6 +14,10 @@ interface ChatCompanion {
   name: string;
   description: string;
   src: string;
+  createdAt: string;
+  steamshipAgent: {
+    createdAt: string;
+  }[];
 }
 
   export const MyChats = () => {
@@ -40,7 +44,10 @@ interface ChatCompanion {
           const uniqueNewChats = newChats.filter(
             (newChat: ChatCompanion) => !prevChats.some((prevChat) => prevChat.id === newChat.id)
           );
-          return [...prevChats, ...uniqueNewChats];
+          // Combine and sort all chats by createdAt in descending order
+          return [...prevChats, ...uniqueNewChats].sort((a, b) => 
+            new Date(b.steamshipAgent[0].createdAt).getTime() - new Date(a.steamshipAgent[0].createdAt).getTime()
+          );
         });
         setPage((prevPage) => prevPage + 1);
         setHasMore(response.data.currentPage < response.data.totalPages);
@@ -119,7 +126,7 @@ interface ChatCompanion {
             <div className="flex-grow">
               <h3 className="text-lg font-semibold">{chat.name}</h3>
               <p className="text-sm text-gray-500">{chat.description}</p> 
-              <p className="text-xs text-gray-400">
+              <p className="text-xs text-gray-400">Last chat: {new Date(chat.steamshipAgent[0].createdAt).toLocaleDateString()}
               </p>
             </div>
           </div>

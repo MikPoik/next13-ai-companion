@@ -69,21 +69,29 @@ async function getCompanionRecord(chatId: string, userId: string) {
         throw err;
     }
 }
+
+type RouteContext = {
+    params: Promise<{ chatId: string }>;
+}
+
+
 export async function POST(
     request: Request,
-    { params }: { params: { chatId: string } }
+    { params }: RouteContext
 ) {
     const maxRetries = 3;
     let retryCount = 0;
     while (retryCount < maxRetries) {
     try {
 
+        const unwrappedParams = await params;
+        const routeParamChatId = unwrappedParams.chatId;
         
         const DATABASE_URL = process.env['DATABASE_URL'] ||""
         const sql = neon(DATABASE_URL);
         
-        const {messages, chatId} = await request.json();
-        //console.log("chatId ",chatId)
+        const {messages} = await request.json();
+
         
         // Find the most recent user message
         const mostRecentUserMessage = messages.slice().reverse().find((msg: Message) => msg.role === "user");
@@ -102,7 +110,7 @@ export async function POST(
         let agentUrl = ""
         let agentWorkspace = ""
         let agentInstanceHandle = ""
-        const result = await getCompanionRecord(chatId, user.id)
+        const result = await getCompanionRecord(routeParamChatId, user.id)
         .then(records => {
             if (records.length > 0) {
                 const record = records[0]; // Assuming you're interested in the first record

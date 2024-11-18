@@ -1,37 +1,37 @@
 import { auth } from "@clerk/nextjs/server";
-import prismadb from "@/lib/prismadb";
-const DAY_IN_MS = 86_400_000;
+import prismadb from "./prismadb";
+
 export const checkSubscription = async (): Promise<{
   isSubscribed: boolean;
   tier: 'free' | 'pro' | 'unlimited';
 }> => {
-  const { userId } = auth();
-  if (!userId) {
+  const session = await auth();
+
+  if (!session?.userId) {
     return { isSubscribed: false, tier: 'free' };
   }
+
   const userSubscription = await prismadb.userSubscription.findUnique({
-    where: { userId: userId },
+    where: {
+      userId: session.userId
+    },
     select: {
+      stripeSubscriptionId: true,
       stripeCurrentPeriodEnd: true,
       stripePriceId: true,
-      tier: true, // Assuming you've added this field to your schema
-    },
+      tier: true
+    }
   });
-  const userBalance = await prismadb.userBalance.findUnique({
-    where: { userId: userId }
-  });
-  if (!userBalance) {
+
+  if (!userSubscription) {
     return { isSubscribed: false, tier: 'free' };
   }
-  const hasProTokenBalance = (userBalance?.proTokens ?? 0) > 0;
-  const hasValidSubscription = userSubscription?.stripeCurrentPeriodEnd 
-    ? (userSubscription.stripeCurrentPeriodEnd.getTime()) > Date.now() 
-    : false;
-  if (userSubscription?.tier === 'unlimited' && hasValidSubscription) {
-    return { isSubscribed: true, tier: 'unlimited' };
-  } else if (hasProTokenBalance || (hasValidSubscription && userSubscription?.tier === 'pro')) {
-    return { isSubscribed: true, tier: 'pro' };
-  } else {
-    return { isSubscribed: false, tier: 'free' };
-  }
+
+  const DAY_IN_MS = 86_400_000;
+  const isValid = userSubscription.stripeCurrentPeriodEnd?.getTime()! + DAY_IN_MS > Date.now();
+
+  return {
+    isSubscribed: !!userSubscription.stripeSubscriptionId && isValid,
+    tier: userSubscription.tier as 'free' | 'pro' | 'unlimited'
+  };
 };

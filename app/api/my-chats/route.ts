@@ -28,13 +28,23 @@ export async function GET(req: Request) {
         userName: true,
         name: true,
         description: true,
-        src: true
-
-
+        src: true,
+        createdAt: true,
+        steamshipAgent: {
+          select: {
+            createdAt: true
+          },
+          orderBy: {
+            createdAt: 'desc'
+          },
+          take: 1
+        }
       },
-      orderBy: {
-        createdAt: 'desc'
-      },
+      orderBy: [{
+        steamshipAgent: {
+          _count: 'desc'
+        }
+      }],
       skip: skip,
       take: pageSize,
     });

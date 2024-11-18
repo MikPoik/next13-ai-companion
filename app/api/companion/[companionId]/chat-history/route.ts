@@ -4,11 +4,17 @@ import prismadb from "@/lib/prismadb";
 import { checkSubscription } from "@/lib/subscription";
 import { call_modal_agent } from "@/lib/utils";
 
+type RouteContext = {
+    params: Promise<{ companionId: string }>;
+}
 // DELETE route for deleting the chat history
 export async function DELETE(
   request: Request,
-  { params }: { params: { companionId: string } }
+  { params }: RouteContext
 ) {
+  const unwrappedParams = await params;
+  const companionId = unwrappedParams.companionId;
+  
   try {
     const user = await currentUser();
     if (!user) {
@@ -18,7 +24,7 @@ export async function DELETE(
     const deletedChatHistory = await prismadb.message.deleteMany({
       where: {
         userId: user.id,
-        companionId: params.companionId
+        companionId: companionId
       }
     });
 
@@ -28,7 +34,7 @@ export async function DELETE(
 
     try {
       const companion = await prismadb.companion.findUnique({
-        where: { id: params.companionId }, // Changed to params.companionId for consistency
+        where: { id: companionId }, 
         include: { 
           steamshipAgent: {
             take: 1, // Limit the number of records to 1

@@ -7,9 +7,7 @@ import { checkSubscription } from "@/lib/subscription";
 import { CompanionForm } from "./components/companion-form";
 
 interface CompanionIdPageProps {
-  params: {
-    companionId: string;
-  };
+  params: Promise<{ companionId: string }>;
 };
 
 const CompanionIdPage = async ({
@@ -22,11 +20,6 @@ const CompanionIdPage = async ({
   const unwrappedParams = await params;
   const companionId = unwrappedParams.companionId;
   
-  //const validSubscription = await checkSubscription();
-
-  //if (!validSubscription) {
-  //  return redirect("/");
-  //}
 
     const companion = await prismadb.companion.findUnique({
       where: {
@@ -43,7 +36,7 @@ const CompanionIdPage = async ({
   const voices = await prismadb.voice.findMany();
   const phoneVoices = await prismadb.phoneVoice.findMany();
   const tags = await prismadb.tag.findMany();
-  //return redirect("/");
+
   return (
     <CompanionForm initialData={companion} categories={categories} voices={voices} phoneVoices={phoneVoices} tags={tags} />
   );

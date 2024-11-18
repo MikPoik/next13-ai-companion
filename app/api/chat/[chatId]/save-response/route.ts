@@ -24,38 +24,37 @@ interface Block {
   workspaceId?: string;
 }
 
-async function parseAndSaveImages(blockListStr: string, userId: string, chatId: string, id: string): Promise<string | null> {
+async function containsMarkdownImageSyntax(blockListStr: string): Promise<boolean> {
   try {
-    // Fix the input blockList string into JSON
-    const blockList: Block[] = JSON.parse(`[${blockListStr.split('\n').join(',')}]`.replace(/,(\s*[\]}])/g, '$1'));
-    for (const block of blockList) {
-      if (block.mimeType && block.mimeType.startsWith("image")) {
-        const imageId = block.id || null;
-        //console.log(`Found image block: ${imageId}`);
-        // Return Image Id
-        return imageId;
-      }
-    }
-    return null; // No image block found
+    // Check if the input blockList string contains Markdown image syntax
+    const markdownImageRegex = /!\[.*?\]\(.*?\)/g;
+    const containsImage = markdownImageRegex.test(blockListStr);
+    return containsImage; // Return true if Markdown image syntax is found, otherwise false
   } catch (error) {
-    console.error("SaveResponse,Error parsing or saving image block ids:", error);
-    console.error("SaveResponse,Block list string causing error:", blockListStr);
-    return null; // In case of error, return null
+    console.error("SaveResponse, Error detecting Markdown image syntax:", error);
+    console.error("SaveResponse, Block list string causing error:", blockListStr);
+    return false; // In case of error, return false
   }
 }
 
+
+type RouteContext = {
+    params: Promise<{ chatId: string }>;
+}
+
+
 export async function POST(
     request: Request,
-    { params }: { params: { chatId: string } }
+    { params }: RouteContext
 ) {
     try {
+        const unwrappedParams = await params;
+        const chatId = unwrappedParams.chatId;
 
         
         const { prompt,id,blockList } = await request.json();
 
 
-        //console.log("Message id ",id)
-        //console.log("Block List ",blockList)
         //Parse blockList for possible image block and save to db also.
         
         const user = await currentUser();
@@ -72,59 +71,35 @@ export async function POST(
         var hasAudio = 0;
         responseText = prompt;
         
-        const image_url = "";// await parseAndSaveImages(blockList,user.id,params.chatId,id);
+        const image_url = await containsMarkdownImageSyntax(blockList)
         let finalContent = prompt
         if (image_url) {
-            //escape double quotes from prompt:
-            const processed_prompt = prompt.replace(/"/g, '\\"');
-            finalContent = `[{"requestId":null,"text":"${processed_prompt}","mimeType":"image/png","streamState":null,"url":null,"contentURL":null,"fileId":null,"id":"${image_url}","index":null,"publicData":true,"tags":null,"uploadBytes":null,"uploadType":null}]`;
             imageTokens = 500
         }
-         await prismadb.message.upsert({
-             where: {
-                 id: id,
-             },
-             create: {
-                 id: id,
-                 content: finalContent.content,
-                 role: "assistant",
-                 userId: user.id,
-                 companionId: params.chatId,
-                 createdAt: new Date(Date.now() + 1000),
-             },
-             update: {
-                 id: id,
-                 content: finalContent.content,
-                 role: "assistant",
-                 userId: user.id,
-                 companionId: params.chatId,
-                 createdAt: new Date(Date.now() + 1000),
-             }
-         });
         
         await prismadb.companion.update({
-            where: { id: params.chatId },
+            where: { id: chatId },
             data: {
                 messageCount: {
                     increment: 1
                 }
             }
         });
-        
+
         if (tier !="unlimited") {            
             const balance = await prismadb.userBalance.findUnique({
                 where: {
                     userId: user.id
                 },
             });
-            //console.log(balance);
+
             if (balance) {
                 if (balance.tokenCount > balance.tokenLimit+balance.proTokens) {
                     return NextResponse.json("No balance");
                 }
             }
             const tokenCost = roughTokenCount(prompt.content) + imageTokens + voiceTokens;
-            //console.log("Token Cost: ", tokenCost);
+
             const currentDateTime = new Date().toISOString();
     
                 if (!balance) {

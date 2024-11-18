@@ -15,18 +15,23 @@ function uuidv4() {
     });
 }
 
+type RouteContext = {
+    params: Promise<{ companionId: string }>;
+}
+
 export async function PATCH(
     req: Request,
-    { params }: { params: { companionId: string } }
+    { params }: RouteContext
 ) {
 
-
+      const unwrappedParams = await params;
+      const companionId = unwrappedParams.companionId;
     try {
         const body = await req.json();
         const user = await currentUser();
         const { name, src, description, personality, seed, categoryId, isPublic, behaviour, selfiePost, selfiePre, imageModel, voiceId, createImages, backstory, phoneVoiceId, tags, nsfw,model } = body;
 
-        if (!params.companionId) {
+        if (!companionId) {
             return new NextResponse("Companion ID required", { status: 400 });
         }
 
@@ -44,7 +49,7 @@ export async function PATCH(
 
         //find companion from db
         const companion = await prismadb.companion.findUnique({
-          where: { id: params.companionId },
+          where: { id: companionId },
           include: { 
 
             steamshipAgent: {
@@ -106,7 +111,7 @@ export async function PATCH(
 
         const updateCompanion = await prismadb.companion.update({
             where: {
-                id: params.companionId,
+                id: companionId,
                 userId: user.id,
             },
             data: {
@@ -190,8 +195,10 @@ export async function PATCH(
 
 export async function DELETE(
     request: Request,
-    { params }: { params: { companionId: string } }
+    { params }: RouteContext
 ) {
+  const unwrappedParams = await params;
+  const companionId = unwrappedParams.companionId;
     console.log("DELETE COMPANION")
     try {
         const user = await currentUser();
@@ -204,7 +211,7 @@ export async function DELETE(
         const companion = await prismadb.companion.delete({
             where: {
                 userId: user.id,
-                id: params.companionId
+                id: companionId
             }
         });
 

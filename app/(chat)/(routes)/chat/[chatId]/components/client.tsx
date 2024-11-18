@@ -140,29 +140,19 @@
       onFinish: (message) => {
         
         const finalStreamedContent = useStreamStore.getState().content;
-        
-      
+              
         const lastUserMessage = messagesRef.current[messagesRef.current.length - 2];
         const lastAssistantMessage = messagesRef.current[messagesRef.current.length - 1];
-        //console.log("last user message",lastUserMessage)
+        console.log("last user message",lastUserMessage)
         //console.log("last assistant message",lastAssistantMessage)
         setInput("");
-        /*
-        if (!lastAssistantMessage.content.includes("I'm sorry, I had an error when generating response")){
-          fetch(`/api/chat/${companion.id}/save-prompt`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ prompt: lastUserMessage.content, id: lastUserMessage.id })
-          }); 
-          fetch(`/api/chat/${companion.id}/save-response`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ prompt: lastAssistantMessage, id: lastAssistantMessage.id, blockList: lastAssistantMessage.content })
-          }); 
-        }
-        */
-        //console.log(messages)
-        //console.log(messagesRef)
+        
+        fetch(`/api/chat/${companion.id}/save-response`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ prompt: lastAssistantMessage, id: lastAssistantMessage.id, blockList: lastAssistantMessage.content })
+        }); 
+              
         bottomRef.current?.scrollIntoView({ behavior: "smooth" });
         //const parsedContent = parseImageFromBlocks(lastAssistantMessage.content,finalStreamedContent)
         //Loop messages here, check for last message and set the finalStreamedContent to the last message.content
@@ -181,8 +171,6 @@
         //console.log(updatedMessages)
         setMessages(updatedMessages as unknown as ChatMessageType[]);
 
-        //console.log(messages)
-        //console.log(messagesRef)
 
         // Clear the content in the store
         useStreamStore.getState().setContent("");
@@ -227,7 +215,7 @@
 
           if (messages.length <= 1) {
             await append({
-              content: `As ${companion.name}. Narrate a brief scene introduction with me, showing ${companion.name}'s personality. Keep it concise but engaging. Begin!`,
+              content: `As Character, narrate a brief introduction scene showing the character's personality. Keep it concise but engaging.`,
               role: "user",
             }, {
               options: {
@@ -409,7 +397,7 @@
       isLoading: false,
       src: ""
     }));
-
+  
     useEffect(() => {
       const scrollToBottom = () => {
         if (!scrollRef.current && !isLoading) return;
@@ -446,7 +434,7 @@
         <ChatHeader isPro={isPro} companion={companion} />
         <div ref={scrollRef} style={scrollContainerStyle} className="flex-1 overflow-y-auto py-2 pb-5 pl-1">
           {transformedMessages.map((message, index) => (
-            <div key={message.id} className="flex items-center">
+            <div key={message.id} className="flex items-center group">
               <ChatMessageComponent
                 id={message.id}
                 role={message.role}
@@ -458,10 +446,19 @@
                 companionName={companion.name}
                 accumulatedContentRef={accumulatedContentRef}
               />
-              {transformedMessages.length >= 2 && index === transformedMessages.length - 2 && !isLoading && message.role === "user" && (
-                <Button onClick={() => handleDelete(transformedMessages[transformedMessages.length - 1].id, transformedMessages[transformedMessages.length - 2].id)} disabled={isDeleting} className="opacity-20 group-hover:opacity-100 transition hover:bg-red-500" size="icon" variant="ghost" title="Delete message pair">
-                  <Trash2 className="w-4 h-4" /><MoveDown className="w-3 h-3" />
-                </Button>
+              {transformedMessages.length >= 2 && !isLoading && message.role === "user" && (
+              <Button 
+                onClick={() => handleDelete(transformedMessages[transformedMessages.length - 1].id, 
+                transformedMessages[transformedMessages.length - 2].id)} 
+                disabled={isDeleting} 
+                className="opacity-20 group-hover:opacity-100 transition hover:bg-red-500" 
+                size="icon" 
+                variant="ghost" 
+                title="Delete message pair"
+              >
+                <Trash2 className="w-4 h-4" />
+                <MoveDown className="w-3 h-3" />
+              </Button>
               )}
               
             </div>

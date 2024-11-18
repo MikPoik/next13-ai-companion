@@ -25,12 +25,13 @@ export async function GET(request: NextRequest) {
         const calltime = params.get('calltime'); // this would be "calltime-5"
         //console.log(tokens);
         //console.log(calltime);
-        const { userId } = auth();
+        const session = await auth();
         const user = await currentUser();
-
-        if (!userId || !user) {
+        if (!session?.userId || !user) {
             return new NextResponse("Unauthorized", { status: 401 });
         }
+        const userId = session.userId;
+
         //console.log(userId);
         let metadata_json: Metadata = {};
         if (tokens) {

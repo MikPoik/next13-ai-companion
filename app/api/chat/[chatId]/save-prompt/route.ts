@@ -2,12 +2,17 @@ import prismadb from "@/lib/prismadb";
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 
+type RouteContext = {
+    params: Promise<{ chatId: string }>;
+}
+
 export async function POST(
     request: Request,
-    { params }: { params: { chatId: string } }
+     { params }: RouteContext
 ) {
      try {
-
+         const unwrappedParams = await params;
+         const chatId = unwrappedParams.chatId;
 
          const { prompt,id } = await request.json();
          //console.log("Save-Prompt - prompt received:", prompt);
@@ -25,18 +30,18 @@ export async function POST(
                  content: prompt,
                  role: "user",
                  userId: user.id,
-                 companionId: params.chatId 
+                 companionId: chatId 
              },
              update: {
                  id: id,
                  content: prompt,
                  role: "user",
                  userId: user.id,
-                 companionId: params.chatId
+                 companionId: chatId
              }
          });
          await prismadb.companion.update({
-             where: { id: params.chatId },
+             where: { id: chatId },
              data: {
                  messageCount: {
                      increment: 1

@@ -156,7 +156,7 @@ export const Companions = ({ initialCompanions }: CompanionsProps) => {
             <Card className="bg-primary/10 rounded-xl cursor-pointer hover:opacity-75 transition border-0 flex flex-col h-full relative"
             style={{aspectRatio: '3 / 4'}}>
               <div className="absolute inset-0 z-0">
-                <Image src={item.src} fill className="rounded-xl object-cover" alt="Character" />
+                <Image src={item.src} fill className="rounded-xl object-cover" alt="Character" sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" />
               </div>
               <Link 
                 href={{

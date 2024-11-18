@@ -1,4 +1,4 @@
-run = "npm run dev"
+run = "next dev"
 hidden = [".config", "package-lock.json", "tsconfig.json"]
 modules = ["nodejs-20", "web", "nix"]
 
