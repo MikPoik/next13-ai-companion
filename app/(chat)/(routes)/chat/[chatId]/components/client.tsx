@@ -215,7 +215,7 @@
 
           if (messages.length <= 1) {
             await append({
-              content: `As Character, narrate a brief introduction scene showing the character's personality. Keep it concise but engaging.`,
+              content: `Narrate a brief introduction scene with me,showing the character's personality. Keep it concise but engaging. Stay in character. Start with dialogue or actions directly. Progress at slow pace.`,
               role: "user",
             }, {
               options: {

@@ -34,17 +34,22 @@ const imageStyles = {
     backgroundColor: "#303030",
     maxWidth: "768px",
     aspectRatio: "3/4",
-    transition: "all 0.3s ease-in-out",
+    width: "100%",
+    transform: "translateZ(0)",    // Force GPU acceleration
+    WebkitFontSmoothing: "antialiased",
     overflow: "hidden",
   },
-  loadedWrapper: {
+  loadedWrapper: {  // Add this missing style
     backgroundColor: "transparent",
+    transition: "background-color 0.3s ease",
   },
   loadedImg: {
     opacity: 1,
-    objectFit: "cover" as const,
+    objectFit: "cover",
     width: "100%",
     height: "100%",
+    imageRendering: "high-quality",  // Modern browsers
+    WebkitImageRendering: "crisp-edges", // Webkit
   }
 };
 function applyLoadedStyles(wrapperElement: HTMLDivElement, imgElement: HTMLImageElement) {
@@ -53,7 +58,7 @@ function applyLoadedStyles(wrapperElement: HTMLDivElement, imgElement: HTMLImage
 }
 
 export const messageStyles = {
-  other: "text-white-200", // default text
+  other: "text-white-200 dark:text-gray-100", // default text
   action: "italic text-yellow-500 dark:text-yellow-500", // *actions*
   internal: "text-gray-300 dark:text-gray-300", // (thoughts)
   emphasis: "text-blue-400 dark:text-blue-400", // for other emphasized text
@@ -196,7 +201,12 @@ export const ChatMessage = ({
                                <Image
                                  src={imageUrl}
                                  alt="Generated Image"
-                                 fill={true}
+                                 fill
+                                 quality={100}                    // Increase from default 75
+                                 sizes="(max-width: 768px) 100vw, 768px"
+                                 className="object-cover"         // Change from object-contain for sharper images
+                                 placeholder="empty"              // Remove blur placeholder
+                                 loading="eager" 
                                  onLoad={(event) => {
                                    if (wrapperRef.current) {
                                      handleImageLoad(wrapperRef.current, event.target as HTMLImageElement);
@@ -218,8 +228,6 @@ export const ChatMessage = ({
                                    }
                                    */
                                  }}
-                                 className="object-contain"
-                                 sizes="(max-width: 768px) 100vw, 768px"
                                />
                              </div>)}
               </div>

@@ -150,7 +150,7 @@ export async function POST(req: Request) {
               if (
                 entry.role !== 'system' && 
                 !(entry.role === 'assistant' && entry.tag === 'image') &&
-                !(entry.role === 'user' && text.includes("Narrative Guidelines"))
+                !(entry.role === 'user' && text.includes("Narrate"))
               ) {
                 formattedMessages += `${roleText}: ${text}\n`;
               }
@@ -236,6 +236,7 @@ export async function POST(req: Request) {
                 "character_personality": companion.personality,
                 "character_appearance": companion.selfiePre,
                 "previous_messages": formattedMessages,
+                "character_seed":companion.seed,
                 "character_background": companion.backstory.length > 2000 ? companion.backstory.slice(0, 2000) : companion.backstory,
                 "tags": tags,
             }

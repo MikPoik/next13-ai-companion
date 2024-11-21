@@ -153,10 +153,30 @@ export const Companions = ({ initialCompanions }: CompanionsProps) => {
             data-index={index} 
             key={item.id}
           >
-            <Card className="bg-primary/10 rounded-xl cursor-pointer hover:opacity-75 transition border-0 flex flex-col h-full relative"
-            style={{aspectRatio: '3 / 4'}}>
+            <Card className="bg-primary/10 rounded-xl cursor-pointer hover:opacity-75 transition border-0"
+              style={{
+                aspectRatio: '2 / 3',
+                position: 'relative',
+                maxWidth: '512px',
+                maxHeight: '768px',
+                overflow: 'hidden'
+              }}>
               <div className="absolute inset-0 z-0">
-                <Image src={item.src} fill className="rounded-xl object-cover" alt="Character" sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" />
+                <Image    src={item.src} 
+                  fill
+                  className="rounded-xl object-cover"
+                  alt="Character"
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                  quality={45}  // Lower quality is fine for thumbnails
+                  loading="lazy"
+                  placeholder="empty"
+                  blurDataURL={item.src}
+                  style={{
+                    objectFit: 'cover', 
+                    objectPosition: 'center',
+                    width: '100%',
+                    height: '100%'
+                  }} />
               </div>
               <Link 
                 href={{

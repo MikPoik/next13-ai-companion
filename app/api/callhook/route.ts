@@ -5,14 +5,15 @@ import { UserButton } from "@clerk/nextjs"
 import {Role } from "@prisma/client";
 export const maxDuration = 60;
 import { checkSubscription } from "@/lib/subscription";
+import { call_modal_agent } from "@/lib/utils";
 
 export async function POST(req: Request) {
     try {
         const body = await req.text();
         //console.log("CALL HOOK");
-        //console.log("jsonbody", body);
+        console.log("jsonbody", body);
         const data = JSON.parse(body);
-        //console.log("data", data);
+        console.log("data", data);
         const callId = data.id;
         const agentId = data.agent_id;
         //console.log('Call ID:', callId);
@@ -20,7 +21,7 @@ export async function POST(req: Request) {
         const correctedDuration = data.telephony_data.duration;
         //console.log('Corrected Duration:', correctedDuration);
         const transcriptsText = data.transcript;
-        //console.log('Transcripts:', transcriptsText);
+        console.log('Transcripts:', transcriptsText);
         // Declare transcriptUser outside of the nested try block
         let transcriptUser: Array<{ user: string, text: string }> = [];
         try {
@@ -146,7 +147,19 @@ export async function POST(req: Request) {
         if (!companion.steamshipAgent.length) {
             return new NextResponse(`No companion found}`, { status: 400 });
         }
-        //TODO append chat_history
+        const agent_config = {
+            "workspace_id": companion.steamshipAgent[0].workspaceHandle,
+            "context_id": "default",
+            "agent_id": companion.steamshipAgent[0].instanceHandle,
+            kwargs: {
+                chat_messages: json_messages
+            }
+        };
+
+        //retrieve history in format [{"role": "user", "content": "message"},... , {"role": "assistant", "content": "message"}]
+        const appended_history_response = await call_modal_agent("append_chat_history", agent_config);
+        console.log(await appended_history_response.json())
+
           return new NextResponse(JSON.stringify({ message: 'Webhook processed successfully' }), { 
               status: 200,
               headers: { 'Content-Type': 'application/json' }

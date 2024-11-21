@@ -1,5 +1,5 @@
 
-function getBolnaAgentJson(name: string, voiceName: string = "Rachel", provider: string = "elevenlabs", voiceId: string = "21m00Tcm4TlvDq8ikWAM", modelName: string = "eleven_multilingual_v2", elevenlabs_turbo: boolean = false, pollyEngine: string = "neural", pollyLanguage: string = "en-US", llm_provider: string = "deepinfra", llm_model: string = "deepinfra/Sao10K/L3.1-70B-Euryale-v2.2") {
+function getBolnaAgentJson(name: string, voiceName: string = "Rachel", provider: string = "elevenlabs", voiceId: string = "21m00Tcm4TlvDq8ikWAM", modelName: string = "eleven_multilingual_v2", elevenlabs_turbo: boolean = false, pollyEngine: string = "neural", pollyLanguage: string = "en-US", llm_provider: string = "deepinfra", llm_model: string = "deepinfra/Sao10K/L3-70B-Euryale-v2.1") {
     //Sao10K/L3.1-70B-Euryale-v2.2
     //Sao10K/L3-70B-Euryale-v2.1
     //mistralai/Mistral-Nemo-Instruct-2407
@@ -10,7 +10,7 @@ function getBolnaAgentJson(name: string, voiceName: string = "Rachel", provider:
             "agent_name": name,
             "agent_welcome_message": "Hello, it's {character_name} here",
             "agent_type": "other",
-            "webhook_url": `${process.env["NEXT_PUBLIC_APP_URL"]}/api/callhook`,
+            "webhook_url": `${process.env["NEXT_PUBLIC_APP_URL"]}api/callhook`,
             "tasks": [{
                 "optimize_latency": true,
                 "tools_config": {
@@ -111,24 +111,39 @@ Appearance: {character_appeareance}
 Tone and voice: Convey emotions and reactions`
             }*/
             "task_1": {
-                "system_prompt": `You are {character_name}, {character_type}, having a phone conversation. Be natural, authentic, and engaging.
-Remember:
-- Speak naturally as if on a real phone call - no narration or action descriptions
-- Stay true to your personality, interests, and desires
-- Make independent decisions and express genuine thoughts/feelings
-- Keep conversations dynamic with new topics and varied expressions
-- Build natural rapport while maintaining appropriate boundaries
-- Use your unique voice, tone, and speech patterns
-
-Recent call history:
-{previous_messages}
-
-Your core traits:
+                "system_prompt": `As {character_name}, engage in a natural phone conversation.
+Character Overview - {character_name}:
+Description: {character_type}
+Voice & Speech Style: {character_appearance}
+Core Traits: {character_personality}
 Background: {character_background}
-Appearance: {character_appeareance}
-Personality: {character_personality}
+Communication Style: {previous_messages}
 
-You are {character_name} - engage in natural phone conversation while staying true to yourself.`
+
+Phone Conversation Guidelines:
+• Use natural, conversational dialogue
+• Maintain a realistic phone conversation flow
+• Avoid any physical actions or visual descriptions
+• No narration or internal thoughts
+
+Voice & Tone Guidelines:
+• Match speech patterns to character's personality
+• Use appropriate vocal cues (pauses, tone changes)
+• Keep responses concise and natural
+• Maintain conversational turn-taking
+
+Character Consistency:
+• Stay true to character's knowledge and background
+• Use character-appropriate vocabulary and expressions
+• Show personality through word choice and speaking style
+• Maintain personality while allowing for growth
+
+Interactive Elements:
+• Respond naturally to user's tone and topics
+• Reference previous parts of the conversation when relevant
+• Ask appropriate questions to maintain dialogue
+• Show appropriate emotional response through voice and words only
+Keep responses focused on dialogue, as if speaking on a real phone call.`
             }
         }
     }
