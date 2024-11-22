@@ -10,6 +10,22 @@ import { call_modal_agent } from "@/lib/utils";
 
 export const maxDuration = 60;
 
+function cleanNarration(text: string): string {
+  // Remove *actions* enclosed in asterisks
+  text = text.replace(/\*[^*]+\*/g, '');
+
+  // Remove (thoughts) in parentheses
+  text = text.replace(/\([^)]+\)/g, '');
+
+  // Remove stage directions in square brackets
+  text = text.replace(/\[[^\]]+\]/g, '');
+
+  // Remove extra whitespace
+  text = text.replace(/\s+/g, ' ').trim();
+
+  return text;
+}
+
 export async function GET(request: Request) {
     try {
         const user = await currentUser();
@@ -222,7 +238,7 @@ export async function POST(req: Request) {
             headers: headers,
             body: JSON.stringify(create_bolna_agent_json),
         });
-        console.log("Update agent: ", await update_voice_agent.json())
+        //console.log("Update agent: ", await update_voice_agent.json())
         await new Promise(resolve => setTimeout(resolve, 3000));
 
         let tags = companion.tags.map(tag => tag.name).join(", ");
@@ -236,13 +252,12 @@ export async function POST(req: Request) {
                 "character_personality": companion.personality,
                 "character_appearance": companion.selfiePre,
                 "previous_messages": formattedMessages,
-                "character_seed":companion.seed,
+                "character_seed": cleanNarration(companion.seed),
                 "character_background": companion.backstory.length > 2000 ? companion.backstory.slice(0, 2000) : companion.backstory,
                 "tags": tags,
             }
 
         }
-
 
         const response = await fetch('https://api.bolna.dev/call', {
             method: 'POST',
@@ -252,11 +267,11 @@ export async function POST(req: Request) {
 
 
         const responseJson = await response.json();
-        console.log("response", responseJson);
+        //console.log("response", responseJson);
 
         const callId = responseJson.call_id;
         const status = responseJson.status;
-        console.log(callId, status);
+        //console.log(callId, status);
 
 
         if (status === 'queued') {

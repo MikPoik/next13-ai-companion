@@ -117,8 +117,6 @@ Description: {character_type}
 Voice & Speech Style: {character_appearance}
 Core Traits: {character_personality}
 Background: {character_background}
-Communication Style: {previous_messages}
-
 
 Phone Conversation Guidelines:
 • Use natural, conversational dialogue
@@ -143,7 +141,9 @@ Interactive Elements:
 • Reference previous parts of the conversation when relevant
 • Ask appropriate questions to maintain dialogue
 • Show appropriate emotional response through voice and words only
-Keep responses focused on dialogue, as if speaking on a real phone call.`
+Keep responses focused on dialogue, as if speaking on a real phone call.
+
+Previous dialogue for context: {previous_messages}`
             }
         }
     }

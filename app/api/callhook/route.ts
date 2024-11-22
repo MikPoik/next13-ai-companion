@@ -11,9 +11,7 @@ export async function POST(req: Request) {
     try {
         const body = await req.text();
         //console.log("CALL HOOK");
-        console.log("jsonbody", body);
         const data = JSON.parse(body);
-        console.log("data", data);
         const callId = data.id;
         const agentId = data.agent_id;
         //console.log('Call ID:', callId);
@@ -96,9 +94,7 @@ export async function POST(req: Request) {
         //console.log("update_history")
         let update_history;
 
-        //console.log('update_history', update_history);
-        // Update user balance
-        //const { isSubscribed, tier } = await checkSubscription();
+
 
         const userBalance = await prismadb.userBalance.update({
             where: {
@@ -148,15 +144,14 @@ export async function POST(req: Request) {
             return new NextResponse(`No companion found}`, { status: 400 });
         }
         const agent_config = {
-            "workspace_id": companion.steamshipAgent[0].workspaceHandle,
-            "context_id": "default",
-            "agent_id": companion.steamshipAgent[0].instanceHandle,
+            workspace_id: companion.steamshipAgent[0].workspaceHandle,
+            context_id: "default",
+            agent_id: companion.steamshipAgent[0].instanceHandle,
             kwargs: {
                 chat_messages: json_messages
             }
         };
 
-        //retrieve history in format [{"role": "user", "content": "message"},... , {"role": "assistant", "content": "message"}]
         const appended_history_response = await call_modal_agent("append_chat_history", agent_config);
         console.log(await appended_history_response.json())
 
