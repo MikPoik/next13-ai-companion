@@ -38,7 +38,7 @@ const formSchema = z.object({
         .min(1, {
             message: "Description is required.",
         })
-        .max(50, { message: "Description is too long" }),
+        .max(120, { message: "Description is too long" }),
     personality: z.string().min(1, {
         message: "Personality require at least 200 characters."
     }),
@@ -392,7 +392,6 @@ export const CompanionForm = ({
                                                 </SelectTrigger>
                                             </FormControl>
                                             <SelectContent style={dropdownStyle}>
-                                                <SelectItem key="SG161222/Realistic_Vision_V6.0_B1_noVAE" value="SG161222/Realistic_Vision_V6.0_B1_noVAE">Realistic Vision v6</SelectItem>
                                                 <SelectItem key="realistic-vision-v3" value="realistic-vision-v3">Realistic Vision v3</SelectItem>
                                                 <SelectItem key="dark-sushi-mix-v2-25" value="dark-sushi-mix-v2-25">Dark Sushi mix v2.25</SelectItem>
                                                 <SelectItem key="absolute-reality-v1-8-1" value="absolute-reality-v1-8-1">Absolute Reality v1.8.1</SelectItem>
@@ -574,6 +573,7 @@ export const CompanionForm = ({
                                             <SelectItem key="NousResearch/Hermes-3-Llama-3.1-405B" value="NousResearch/Hermes-3-Llama-3.1-405B">Hermes-3-Llama-3.1-405B</SelectItem>
 
                                             <SelectItem key="Sao10K/L3-70B-Euryale-v2.1" value="Sao10K/L3-70B-Euryale-v2.1">Euryale L3 70B</SelectItem>
+                                            <SelectItem key="Sao10K/L3.1-70B-Euryale-v2.2" value="Sao10K/L3.1-70B-Euryale-v2.2">Euryale L3.1 70B</SelectItem>
 
                                             <SelectItem key="NousResearch/Nous-Hermes-2-Mixtral-8x7B-DPO" value="NousResearch/Nous-Hermes-2-Mixtral-8x7B-DPO">Mixtral 8x7B DPO</SelectItem>
                                             <SelectItem key="mistralai/Mixtral-8x22B-Instruct-v0.1" value="mistralai/Mixtral-8x22B-Instruct-v0.1">Mixtral 8x22B</SelectItem>

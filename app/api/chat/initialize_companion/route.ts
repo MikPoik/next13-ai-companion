@@ -31,7 +31,8 @@ async function updateAgent(name: string, description: string, personality: strin
               appearance: appearance,
               personality: personality,
               description: description,
-              seed_message: seed
+              seed_message: seed,
+              tags: tags
           },
         llm_config: {
           model: llm_model,

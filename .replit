@@ -1,6 +1,6 @@
 run = "next dev"
 hidden = [".config", "package-lock.json", "tsconfig.json"]
-modules = ["nodejs-20", "web", "nix"]
+modules = ["nodejs-20", "web", "nix", "postgresql-16"]
 
 [packager]
 language = "nodejs"
@@ -95,3 +95,4 @@ externalPort = 5173
 [[ports]]
 localPort = 46021
 externalPort = 8008
+exposeLocalhost = true
