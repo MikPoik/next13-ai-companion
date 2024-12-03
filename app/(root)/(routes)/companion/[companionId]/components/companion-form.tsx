@@ -392,6 +392,7 @@ export const CompanionForm = ({
                                                 </SelectTrigger>
                                             </FormControl>
                                             <SelectContent style={dropdownStyle}>
+                                                <SelectItem key="realistic-vision-v5-1" value="realistic-vision-v5-1">Realistic Vision v5</SelectItem>
                                                 <SelectItem key="realistic-vision-v3" value="realistic-vision-v3">Realistic Vision v3</SelectItem>
                                                 <SelectItem key="dark-sushi-mix-v2-25" value="dark-sushi-mix-v2-25">Dark Sushi mix v2.25</SelectItem>
                                                 <SelectItem key="absolute-reality-v1-8-1" value="absolute-reality-v1-8-1">Absolute Reality v1.8.1</SelectItem>

@@ -212,7 +212,7 @@
       const autoSubmit = async () => {
         try {
           initializingRef.current = true;
-          let introMessage = `Let's start the interaction. Embody character and speak naturally, expressing through dialogue only and conveying emotions and actions through natural words.`;
+          let introMessage = `Now begin role-play with me.`;
           // Check if seed phrase contains narration marks: *text*. "text", (text) <text>
           const checkNarrativeMarks = (text: string): boolean => {
               const narrativeMarksPattern = /["*<\(\[].*?[">\)\]*]/;
