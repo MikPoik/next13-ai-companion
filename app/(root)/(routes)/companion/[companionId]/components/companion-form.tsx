@@ -25,10 +25,10 @@ const STEAMSHIP_IMG_BOT_URL = "https://mpoikkilehto.steamship.run/avatar-gen-dev
 
 const PREAMBLE = `Your personality can be described as ...`;
 const PREAMBLE_BEHAVIOUR = `You behave like ...`;
-const PREAMBLE_BACKSTORY = `relevant details and facts about the character ...`;
-const PREAMBLE_SELFIE_PRE = `Keywords to describe your character appearance in detail: keyword, keyword...`;
+const PREAMBLE_BACKSTORY = `Story info, events, relevant details and facts about the character ...`;
+const PREAMBLE_SELFIE_PRE = `Keywords to describe your character appearance in detail: `;
 const PREAMBLE_SELFIE_POST = `describe image details and effects ...`;
-const SEED_CHAT = `Introduction message for the character ...`;
+const SEED_CHAT = `Dialogue example for the character ...`;
 
 const formSchema = z.object({
     name: z.string().min(1, {
@@ -38,7 +38,7 @@ const formSchema = z.object({
         .min(1, {
             message: "Description is required.",
         })
-        .max(120, { message: "Description is too long" }),
+        .max(200, { message: "Description is too long" }),
     personality: z.string().min(1, {
         message: "Personality require at least 200 characters."
     }),
@@ -572,7 +572,7 @@ export const CompanionForm = ({
                                         <SelectContent>
 
                                             <SelectItem key="NousResearch/Hermes-3-Llama-3.1-405B" value="NousResearch/Hermes-3-Llama-3.1-405B">Hermes-3-Llama-3.1-405B</SelectItem>
-
+                                            <SelectItem key="meta-llama/Meta-Llama-3.1-405B-Instruct" value="meta-llama/Meta-Llama-3.1-405B-Instruct">Meta-Llama-3.1-405B</SelectItem>
                                             <SelectItem key="Sao10K/L3-70B-Euryale-v2.1" value="Sao10K/L3-70B-Euryale-v2.1">Euryale L3 70B</SelectItem>
                                             <SelectItem key="Sao10K/L3.1-70B-Euryale-v2.2" value="Sao10K/L3.1-70B-Euryale-v2.2">Euryale L3.1 70B</SelectItem>
 
@@ -584,7 +584,7 @@ export const CompanionForm = ({
                                             <SelectItem key="nvidia/Llama-3.1-Nemotron-70B-Instruct" value="nvidia/Llama-3.1-Nemotron-70B-Instruct">Nvidia Nemotron 70B</SelectItem>      
                                             <SelectItem key="Gryphe/MythoMax-L2-13b" value="Gryphe/MythoMax-L2-13b">Mythomax 13B</SelectItem>      
                                             <SelectItem key="meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo" value="meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo">Meta Llama 3.1 70B Turbo (SFW)</SelectItem>
-                                            <SelectItem key="meta-llama/Meta-Llama-3.1-405B-Instruct" value="meta-llama/Meta-Llama-3.1-405B-Instruct">Meta-Llama-3.1-405B (SFW)</SelectItem>
+
                                             <SelectItem key="gpt-4o" value="gpt-4o">GPT-4o (SFW)</SelectItem>
 
                                             <SelectItem key="gpt-4o-mini" value="gpt-4o-mini">GPT-4o-mini (SFW)</SelectItem>
