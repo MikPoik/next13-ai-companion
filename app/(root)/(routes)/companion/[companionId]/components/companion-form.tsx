@@ -278,12 +278,21 @@ export const CompanionForm = ({
                 router.push(preserveQueryParams("/"))
             }
         } catch (error) {
-            //console.log(error);
+            console.log(error);
+            if ((error as any).response.status === 406) {
             toast({
                 variant: "destructive",
-                description: "Something went wrong.",
+                description: "Illegal content detected in character",
                 duration: 3000,
             });
+            }
+            else {
+                toast({
+                    variant: "destructive",
+                    description: "Something went wrong.",
+                    duration: 3000,
+                });
+            }
         }
     };
     // Define CSS styles for the button
@@ -572,7 +581,7 @@ export const CompanionForm = ({
                                         <SelectContent>
 
                                             <SelectItem key="NousResearch/Hermes-3-Llama-3.1-405B" value="NousResearch/Hermes-3-Llama-3.1-405B">Hermes-3-Llama-3.1-405B</SelectItem>
-                                            <SelectItem key="meta-llama/Meta-Llama-3.1-405B-Instruct" value="meta-llama/Meta-Llama-3.1-405B-Instruct">Meta-Llama-3.1-405B</SelectItem>
+
                                             <SelectItem key="Sao10K/L3-70B-Euryale-v2.1" value="Sao10K/L3-70B-Euryale-v2.1">Euryale L3 70B</SelectItem>
                                             <SelectItem key="Sao10K/L3.1-70B-Euryale-v2.2" value="Sao10K/L3.1-70B-Euryale-v2.2">Euryale L3.1 70B</SelectItem>
 
@@ -583,6 +592,7 @@ export const CompanionForm = ({
 
                                             <SelectItem key="nvidia/Llama-3.1-Nemotron-70B-Instruct" value="nvidia/Llama-3.1-Nemotron-70B-Instruct">Nvidia Nemotron 70B</SelectItem>      
                                             <SelectItem key="Gryphe/MythoMax-L2-13b" value="Gryphe/MythoMax-L2-13b">Mythomax 13B</SelectItem>      
+                                            <SelectItem key="meta-llama/Meta-Llama-3.1-405B-Instruct" value="meta-llama/Meta-Llama-3.1-405B-Instruct">Meta-Llama-3.1-405B (SFW)</SelectItem>
                                             <SelectItem key="meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo" value="meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo">Meta Llama 3.1 70B Turbo (SFW)</SelectItem>
 
                                             <SelectItem key="gpt-4o" value="gpt-4o">GPT-4o (SFW)</SelectItem>
@@ -656,7 +666,7 @@ export const CompanionForm = ({
                             <FormItem>
                                 <FormLabel>Companion backstory</FormLabel>
                                 <FormControl>
-                                    <Textarea disabled={isLoading} rows={6} className="bg-background resize-none" placeholder={PREAMBLE_BACKSTORY} {...field} />
+                                    <Textarea disabled={isLoading} rows={20} className="bg-background resize-none" placeholder={PREAMBLE_BACKSTORY} {...field} />
                                 </FormControl>
                                 <FormDescription>
                                     Describe all relevant facts and details about companion.
@@ -787,12 +797,21 @@ export const CompanionForm = ({
                                                     type="checkbox"
                                                     {...rest} // Spread the rest of the field object into the input element's props
                                                     checked={value} // Use the value property to set the checked property
-                                                    style={{ width: '14px', height: '14px' }}
+                                                    style={{ 
+                                                        width: '14px', 
+                                                        height: '14px',
+                                                        backgroundColor: '#2d2d2d',
+                                                        border: '2px solid #666',
+                                                        borderRadius: '3px',
+                                                        opacity: '0.8',
+                                                        cursor: 'not-allowed'
+                                                    }}
+                                                    disabled
                                                 />
                                             </label>
                                         </FormControl>
                                         <FormDescription>
-                                            (Other users can talk to the character)
+                                            (New companions are public, other users can also talk to the character)
                                         </FormDescription>
                                         <FormMessage />
                                     </FormItem>
