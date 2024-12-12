@@ -101,43 +101,61 @@ export const ChatMessage = ({
   }
 
   const formatText = (text: string) => {
+    let formatted = text;
+    let elements: JSX.Element[] = [];
+    let lastIndex = 0;
 
-    const patterns = {
-        actions: /(\*[^*]+\*)/g,         // Matches *actions*
-        quotes: /"([^"]+)"/g,            // Matches "quotes"
-        internal: /\(([^)]+)\)/g,        // Matches (internal thoughts)
-        emphasis: /_([^_]+)_/g           // Matches _emphasis_
-    };
-    const parts = text.split(/((?:\*[^*]+\*)|(?:"[^"]+")|\([^)]+\)|(?:_[^_]+_))/g);
-    return parts.map((part, index) => {
-      if (part && part.startsWith('*') && part.endsWith('*')) {
-        let remaining_part = part.slice(1, -1);
-        if (remaining_part.length > 0) {
-          return <i key={index} className={messageStyles.action}>{part.slice(1, -1)}</i>;
-        }
-      }
+    // Find all formatting patterns in order of priority
+    const matches = [
+      ...text.matchAll(/\*([^*]+)\*|"([^"]+)"|(\([^)]+\))/g)
+    ].sort((a, b) => (a.index || 0) - (b.index || 0));
 
-      if (part && part.startsWith('(') && part.endsWith(')')) {
-        let remaining_part = part.slice(1, -1);
-        if (remaining_part.length > 0) {
-          return <span key={index} className={messageStyles.internal}>{part}</span>;
+    matches.forEach((match, idx) => {
+      if (match.index !== undefined) {
+        // Add any plain text before this match
+        if (match.index > lastIndex) {
+          elements.push(
+            <span key={`text-${lastIndex}`} className={messageStyles.other}>
+              {text.slice(lastIndex, match.index)}
+            </span>
+          );
         }
 
-      }
-      if (part && part.startsWith('[') && part.endsWith(']')) {
-        let remaining_part = part.slice(1, -1);
-        if (remaining_part.length > 0) {
-          return <i key={index} className={messageStyles.action}>{part.slice(1, -1)}</i>;
+        const content = match[0];
+        if (content.startsWith('*') && content.endsWith('*')) {
+          elements.push(
+            <i key={`action-${match.index}`} className={messageStyles.action}>
+              {content.slice(1, -1)}
+            </i>
+          );
+        } else if (content.startsWith('"') && content.endsWith('"')) {
+          elements.push(
+            <span key={`speech-${match.index}`} className={messageStyles.speech}>
+              {content}
+            </span>
+          );
+        } else if (content.startsWith('(') && content.endsWith(')')) {
+          elements.push(
+            <span key={`internal-${match.index}`} className={messageStyles.internal}>
+              {content}
+            </span>
+          );
         }
+
+        lastIndex = match.index + content.length;
       }
-      if (part && part.startsWith('"') && part.endsWith('"')) {
-        let remaining_part = part.slice(1, -1);
-        if (remaining_part.length > 0) {
-          return <span key={index} className={messageStyles.speech}>{part}</span>;
-        }
-      }
-      return <span key={index} className={messageStyles.other}>{part}</span>;
     });
+
+    // Add any remaining text after the last match
+    if (lastIndex < text.length) {
+      elements.push(
+        <span key={`text-${lastIndex}`} className={messageStyles.other}>
+          {text.slice(lastIndex)}
+        </span>
+      );
+    }
+
+    return elements;
   };
 
   const onCopy = () => {

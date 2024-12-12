@@ -51,7 +51,7 @@ function getBolnaAgentJson(name: string, voiceName: string = "Rachel", provider:
                         "min_p": 0.05,
                         "frequency_penalty": 0.01,
                         "stop": null,
-                        "top_k": 0,
+                        "top_k": 50,
                         "temperature": 0.7,
                         "backend": "bolna",
                         "provider": llm_provider,
@@ -143,7 +143,9 @@ Interactive Elements:
 • Show appropriate emotional response through voice and words only
 Keep responses focused on dialogue, as if speaking on a real phone call.
 
-Previous dialogue for context: {previous_messages}`
+Previous dialogue for context: {previous_messages}
+
+Remember to speak directly to the user, avoid any narration.`
             }
         }
     }

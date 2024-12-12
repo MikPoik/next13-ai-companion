@@ -178,7 +178,7 @@ export async function POST(req: Request) {
         if (!formattedMessages.includes('assistant:')) {
           formattedMessages = `assistant: ${companion.seed.replace(EMOJI_PATTERN, '')}\n${formattedMessages}`;
         }
-        console.log(formattedMessages)
+        //console.log(formattedMessages)
         // Create dynamic environment variables
         const now = new Date();
         const day = now.toLocaleString("en-US", { weekday: "long" });
@@ -269,7 +269,7 @@ export async function POST(req: Request) {
         const responseJson = await response.json();
         //console.log("response", responseJson);
 
-        const callId = responseJson.call_id;
+        const callId = responseJson.execution_id;
         const status = responseJson.status;
         //console.log(callId, status);
 
@@ -277,7 +277,7 @@ export async function POST(req: Request) {
         if (status === 'queued') {
             const callLog = await prismadb.callLog.create({
                 data: {
-                    id: callId.split('#')[1],
+                    id: callId,
                     userId: user.id,
                     companionId: companion.id,
                     status: 'call-requested',

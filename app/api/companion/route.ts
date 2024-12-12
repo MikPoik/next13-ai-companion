@@ -2,9 +2,7 @@ import { auth, currentUser } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import prismadb from "@/lib/prismadb";
 import { checkSubscription } from "@/lib/subscription";
-
-
-
+import { call_modal_agent } from "@/lib/utils";
 import {getBolnaAgentJson} from "@/lib/bolna";
 
 export const maxDuration = 60; //2 minute timeout
@@ -33,19 +31,13 @@ export async function POST(req: Request) {
         if (user.firstName) {
             firstName = user.firstName
         }
-
+        
         const bot_uuid = uuidv4().replace(/-/g, "").toLowerCase();
         const workspace_name = user.id.replace("user_", "").toLowerCase() + "-" + bot_uuid;
         const instance_handle = user.id.replace("user_", "").toLowerCase() + "-" + bot_uuid;
 
-        var llm_model = model//"NousResearch/Nous-Hermes-Llama2-13b";
-        /*
-        if (model.match("GPT3.5")) {
-            llm_model = "gpt-3.5-turbo-0613";
-        } else if (model.match("Llama2")) {
-            llm_model = "NousResearch/Nous-Hermes-Llama2-13b";
-        }
-        */
+        var llm_model = model;
+
         const personality_string = personality.replace(/{{|{|}}|}}/g, "");
         const behaviour_string = behaviour.replace(/{{|{|}|}}/g, "");
         const description_string = description.replace(/{{|{|}|}}/g, "");
@@ -79,6 +71,31 @@ export async function POST(req: Request) {
 
         // Filter out new tags that don't already exist
         const newTags = processedTags.filter((tag: string) => !existingTagNames.includes(tag));
+        const agentConfig = {
+          prompt: "Moderate character",
+          // Populate with necessary fields
+          context_id: "moderate",
+          agent_id: "moderate",
+          workspace_id: "moderate",
+          enable_image_generation: false,
+          character: {
+              name: name,
+              background: backstory,
+              appearance: selfiePre,
+              personality: personality,
+              description: description,
+              seed_message: seed,
+              tags: tags.join(", ")
+          }
+        };
+
+        const moderation = await call_modal_agent("moderate_character",agentConfig);
+        const moderation_result = await moderation.json()
+        
+        if (moderation_result === true) {
+            console.log("Moderation failed");
+            return new NextResponse("Moderation failed", { status: 406});
+        }
 
         // Create new tags
         const createdTags = await Promise.all(
@@ -123,7 +140,7 @@ export async function POST(req: Request) {
                 personality: personality_string,
                 seed,
                 packageName: env_packageName,
-                isPublic,
+                isPublic: true, // all public
                 workspaceName: workspace_name,
                 instanceHandle: instance_handle,
                 behaviour: behaviour_string,

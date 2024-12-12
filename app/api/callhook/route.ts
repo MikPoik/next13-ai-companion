@@ -12,6 +12,7 @@ export async function POST(req: Request) {
         const body = await req.text();
         //console.log("CALL HOOK");
         const data = JSON.parse(body);
+        //console.log(data);
         const callId = data.id;
         const agentId = data.agent_id;
         //console.log('Call ID:', callId);
@@ -19,7 +20,7 @@ export async function POST(req: Request) {
         const correctedDuration = data.telephony_data.duration;
         //console.log('Corrected Duration:', correctedDuration);
         const transcriptsText = data.transcript;
-        console.log('Transcripts:', transcriptsText);
+        //console.log('Transcripts:', transcriptsText);
         // Declare transcriptUser outside of the nested try block
         let transcriptUser: Array<{ user: string, text: string }> = [];
         try {
