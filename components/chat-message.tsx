@@ -101,47 +101,42 @@ export const ChatMessage = ({
   }
 
   const formatText = (text: string) => {
-    const formatNestedText = (innerText: string): React.ReactNode => {
-      const patterns = {
-        quotes: /"([^"]+)"/g,
-        internal: /\(([^)]+)\)/g,
-        emphasis: /_([^_]+)_/g
-      };
 
-      let result = innerText;
-      let elements: React.ReactNode[] = [];
-      let lastIndex = 0;
-
-      // Handle quotes
-      const matches = [...innerText.matchAll(/"([^"]+)"/g)];
-      matches.forEach((match) => {
-        if (match.index !== undefined) {
-          // Add text before quote
-          if (match.index > lastIndex) {
-            elements.push(<span key={`text-${lastIndex}`}>{innerText.slice(lastIndex, match.index)}</span>);
-          }
-          // Add quoted text
-          elements.push(<span key={`quote-${match.index}`} className={messageStyles.speech}>{match[0]}</span>);
-          lastIndex = match.index + match[0].length;
-        }
-      });
-      
-      // Add remaining text
-      if (lastIndex < innerText.length) {
-        elements.push(<span key={`text-${lastIndex}`}>{innerText.slice(lastIndex)}</span>);
-      }
-
-      return elements.length ? <>{elements}</> : innerText;
+    const patterns = {
+        actions: /(\*[^*]+\*)/g,         // Matches *actions*
+        quotes: /"([^"]+)"/g,            // Matches "quotes"
+        internal: /\(([^)]+)\)/g,        // Matches (internal thoughts)
+        emphasis: /_([^_]+)_/g           // Matches _emphasis_
     };
-
-    // First split by action markers
-    const actionParts = text.split(/(\*[^*]+\*)/g);
-    return actionParts.map((part, index) => {
-      if (part.startsWith('*') && part.endsWith('*')) {
-        const innerText = part.slice(1, -1);
-        return <i key={index} className={messageStyles.action}>{formatNestedText(innerText)}</i>;
+    const parts = text.split(/((?:\*[^*]+\*)|(?:"[^"]+")|\([^)]+\)|(?:_[^_]+_))/g);
+    return parts.map((part, index) => {
+      if (part && part.startsWith('*') && part.endsWith('*')) {
+        let remaining_part = part.slice(1, -1);
+        if (remaining_part.length > 0) {
+          return <i key={index} className={messageStyles.action}>{part.slice(1, -1)}</i>;
+        }
       }
-      return <span key={index} className={messageStyles.other}>{formatNestedText(part)}</span>;
+
+      if (part && part.startsWith('(') && part.endsWith(')')) {
+        let remaining_part = part.slice(1, -1);
+        if (remaining_part.length > 0) {
+          return <span key={index} className={messageStyles.internal}>{part}</span>;
+        }
+
+      }
+      if (part && part.startsWith('[') && part.endsWith(']')) {
+        let remaining_part = part.slice(1, -1);
+        if (remaining_part.length > 0) {
+          return <i key={index} className={messageStyles.action}>{part.slice(1, -1)}</i>;
+        }
+      }
+      if (part && part.startsWith('"') && part.endsWith('"')) {
+        let remaining_part = part.slice(1, -1);
+        if (remaining_part.length > 0) {
+          return <span key={index} className={messageStyles.speech}>{part}</span>;
+        }
+      }
+      return <span key={index} className={messageStyles.other}>{part}</span>;
     });
   };
 
