@@ -28,7 +28,7 @@ const PREAMBLE_BEHAVIOUR = `You behave like ...`;
 const PREAMBLE_BACKSTORY = `Story info, events, relevant details and facts about the character ...`;
 const PREAMBLE_SELFIE_PRE = `Keywords to describe your character appearance in detail: `;
 const PREAMBLE_SELFIE_POST = `describe image details and effects ...`;
-const SEED_CHAT = `Dialogue example for the character ...`;
+const SEED_CHAT = `First message for the character ...`;
 
 const formSchema = z.object({
     name: z.string().min(1, {
@@ -587,7 +587,6 @@ export const CompanionForm = ({
 
                                             <SelectItem key="NousResearch/Nous-Hermes-2-Mixtral-8x7B-DPO" value="NousResearch/Nous-Hermes-2-Mixtral-8x7B-DPO">Mixtral 8x7B DPO</SelectItem>
                                             <SelectItem key="mistralai/Mixtral-8x22B-Instruct-v0.1" value="mistralai/Mixtral-8x22B-Instruct-v0.1">Mixtral 8x22B</SelectItem>
-                                            <SelectItem key="lizpreciatior/lzlv_70b_fp16_hf" value="lizpreciatior/lzlv_70b_fp16_hf">Lzlv 70B</SelectItem>
                                             <SelectItem key="mistralai/Mistral-Nemo-Instruct-2407" value="mistralai/Mistral-Nemo-Instruct-2407">Mistral Nemo 12B</SelectItem>      
 
                                             <SelectItem key="nvidia/Llama-3.1-Nemotron-70B-Instruct" value="nvidia/Llama-3.1-Nemotron-70B-Instruct">Nvidia Nemotron 70B</SelectItem>      
@@ -680,7 +679,7 @@ export const CompanionForm = ({
                         control={form.control}
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Seed chat message</FormLabel>
+                                <FormLabel>Introduction chat message</FormLabel>
                                 <FormControl>
                                     <Input disabled={isLoading} placeholder={SEED_CHAT} {...field} />
                                 </FormControl>

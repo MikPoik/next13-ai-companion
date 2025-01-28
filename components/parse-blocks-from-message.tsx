@@ -58,7 +58,7 @@ export function chatMessageJsonlToBlock(
             id: message.id,
             text: content[0].text.replace(/\\"/g, '"') || '', // Use the content if available
             historical: false,
-            streamingUrl: `https://api.steamship.com/api/v1/block/${content[0].id}/raw`,
+            streamingUrl: ``,
             messageType: MessageTypes.IMAGE,
             isVisibleInChat: validTypes.includes("IMAGE"),
             isInputElement: false,
@@ -102,7 +102,7 @@ export function chatMessageJsonlToBlock(
       id: message.id,
       text: message.content,
       historical: false,
-      streamingUrl: `https://api.steamship.com/api/v1/block/null/raw`,
+      streamingUrl: ``,
       messageType: messageType,//MessageTypes.TEXT,//getMessageType(message.role),
       isVisibleInChat: validTypes.includes("TEXT"),
       isInputElement: false,
@@ -137,7 +137,7 @@ export function chatMessageJsonlToBlock(
         try {
           const block: ExtendedBlock = JSON.parse(blockStr);
           if (!block.streamingUrl && block.id) {
-            block.streamingUrl = `https://api.steamship.com/api/v1/block/${block.id}/raw`;
+            block.streamingUrl = ``;
           }
           block.historical = false; // Set historical flag to false for new blocks
           block.messageType = getMessageType(block); // Determine the message type
