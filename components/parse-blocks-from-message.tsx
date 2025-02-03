@@ -91,13 +91,17 @@ export function chatMessageJsonlToBlock(
       //message.content = '';
     }
 
-    let messageType: "TEXT" | "IMAGE" = MessageTypes.TEXT;
-    if (/!\[.*?\]\(.*?\)/.test(message.content)) {
+    let messageType: "TEXT" | "IMAGE" | "VOICE" = MessageTypes.TEXT;
+    if (/!\[image]\(.*?\)/.test(message.content)) {
       
       messageType = MessageTypes.IMAGE
       
     }
-      
+    if (/!\[voice]\(.*?\)/.test(message.content)) {
+
+      messageType = MessageTypes.VOICE
+
+    }
     const block: ExtendedBlock = {
       id: message.id,
       text: message.content,

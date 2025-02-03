@@ -6,6 +6,7 @@ export const MessageTypes = {
   USER_MESSAGE: "USER_MESSAGE",
   STREAMING_BLOCK: "STREAMING_BLOCK",
   IMAGE: "IMAGE",
+  VOICE: "VOICE",
   TEXT: "TEXT",
   USER_STATUS_MESSAGE: "USER_STATUS_MESSAGE"
 } as const;
@@ -13,6 +14,7 @@ export const MessageTypes = {
 export const validTypes = [
   MessageTypes.IMAGE,
   MessageTypes.TEXT,
+  MessageTypes.VOICE,
   MessageTypes.STREAMING_BLOCK,
   MessageTypes.USER_MESSAGE
 ] as string[];
@@ -29,7 +31,10 @@ export const getMessageType = (block: Block) => {
   if (block.tags?.find((tag) => tag.name === "image")) {
     return MessageTypes.IMAGE;
   }
-    
+  if (block.tags?.find((tag) => tag.name === "voice")) {
+    console.log("VOICE BLOCK")
+    return MessageTypes.VOICE;
+  }
   if (block?.tags?.find((tag) => tag.kind === "status-message")) {
     return MessageTypes.STATUS_MESSAGE;
   }

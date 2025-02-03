@@ -186,11 +186,30 @@ export const ChatMessage = ({
           //console.log("Stream block detected:", block)
            return <StreamContent blockId={block.id} onContentUpdate={accumulatedContentRef?.current ? (newContent: string) => accumulatedContentRef.current = newContent : undefined} key={block.id} />;
         }
+        if (block.messageType === MessageTypes.VOICE) {
+          console.log("Audio block detected:", block.text)
+          const parseImageUrlFromMarkdown = (text: string) => {
+            // Extract URL
+            const regex = /\!\[voice]\((.*?)\)/;
+            const matches = text.match(regex);
+
+            // Strip markdown image syntax from text
+            const strippedText = text.replace(/\!\[.*?\]\(.*?\)/g, '').trim();
+
+
+            // Return both URL and cleaned text
+            return {
+              audioUrl: matches ? matches[1] : null,
+              cleanText: strippedText
+            };
+          };
+        }
+        
         if (block.messageType === MessageTypes.IMAGE) {
           //console.log("Image block detected:", block.text)
           const parseImageUrlFromMarkdown = (text: string) => {
             // Extract URL
-            const regex = /\!\[.*?\]\((.*?)\)/;
+            const regex = /\!\[image]\((.*?)\)/;
             const matches = text.match(regex);
 
             // Strip markdown image syntax from text
@@ -203,6 +222,7 @@ export const ChatMessage = ({
               cleanText: strippedText
             };
           };
+          
           const { imageUrl, cleanText } = parseImageUrlFromMarkdown(block.text);
           
           //console.log("Parsed image url: ", imageUrl)
@@ -252,7 +272,8 @@ export const ChatMessage = ({
             </div>
           );
         }
-        return null;
+
+
       }).filter(Boolean);
     } else if (typeof content === 'string') {
       console.log("string content")
