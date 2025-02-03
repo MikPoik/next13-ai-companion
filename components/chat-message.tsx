@@ -188,21 +188,32 @@ export const ChatMessage = ({
         }
         if (block.messageType === MessageTypes.VOICE) {
           console.log("Audio block detected:", block.text)
-          const parseImageUrlFromMarkdown = (text: string) => {
-            // Extract URL
+          const parseVoiceUrlFromMarkdown = (text: string) => {
             const regex = /\!\[voice]\((.*?)\)/;
             const matches = text.match(regex);
-
-            // Strip markdown image syntax from text
             const strippedText = text.replace(/\!\[.*?\]\(.*?\)/g, '').trim();
-
-
-            // Return both URL and cleaned text
+            
             return {
               audioUrl: matches ? matches[1] : null,
               cleanText: strippedText
             };
           };
+
+          const { audioUrl, cleanText } = parseVoiceUrlFromMarkdown(block.text);
+          
+          return (
+            <div key={block.id}>
+              {cleanText && cleanText !== "" && (
+                <p className="mb-2">{formatText(cleanText)}</p>
+              )}
+              <div className="audio-player-wrapper">
+                <audio controls className="w-full max-w-md">
+                  <source src={audioUrl} type="audio/mpeg" />
+                  Your browser does not support the audio element.
+                </audio>
+              </div>
+            </div>
+          );
         }
         
         if (block.messageType === MessageTypes.IMAGE) {
