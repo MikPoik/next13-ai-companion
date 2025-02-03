@@ -32,7 +32,6 @@ export const getMessageType = (block: Block) => {
     return MessageTypes.IMAGE;
   }
   if (block.tags?.find((tag) => tag.name === "voice")) {
-    console.log("VOICE BLOCK")
     return MessageTypes.VOICE;
   }
   if (block?.tags?.find((tag) => tag.kind === "status-message")) {
