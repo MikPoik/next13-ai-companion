@@ -89,21 +89,24 @@ export const ChatClient = ({ isPro, companion,chat_history }: ChatClientProps) =
   const [micPermission, setMicPermission] = useState(true); // Added micPermission state
 
   const startRecording = async () => {
+    if (isRecording) return; // Prevent multiple starts
+    
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
         .catch((err) => {
           if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
-            // Silently fail for permission denied
             setIsRecording(false);
-            setMicPermission(false); // Update permission state
+            setMicPermission(false);
             return null;
           }
-          throw err; // Re-throw other errors
+          throw err;
         });
 
-      if (!stream) return; // Exit if no stream (permission denied)
+      if (!stream) return;
 
-      const mediaRecorder = new MediaRecorder(stream);
+      const mediaRecorder = new MediaRecorder(stream, {
+        mimeType: 'audio/webm'
+      });
       mediaRecorderRef.current = mediaRecorder;
       chunksRef.current = [];
 
@@ -567,17 +570,18 @@ export const ChatClient = ({ isPro, companion,chat_history }: ChatClientProps) =
       </div>
       <form onSubmit={onSubmit} className="border-t border-primary/10 py-1 pb-1 flex items-center gap-x-2 pl-1 sticky bottom-0">
         <Button 
-            onClick={isRecording ? stopRecording : startRecording} 
+            onMouseDown={startRecording}
+            onMouseUp={stopRecording}
+            onMouseLeave={stopRecording}
+            onTouchStart={startRecording}
+            onTouchEnd={stopRecording}
             variant="ghost" 
-            className="flex-shrink-0"
-            title={!micPermission ? "Microphone access required" : ""}
+            className="flex-shrink-0 touch-none"
+            title={!micPermission ? "Press and hold to record" : ""}
             disabled={!micPermission}
           >
-            {isRecording ? (
-              <MicOff className="w-6 h-6 text-red-500" />
-            ) : (
-              <Mic className="w-6 h-6 text-blue-500" style={{opacity: micPermission ? 1 : 0.5}} />
-            )}
+            <Mic className={`w-6 h-6 ${isRecording ? 'text-red-500' : 'text-blue-500'}`} 
+                 style={{opacity: micPermission ? 1 : 0.5}} />
           </Button>
         <div className="flex-1">
           <Input 
