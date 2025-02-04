@@ -1,121 +1,135 @@
-// components/parse-blocks-from-message.tsx
-import { Message } from "ai";
-import { getMessageType, validTypes,MessageTypes } from "@/components/block-chat-types";
-import { ExtendedBlock } from "@/components//extended-block"; // Import ExtendedBlock type
-const { v4: uuidv4 } = require('uuid');
-/**
- * Parses a single message string into an ExtendedBlock.
- * @param message Message object containing the content to parse.
- * @param skipIfInputEquals Optional string to skip if input matches.
- * @returns Array of ExtendedBlock objects.
- */
-function replaceQuotesInText(text: string): string {
-  const regex = /("text":\s*")((?:\\.|[^"\\])*)("(?=\s*,\s*"mimeType"))/;
-  
-  const match = text.match(regex);
-if (match) {
-  const [fullMatch, textStart, originalText, textEnd] = match;
-  const escapedText = originalText.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
-  return text.replace(fullMatch, `${textStart}${escapedText}${textEnd}`);
-} else {
-  return text;
-}
-}
+  // components/parse-blocks-from-message.tsx
+  import { Message } from "ai";
+  import { getMessageType, validTypes, MessageTypes } from "@/components/block-chat-types";
+  import { ExtendedBlock } from "@/components/extended-block"; // Import ExtendedBlock type
+  const { v4: uuidv4 } = require('uuid');
 
-function sanitizeJSONString(content: string): string {
-  return content.replace(/\n/g, "\\n");
-}
-function parseMessageContent(messageContent: string): any {
-  messageContent = replaceQuotesInText(messageContent);
-  const sanitizedContent = sanitizeJSONString(messageContent);
-  return JSON.parse(sanitizedContent);
-}
-export function chatMessageJsonlToBlock(
-  message: Message,
-  skipIfInputEquals: string | null
-): ExtendedBlock[] {
-  const applySkipIfInput =
-    skipIfInputEquals != null && skipIfInputEquals.trim().length > 0;
-  //console.log("Process message ",message)
-  //console.log("Process message content",message.content)
-  
-  if (typeof message === 'object' && message.content !== null && !message.content.toString().includes("workspaceId")) {
-    //console.log("Processing JSON object message.content");
-    //console.log(message.content)
-    // Check if message content is a JSON array and parse the "text" field to message.content for previous message format
+  /**
+   * Replaces escaped quotes in a JSON-like string.
+   */
+  function replaceQuotesInText(text: string): string {
+    const regex = /("text":\s*")((?:\\.|[^"\\])*)("(?=\s*,\s*"mimeType"))/;
+    const match = text.match(regex);
+    if (match) {
+      const [fullMatch, textStart, originalText, textEnd] = match;
+      const escapedText = originalText.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+      return text.replace(fullMatch, `${textStart}${escapedText}${textEnd}`);
+    }
+    return text;
+  }
+
+  /**
+   * Sanitizes a JSON string by replacing newlines with escaped newlines.
+   */
+  function sanitizeJSONString(content: string): string {
+    return content.replace(/\n/g, "\\n");
+  }
+
+  /**
+   * Parses message content into a JavaScript object.
+   */
+  function parseMessageContent(messageContent: string): any {
+    messageContent = replaceQuotesInText(messageContent);
+    const sanitizedContent = sanitizeJSONString(messageContent);
     try {
-      if (message.content.startsWith("[") && message.content.endsWith("]")){
-        //console.log("JSON array detected")
-       
-        
-        const content = parseMessageContent(message.content.toString());
-        if (Array.isArray(content) && content.length > 0 && content[0].text && !/!\[.*?\]\(.*?\)/.test(content[0].text)) {
-         console.log("JSON array detected and text field exists");
-          message.content = content.map(block => block.text).join("\n");
-        } else if (Array.isArray(content) && content.length > 0 && /!\[.*?\]\(.*?\)/.test(content[0].text))  {
-          console.log("Message content is not a JSON array or does not have a 'text' field. It is an image", content);
-          const block: ExtendedBlock = {
-            id: message.id,
-            text: content[0].text.replace(/\\"/g, '"') || '', // Use the content if available
-            historical: false,
-            streamingUrl: ``,
-            messageType: MessageTypes.IMAGE,
-            isVisibleInChat: validTypes.includes("IMAGE"),
-            isInputElement: false,
-            role: message.role,
-            createdAt: typeof message.createdAt === 'string' 
-              ? message.createdAt 
-              : (new Date().toString()),
-            workspaceId: uuidv4(),
-            userId: "default",
-            fileId: "default",
-            index: 0,
-            publicData: true,
-            contentURL: null,
-            uploadBytes: null,
-            uploadType: null,
-            mimeType: null,
-            url: null,
-
-          };
-
-          //console.log(block);
-          return [block];
-          
-          //How to create an ExtendBlock object from a JSON object?
-        }
-      }
+      return JSON.parse(sanitizedContent);
     } catch (error) {
-      console.error('Error parsing JSON content', error,message.content);
-      // Handle error case
-      //message.content = '';
+      console.error("Error parsing JSON content:", error, messageContent);
+      throw error; // Rethrow to handle upstream
+    }
+  }
+
+  /**
+   * Converts a single chat message into an array of ExtendedBlocks.
+   */
+  export function chatMessageJsonlToBlock(
+    message: Message,
+    skipIfInputEquals: string | null
+  ): ExtendedBlock[] {
+    const applySkipIfInput =
+      skipIfInputEquals != null && skipIfInputEquals.trim().length > 0;
+
+    if (typeof message !== 'object' || message.content == null) {
+      console.error("Invalid message object:", message);
+      return [];
     }
 
+    let content = message.content.toString();
+    //console.log(content)
+    // Handle text inside brackets (e.g., "[Caroline says hi]")
+    if (/^\[.*\]$/.test(content)) {
+      console.log("Detected text inside brackets:", content);
+      content = content.slice(1, -1); // Remove brackets
+    }
+
+    // Handle JSON array content
+    if (content.startsWith("[") && content.endsWith("]")) {
+      try {
+        const parsedContent = parseMessageContent(content);
+        if (Array.isArray(parsedContent) && parsedContent.length > 0) {
+          if (parsedContent[0].text && !/!\[.*?\]\(.*?\)/.test(parsedContent[0].text)) {
+            console.log("JSON array detected with 'text' field.");
+            content = parsedContent.map(block => block.text).join("\n");
+          } else if (/!\[.*?\]\(.*?\)/.test(parsedContent[0].text)) {
+            console.log("Detected image content in JSON array.");
+            const block: ExtendedBlock = {
+              id: message.id,
+              text: parsedContent[0].text.replace(/\\"/g, '"') || '',
+              historical: false,
+              streamingUrl: ``,
+              messageType: MessageTypes.IMAGE,
+              isVisibleInChat: validTypes.includes("IMAGE"),
+              isInputElement: false,
+              role: message.role,
+              createdAt: typeof message.createdAt === 'string'
+                ? message.createdAt
+                : new Date().toString(),
+              workspaceId: uuidv4(),
+              userId: "default",
+              fileId: "default",
+              index: 0,
+              publicData: true,
+              contentURL: null,
+              uploadBytes: null,
+              uploadType: null,
+              mimeType: null,
+              url: null,
+            };
+            return [block];
+          }
+        }
+      } catch (error) {
+        console.error("Error processing JSON content:", error, content);
+      }
+    }
+
+    // Determine message type based on content
     let messageType: "TEXT" | "IMAGE" | "VOICE" = MessageTypes.TEXT;
-    if (/!\[image]\(.*?\)/.test(message.content)) {
-      
-      messageType = MessageTypes.IMAGE
-      
+    if (/!\[(?!voice).*?\]\(.*?\)/.test(content)) {
+      console.log("IMAGE")
+      console.log(content)
+      messageType = MessageTypes.IMAGE;
+    } else if (/!\[voice]\(.*?\)/.test(content)) {
+      console.log("VOICE")
+      console.log(content)
+        messageType = MessageTypes.VOICE;
     }
-    if (/!\[voice]\(.*?\)/.test(message.content)) {
 
-      messageType = MessageTypes.VOICE
-
-    }
+    // Create and return the ExtendedBlock
     const block: ExtendedBlock = {
       id: message.id,
-      text: message.content,
+      text: content, // Use the processed content
       historical: false,
       streamingUrl: ``,
-      messageType: messageType,//MessageTypes.TEXT,//getMessageType(message.role),
-      isVisibleInChat: validTypes.includes("TEXT"),
+      messageType: messageType,
+      isVisibleInChat: validTypes.includes(messageType),
       isInputElement: false,
       role: message.role,
-      createdAt:   typeof message.createdAt === 'string' 
-        ? message.createdAt 
-        : (new Date().toString()),
+      createdAt: typeof message.createdAt === 'string'
+        ? message.createdAt
+        : new Date().toString(),
       workspaceId: uuidv4(),
-      userId:"default",
+      userId: "default",
       fileId: "default",
       index: 0,
       publicData: true,
@@ -123,71 +137,23 @@ export function chatMessageJsonlToBlock(
       uploadBytes: null,
       uploadType: null,
       mimeType: null,
-      url: null
+      url: null,
     };
-    //console.log(block)
+
     return [block];
   }
 
-    
-    if (typeof message.content !== 'string') {
-      console.error('Expected message.content to be a string', message.content,message);
-      return []; // Return an empty array or fallback logic here
+  /**
+   * Converts an array of chat messages into an array of ExtendedBlocks.
+   */
+  export function chatMessagesJsonlToBlocks(
+    messages: Message[],
+    skipIfInputEquals: string | null
+  ): ExtendedBlock[] {
+    let result: ExtendedBlock[] = [];
+    for (const message of messages || []) {
+      result = [...result, ...chatMessageJsonlToBlock(message, skipIfInputEquals)];
     }
-  const blocks = message.content
-    .split(/\r?\n|\r|\n/g)
-    .map((blockStr) => {
-      if (blockStr) {
-        try {
-          const block: ExtendedBlock = JSON.parse(blockStr);
-          if (!block.streamingUrl && block.id) {
-            block.streamingUrl = ``;
-          }
-          block.historical = false; // Set historical flag to false for new blocks
-          block.messageType = getMessageType(block); // Determine the message type
-          //console.log(block.messageType)
-          //if (block.messageType === MessageTypes.STREAMING_BLOCK) {
-          //    console.log("Streaming block", block)
-          //}
-          // Use validTypes to determine if the block is visible in chat
-          block.isVisibleInChat = validTypes.includes(block.messageType);
-          //console.log("Visible block: ",block.isVisibleInChat)
-          // TODO: Update logic for isInputElement based on your application's needs
-          block.isInputElement = false; // Example static assignment
-
-          return block;
-        } catch (e) {
-          console.error(
-            `Error parsing block: ${e}.`
-          );
-          // In case of error, return null and filter it out later
-          return null;
-        }
-      }
-      return null;
-    })
-    .filter((block): block is ExtendedBlock => block !== null && (!applySkipIfInput || block.text !== skipIfInputEquals));
-  // Fallback check to attempt parsing as JSON if blocks array is empty or initial parsing failed
-
- 
-    
-  return blocks;
-}
-
-/**
- * Converts chat messages into an array of ExtendedBlocks.
- * @param messages Array of Message objects.
- * @param skipIfInputEquals Optional string to skip if input matches.
- * @returns Array of ExtendedBlock objects.
- */
-export function chatMessagesJsonlToBlocks(
-  messages: Message[],
-  skipIfInputEquals: string | null
-): ExtendedBlock[] {
-  //console.log("Parse messages ",messages)
-  let ret: ExtendedBlock[] = [];
-  for (let msg of messages || []) {
-    ret = [...ret, ...chatMessageJsonlToBlock(msg, skipIfInputEquals)];
+    return result;
   }
-  return ret;
-}
+

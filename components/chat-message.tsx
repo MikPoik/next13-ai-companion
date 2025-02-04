@@ -182,7 +182,7 @@ export const ChatMessage = ({
           //console.log("Text block detected:", block)
           return <p key={block.id}>{formatText(block.text)}</p>;
         }
-        if (block.streamState === 'started' && block.messageType !== MessageTypes.IMAGE && block.mimeType != "image/png") {
+        if (block.streamState === 'started' && block.messageType !== MessageTypes.IMAGE && block.messageType !== MessageTypes.VOICE && block.mimeType != "image/png") {
           //console.log("Stream block detected:", block)
            return <StreamContent blockId={block.id} onContentUpdate={accumulatedContentRef?.current ? (newContent: string) => accumulatedContentRef.current = newContent : undefined} key={block.id} />;
         }
@@ -208,7 +208,7 @@ export const ChatMessage = ({
               )}
               <div className="audio-player-wrapper">
                 <audio controls className="w-full max-w-md">
-                  <source src={audioUrl} type="audio/mpeg" />
+                  <source src={audioUrl || undefined} type="audio/mpeg" />
                   Your browser does not support the audio element.
                 </audio>
               </div>
@@ -220,7 +220,7 @@ export const ChatMessage = ({
           //console.log("Image block detected:", block.text)
           const parseImageUrlFromMarkdown = (text: string) => {
             // Extract URL
-            const regex = /\!\[image]\((.*?)\)/;
+            const regex = /\!\[(?!voice).*?\]\((.*?)\)/;
             const matches = text.match(regex);
 
             // Strip markdown image syntax from text
