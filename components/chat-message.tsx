@@ -256,25 +256,24 @@ export const ChatMessage = ({
               {cleanText && cleanText !== "" && (
                 <p className="mb-2">{formatText(cleanText)}</p>
               )}
-              <div
+              <div ref={wrapperRef}
                 className={`image-placeholder-wrapper ${imageLoaded ? 'loaded' : ''}`}
                 style={imageStyles.wrapper}
               >
-                {imageUrl && (<div ref={wrapperRef} style={imageStyles.wrapper}>
-                               <Image
-                                 src={imageUrl}
-                                 alt="Generated Image"
-                                 fill
-                                 quality={100}                    // Increase from default 75
-                                 sizes="(max-width: 768px) 100vw, 768px"
-                                 className="object-cover"         // Change from object-contain for sharper images
-                                 placeholder="empty"              // Remove blur placeholder
-                                 loading="eager" 
-                                 onLoad={(event) => {
-                                   if (wrapperRef.current) {
-                                     handleImageLoad(wrapperRef.current, event.target as HTMLImageElement);
-                                   }
-                                 }}
+                {imageUrl && <Image
+                  src={imageUrl}
+                  alt="Generated Image"
+                  fill
+                  quality={100}
+                  sizes="(max-width: 768px) 100vw, 768px"
+                  className="object-cover"
+                  placeholder="empty"
+                  loading="eager"
+                  onLoad={(event) => {
+                    if (wrapperRef.current) {
+                      handleImageLoad(wrapperRef.current, event.target as HTMLImageElement);
+                    }
+                  }}
                                  onError={(event) => {
                                     /*
                                    const imgElement = event.target as HTMLImageElement;
