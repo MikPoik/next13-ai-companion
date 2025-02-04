@@ -256,42 +256,31 @@ export const ChatMessage = ({
               {cleanText && cleanText !== "" && (
                 <p className="mb-2">{formatText(cleanText)}</p>
               )}
-              <div ref={wrapperRef}
+              <div 
+                ref={wrapperRef}
                 className={`image-placeholder-wrapper ${imageLoaded ? 'loaded' : ''}`}
                 style={imageStyles.wrapper}
               >
-                {imageUrl && <Image
-                  src={imageUrl}
-                  alt="Generated Image"
-                  fill
-                  quality={100}
-                  sizes="(max-width: 768px) 100vw, 768px"
-                  className="object-cover"
-                  placeholder="empty"
-                  loading="eager"
-                  onLoad={(event) => {
-                    if (wrapperRef.current) {
-                      handleImageLoad(wrapperRef.current, event.target as HTMLImageElement);
-                    }
-                  }}
-                                 onError={(event) => {
-                                    /*
-                                   const imgElement = event.target as HTMLImageElement;
-                                   const retryCount = parseInt(imgElement.dataset.retryCount || '0');
-
-                                   if (retryCount < maxRetries) {
-                                     imgElement.dataset.retryCount = (retryCount + 1).toString();
-                                     setTimeout(() => {
-                                       imgElement.src = imageUrl;
-                                     }, 2000);
-                                   } else {
-                                     console.error(`Failed to load image after ${maxRetries} attempts`);
-                                     imgElement.style.display = 'none';
-                                   }
-                                   */
-                                 }}
-                               />
-                             </div>)}
+                {imageUrl && (
+                  <Image
+                    src={imageUrl}
+                    alt="Generated Image"
+                    fill
+                    quality={100}
+                    sizes="(max-width: 768px) 100vw, 768px"
+                    className="object-cover"
+                    placeholder="empty"
+                    loading="eager"
+                    onLoad={(event) => {
+                      if (wrapperRef.current) {
+                        handleImageLoad(wrapperRef.current, event.target as HTMLImageElement);
+                      }
+                    }}
+                    onError={(event) => {
+                      /* Error handling commented out */
+                    }}
+                  />
+                )}
               </div>
             </div>
           );
