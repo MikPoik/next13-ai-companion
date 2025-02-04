@@ -543,16 +543,16 @@ export const ChatClient = ({ isPro, companion,chat_history }: ChatClientProps) =
 
 
       </div>
-      <form onSubmit={onSubmit} className="border-t border-primary/10 py-1 pb-1 flex items-center gap-x-0 pl-1 sticky bottom-0">
-        <div className="flex items-center gap-x-2">
-          <Button onClick={isRecording ? stopRecording : startRecording} variant="ghost">
-            {isRecording ? (
-              <MicOff className="w-6 h-6 text-red-500" />
-            ) : (
-              <Mic className="w-6 h-6 text-blue-500" />
-            )}
-          </Button>
-          <Input disabled={isLoading || isSubmitting} value={input} onChange={handleInputChange} placeholder="Type a message or use voice input" className="rounded-lg bg-primary/10 flex-grow" ref={inputRef} />
+      <form onSubmit={onSubmit} className="border-t border-primary/10 py-1 pb-1 flex items-center gap-x-2 pl-1 sticky bottom-0">
+        <Button onClick={isRecording ? stopRecording : startRecording} variant="ghost" className="flex-shrink-0">
+          {isRecording ? (
+            <MicOff className="w-6 h-6 text-red-500" />
+          ) : (
+            <Mic className="w-6 h-6 text-blue-500" />
+          )}
+        </Button>
+        <div className="flex-1">
+          <Input disabled={isLoading || isSubmitting} value={input} onChange={handleInputChange} placeholder="Type a message or use voice input" className="rounded-lg bg-primary/10 w-full" ref={inputRef} />
         </div>
         <Button type="submit" disabled={isLoading || isSubmitting} variant="ghost">
               {isLoading || isSubmitting ? (
