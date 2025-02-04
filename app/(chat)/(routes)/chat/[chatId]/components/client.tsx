@@ -86,6 +86,7 @@ export const ChatClient = ({ isPro, companion,chat_history }: ChatClientProps) =
   const chunksRef = useRef<Blob[]>([]);
   const retryCountRef = useRef(0);
   const maxRetries = 3;
+  const [micPermission, setMicPermission] = useState(false); // Added micPermission state
 
   const startRecording = async () => {
     try {
@@ -94,13 +95,14 @@ export const ChatClient = ({ isPro, companion,chat_history }: ChatClientProps) =
           if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
             // Silently fail for permission denied
             setIsRecording(false);
+            setMicPermission(false); // Update permission state
             return null;
           }
           throw err; // Re-throw other errors
         });
 
       if (!stream) return; // Exit if no stream (permission denied)
-        
+
       const mediaRecorder = new MediaRecorder(stream);
       mediaRecorderRef.current = mediaRecorder;
       chunksRef.current = [];
@@ -138,12 +140,14 @@ export const ChatClient = ({ isPro, companion,chat_history }: ChatClientProps) =
 
       mediaRecorder.start();
       setIsRecording(true);
+      setMicPermission(true); // Update permission state
     } catch (error) {
       toast({
         description: "Failed to access microphone",
         variant: "destructive",
         duration: 3000,
       });
+      setMicPermission(false); // Update permission state
     }
   };
 
@@ -555,13 +559,19 @@ export const ChatClient = ({ isPro, companion,chat_history }: ChatClientProps) =
 
       </div>
       <form onSubmit={onSubmit} className="border-t border-primary/10 py-1 pb-1 flex items-center gap-x-2 pl-1 sticky bottom-0">
-        <Button onClick={isRecording ? stopRecording : startRecording} variant="ghost" className="flex-shrink-0">
-          {isRecording ? (
-            <MicOff className="w-6 h-6 text-red-500" />
-          ) : (
-            <Mic className="w-6 h-6 text-blue-500" />
-          )}
-        </Button>
+        <Button 
+            onClick={isRecording ? stopRecording : startRecording} 
+            variant="ghost" 
+            className="flex-shrink-0"
+            title={!micPermission ? "Microphone access required" : ""}
+            disabled={!micPermission}
+          >
+            {isRecording ? (
+              <MicOff className="w-6 h-6 text-red-500" />
+            ) : (
+              <Mic className="w-6 h-6 text-blue-500" style={{opacity: micPermission ? 1 : 0.5}} />
+            )}
+          </Button>
         <div className="flex-1">
           <Input disabled={isLoading || isSubmitting} value={input} onChange={handleInputChange} placeholder="Type a message or use voice input" className="rounded-lg bg-primary/10 w-full" ref={inputRef} />
         </div>
