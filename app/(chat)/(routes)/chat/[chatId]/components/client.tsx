@@ -89,7 +89,18 @@ export const ChatClient = ({ isPro, companion,chat_history }: ChatClientProps) =
 
   const startRecording = async () => {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+        .catch((err) => {
+          if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+            // Silently fail for permission denied
+            setIsRecording(false);
+            return null;
+          }
+          throw err; // Re-throw other errors
+        });
+
+      if (!stream) return; // Exit if no stream (permission denied)
+        
       const mediaRecorder = new MediaRecorder(stream);
       mediaRecorderRef.current = mediaRecorder;
       chunksRef.current = [];
