@@ -1,6 +1,6 @@
 
 import { NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs";
+import { auth, currentUser } from "@clerk/nextjs/server";
 
 export async function POST(req: Request) {
   try {

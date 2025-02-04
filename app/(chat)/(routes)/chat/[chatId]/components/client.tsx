@@ -258,6 +258,8 @@ export const ChatClient = ({ isPro, companion,chat_history }: ChatClientProps) =
   });
 
   const messagesRef = useRef<ChatMessageType[]>(Array.isArray(messages) ? messages : []);
+  const initializingRef = useRef(false);
+  const initializedRef = useRef(false);
 
   // Use refs to prevent double initialization
   useEffect(() => {
