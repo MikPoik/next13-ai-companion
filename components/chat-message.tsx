@@ -169,18 +169,32 @@ export const ChatMessage = ({
   };
 
   const renderContent = () => {
-
     if (streamState === 'started' && streamedContent) {
       return <div>{streamedContent}</div>;
     }
     if (Array.isArray(content)) {
+      // Split blocks into separate messages
       return content.map((block, index) => {
         if (!block.id) {
           block.id = uuidv4();
         }
+
+        // Create a wrapper for each message type
+        const messageWrapper = (messageContent: JSX.Element) => (
+          <div key={block.id} className="flex flex-col gap-2">
+            <span className="text-sm text-gray-500">
+              {role === "user" ? "You" : companionName}:
+            </span>
+            {messageContent}
+          </div>
+        );
         if ('text' in block && typeof block.text === 'string' && validTypes.includes(block.messageType!) && block.messageType === MessageTypes.TEXT && (block.role === 'user' || block.role === 'assistant' || block.role === 'system') && !/!\[.*?\]\(.*?\)/.test(block.text)) {
           //console.log("Text block detected:", block)
-          return <p key={block.id}>{formatText(block.text)}</p>;
+          return messageWrapper(
+            <div className="leading-6 text-sm">
+              {formatText(block.text)}
+            </div>
+          );
         }
         if (block.streamState === 'started' && block.messageType !== MessageTypes.IMAGE && block.messageType !== MessageTypes.VOICE && block.mimeType != "image/png") {
           //console.log("Stream block detected:", block)
@@ -201,8 +215,8 @@ export const ChatMessage = ({
 
           const { audioUrl, cleanText } = parseVoiceUrlFromMarkdown(block.text);
           
-          return (
-            <div key={block.id}>
+          return messageWrapper(
+            <div className="leading-6 text-sm">
               {cleanText && cleanText !== "" && (
                 <p className="mb-2">{formatText(cleanText)}</p>
               )}
@@ -237,8 +251,8 @@ export const ChatMessage = ({
           const { imageUrl, cleanText } = parseImageUrlFromMarkdown(block.text);
           
           //console.log("Parsed image url: ", imageUrl)
-          return  (
-            <div key={block.id}>
+          return messageWrapper(
+            <div className="leading-6 text-sm">
               {cleanText && cleanText !== "" && (
                 <p className="mb-2">{formatText(cleanText)}</p>
               )}
@@ -320,17 +334,10 @@ export const ChatMessage = ({
         }
       `}</style>
       <div className={cn(
-        "group flex items-start gap-x-3 py-2 w-full",
+        "group flex flex-col gap-4 py-2 w-full",
         role === "user" && "justify-end"
       )}>
-        <div className="flex-1 mr-4 space-y-2">
-          <span className="text-sm text-gray-500">
-            {role === "user" ? "You" : companionName}:
-          </span>
-          <div className="leading-6 text-sm">
-            {renderContent()}
-          </div>
-        </div>
+        {renderContent()}
       </div>
     </>
   );
