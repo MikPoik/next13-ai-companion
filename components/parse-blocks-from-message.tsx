@@ -55,53 +55,56 @@
     }
 
     let content = message.content.toString();
-    //console.log(content)
+    let blocks: ExtendedBlock[] = [];
+
     // Handle text inside brackets (e.g., "[Caroline says hi]")
     if (/^\[.*\]$/.test(content)) {
-      console.log("Detected text inside brackets:", content);
       content = content.slice(1, -1); // Remove brackets
     }
 
-    // Handle JSON array content
-    if (content.startsWith("[") && content.endsWith("]")) {
-      try {
-        const parsedContent = parseMessageContent(content);
-        if (Array.isArray(parsedContent) && parsedContent.length > 0) {
-          if (parsedContent[0].text && !/!\[.*?\]\(.*?\)/.test(parsedContent[0].text)) {
-            console.log("JSON array detected with 'text' field.");
-            content = parsedContent.map(block => block.text).join("\n");
-          } else if (/!\[.*?\]\(.*?\)/.test(parsedContent[0].text)) {
-            console.log("Detected image content in JSON array.");
-            const block: ExtendedBlock = {
-              id: message.id,
-              text: parsedContent[0].text.replace(/\\"/g, '"') || '',
-              historical: false,
-              streamingUrl: ``,
-              messageType: MessageTypes.IMAGE,
-              isVisibleInChat: validTypes.includes("IMAGE"),
-              isInputElement: false,
-              role: message.role,
-              createdAt: typeof message.createdAt === 'string'
-                ? message.createdAt
-                : new Date().toString(),
-              workspaceId: uuidv4(),
-              userId: "default",
-              fileId: "default",
-              index: 0,
-              publicData: true,
-              contentURL: null,
-              uploadBytes: null,
-              uploadType: null,
-              mimeType: null,
-              url: null,
-            };
-            return [block];
-          }
+    // Split content based on markdown image and voice patterns
+    const parts = content.split(/(!(?:\[voice\]|\[.*?\])\([^)]+\))/);
+    
+    parts.forEach((part, index) => {
+      if (part.trim()) {
+        let messageType = MessageTypes.TEXT;
+        let text = part;
+
+        if (/!\[voice\]\(.*?\)/.test(part)) {
+          messageType = MessageTypes.VOICE;
+        } else if (/!\[(?!voice).*?\]\(.*?\)/.test(part)) {
+          messageType = MessageTypes.IMAGE;
         }
-      } catch (error) {
-        console.error("Error processing JSON content:", error, content);
+
+        const block: ExtendedBlock = {
+          id: `${message.id}-${index}`,
+          text: text.replace(/\\"/g, '"'),
+          historical: false,
+          streamingUrl: ``,
+          messageType: messageType,
+          isVisibleInChat: validTypes.includes(messageType),
+          isInputElement: false,
+          role: message.role,
+          createdAt: typeof message.createdAt === 'string'
+            ? message.createdAt
+            : new Date().toString(),
+          workspaceId: uuidv4(),
+          userId: "default",
+          fileId: "default",
+          index: index,
+          publicData: true,
+          contentURL: null,
+          uploadBytes: null,
+          uploadType: null,
+          mimeType: null,
+          url: null,
+        };
+
+        blocks.push(block);
       }
-    }
+    });
+
+    return blocks;
 
     // Determine message type based on content
     let messageType: "TEXT" | "IMAGE" | "VOICE" = MessageTypes.TEXT;
