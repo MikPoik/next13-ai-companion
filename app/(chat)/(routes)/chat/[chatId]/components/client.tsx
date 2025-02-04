@@ -86,7 +86,7 @@ export const ChatClient = ({ isPro, companion,chat_history }: ChatClientProps) =
   const chunksRef = useRef<Blob[]>([]);
   const retryCountRef = useRef(0);
   const maxRetries = 3;
-  const [micPermission, setMicPermission] = useState(false); // Added micPermission state
+  const [micPermission, setMicPermission] = useState(true); // Added micPermission state
 
   const startRecording = async () => {
     try {
@@ -409,6 +409,13 @@ export const ChatClient = ({ isPro, companion,chat_history }: ChatClientProps) =
     setIsSubmitting(true);
     handleSubmit(new Event('submit') as any, {});
   };
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter' && !e.shiftKey && !isLoading && !isSubmitting) {
+      e.preventDefault();
+      onSubmit(new Event('submit') as any);
+    }
+  };
+
   const onSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     useStreamStore.getState().setContent("");
@@ -573,7 +580,15 @@ export const ChatClient = ({ isPro, companion,chat_history }: ChatClientProps) =
             )}
           </Button>
         <div className="flex-1">
-          <Input disabled={isLoading || isSubmitting} value={input} onChange={handleInputChange} placeholder="Type a message or use voice input" className="rounded-lg bg-primary/10 w-full" ref={inputRef} />
+          <Input 
+            disabled={isLoading || isSubmitting} 
+            value={input} 
+            onChange={handleInputChange} 
+            onKeyDown={handleKeyDown}
+            placeholder="Type a message or use voice input" 
+            className="rounded-lg bg-primary/10 w-full" 
+            ref={inputRef} 
+          />
         </div>
         <Button type="submit" disabled={isLoading || isSubmitting} variant="ghost">
               {isLoading || isSubmitting ? (
