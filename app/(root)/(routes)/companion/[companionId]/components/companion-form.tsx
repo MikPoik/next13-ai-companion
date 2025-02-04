@@ -696,7 +696,7 @@ export const CompanionForm = ({
                         </div>
                         <Separator className="bg-primary/10" />
                     </div>
-                    *
+                    
                     <FormField
                         control={form.control}
                         name="voiceId"
@@ -725,6 +725,7 @@ export const CompanionForm = ({
                                             ))}
                                         </SelectContent>
                                     </Select>
+                                    {/*
                                     &nbsp;&nbsp;<button // Use a plain HTML button with type="button"
                                         type="button"
                                         className="btn-sm" // Add the appropriate button class
@@ -734,6 +735,7 @@ export const CompanionForm = ({
                                     >
                                         Play
                                     </button>
+                                    */}
                                 </div>
                                 <FormDescription>
                                     Select a voice for your AI (&quot;none&quot; means voice is disabled)
