@@ -1,6 +1,6 @@
 "use client";
 import axios from "axios";
-import { ChevronLeft, Edit, MessagesSquare, MoreVertical, Trash, PhoneCall } from "lucide-react";
+import { ChevronLeft, Edit, MessagesSquare, MoreVertical, Trash, PhoneCall,Download } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Companion, Message } from "@prisma/client";
 import { useUser } from "@clerk/nextjs";
@@ -128,11 +128,12 @@ export const ChatHeader = ({
                             <MoreVertical />
                         </Button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuItem onClick={() => window.location.href = `/api/chat/${companion.id}/download-history`}>
-                        <Download className="w-4 h-4 mr-2" />
-                        Download HTML Chat History
-                    </DropdownMenuItem>
+
                     <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={() => window.location.href = `/api/chat/${companion.id}/download-history`}>
+                            <Download className="w-4 h-4 mr-2" />
+                            Download HTML Chat History
+                        </DropdownMenuItem>
                         <DropdownMenuItem onClick={onDeleteChatHistory}>
                             <Trash className="w-4 h-4 mr-2" />
                             Delete Chat history
