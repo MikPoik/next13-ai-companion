@@ -111,48 +111,55 @@ export const ChatClient = ({ isPro, companion,chat_history }: ChatClientProps) =
       chunksRef.current = [];
 
       mediaRecorder.ondataavailable = (e) => {
-        chunksRef.current.push(e.data);
+        if (e.data.size > 0) {
+          chunksRef.current.push(e.data);
+        }
       };
-      console.log(chunksRef.current.length)
+
+      mediaRecorder.start(100); // Start recording and get data every 100ms
+      setIsRecording(true);
+      setMicPermission(true); // Update permission state
+
       mediaRecorder.onstop = async () => {
         console.log("Stop recording")
-        console.log(chunksRef.current.length)
-        const audioBlob = new Blob(chunksRef.current, { type: 'audio/webm' });
-        const formData = new FormData();
-        formData.append('audio', audioBlob);
+        if (chunksRef.current.length > 0) {
+          const audioBlob = new Blob(chunksRef.current, { type: 'audio/webm' });
+          const formData = new FormData();
+          formData.append('audio', audioBlob);
 
-        try {
-          const response = await fetch(`/api/transcribe`, {
-            method: 'POST',
-            body: formData,
-          });
+          try {
+            const response = await fetch(`/api/transcribe`, {
+              method: 'POST',
+              body: formData,
+            });
 
-          if (!response.ok) throw new Error('Transcription failed');
+            if (!response.ok) throw new Error('Transcription failed');
 
-          const { text } = await response.json();
-          setInput(text);
+            const { text } = await response.json();
+            if (text && text.trim()) {
+              setInput(text);
+            } else {
+              throw new Error('No transcription returned');
+            }
 
-        } catch (error) {
-          toast({
-            description: "Failed to transcribe audio",
-            variant: "destructive",
-            duration: 3000,
-          });
+          } catch (error) {
+            toast({
+              description: "Failed to transcribe audio",
+              variant: "destructive",
+              duration: 3000,
+            });
+          }
         }
-
         stream.getTracks().forEach(track => track.stop());
       };
 
-      mediaRecorder.start();
-      setIsRecording(true);
-      setMicPermission(true); // Update permission state
     } catch (error) {
       toast({
         description: "Failed to access microphone",
         variant: "destructive",
         duration: 3000,
       });
-      setMicPermission(false); // Update permission state
+      setMicPermission(false);
     }
   };
 
