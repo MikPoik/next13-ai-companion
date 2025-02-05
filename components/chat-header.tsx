@@ -119,10 +119,6 @@ export const ChatHeader = ({
                             <Trash className="w-4 h-4 mr-2" />
                             Delete Chat history
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => window.location.href = `/api/chat/${companion.id}/download-history`}>
-                            <Download className="w-4 h-4 mr-2" />
-                            Download HTML Chat History
-                        </DropdownMenuItem>
                     </DropdownMenuContent>
                 </DropdownMenu>
             ) : (
@@ -132,6 +128,10 @@ export const ChatHeader = ({
                             <MoreVertical />
                         </Button>
                     </DropdownMenuTrigger>
+                    <DropdownMenuItem onClick={() => window.location.href = `/api/chat/${companion.id}/download-history`}>
+                        <Download className="w-4 h-4 mr-2" />
+                        Download HTML Chat History
+                    </DropdownMenuItem>
                     <DropdownMenuContent align="end">
                         <DropdownMenuItem onClick={onDeleteChatHistory}>
                             <Trash className="w-4 h-4 mr-2" />
