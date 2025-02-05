@@ -106,44 +106,7 @@
 
     return blocks;
 
-    // Determine message type based on content
-    let messageType: "TEXT" | "IMAGE" | "VOICE" = MessageTypes.TEXT;
-    if (/!\[(?!voice).*?\]\(.*?\)/.test(content)) {
-      console.log("IMAGE")
-      console.log(content)
-      messageType = MessageTypes.IMAGE;
-    } else if (/!\[voice]\(.*?\)/.test(content)) {
-      console.log("VOICE")
-      console.log(content)
-        messageType = MessageTypes.VOICE;
-    }
 
-    // Create and return the ExtendedBlock
-    const block: ExtendedBlock = {
-      id: message.id,
-      text: content, // Use the processed content
-      historical: false,
-      streamingUrl: ``,
-      messageType: messageType,
-      isVisibleInChat: validTypes.includes(messageType),
-      isInputElement: false,
-      role: message.role,
-      createdAt: typeof message.createdAt === 'string'
-        ? message.createdAt
-        : new Date().toString(),
-      workspaceId: uuidv4(),
-      userId: "default",
-      fileId: "default",
-      index: 0,
-      publicData: true,
-      contentURL: null,
-      uploadBytes: null,
-      uploadType: null,
-      mimeType: null,
-      url: null,
-    };
-
-    return [block];
   }
 
   /**

@@ -11,7 +11,7 @@ export async function POST(req: Request) {
 
     const formData = await req.formData();
     const audioFile = formData.get('audio') as Blob;
-    console.log(audioFile.size)
+
     
     const response = await fetch("https://api.deepgram.com/v1/listen?model=nova-2&smart_format=true", {
       method: "POST",
@@ -27,7 +27,7 @@ export async function POST(req: Request) {
     }
 
     const data = await response.json();
-    console.log(JSON.stringify(data, null, 2));
+
     return NextResponse.json({ text: data.results.channels[0].alternatives[0].transcript });
 
   } catch (error) {

@@ -4,12 +4,18 @@ import { NextRequest, NextResponse } from "next/server";
 import prismadb from "@/lib/prismadb";
 import { call_modal_agent } from "@/lib/utils";
 
-export async function GET(
+type RouteContext = {
+    params: Promise<{ chatId: string }>;  // Make params a Promise
+}
+
+export async function POST(
     request: NextRequest,
-    { params }: { params: { chatId: string } }
+    { params }: RouteContext
 ) {
     try {
-        const { chatId } = params;
+        const unwrappedParams = await params;
+        const chatId = unwrappedParams.chatId;
+
         const user = await auth();
 
         if (!user || !user.userId) {

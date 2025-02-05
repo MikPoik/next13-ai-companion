@@ -189,7 +189,7 @@ export const ChatMessage = ({
           </div>
         );
         if ('text' in block && typeof block.text === 'string' && validTypes.includes(block.messageType!) && block.messageType === MessageTypes.TEXT && (block.role === 'user' || block.role === 'assistant' || block.role === 'system') && !/!\[.*?\]\(.*?\)/.test(block.text)) {
-          //console.log("Text block detected:", block)
+
           return messageWrapper(
             <div className="leading-6 text-sm">
               {formatText(block.text)}
@@ -201,7 +201,7 @@ export const ChatMessage = ({
            return <StreamContent blockId={block.id} onContentUpdate={accumulatedContentRef?.current ? (newContent: string) => accumulatedContentRef.current = newContent : undefined} key={block.id} />;
         }
         if (block.messageType === MessageTypes.VOICE) {
-          console.log("Audio block detected:", block.text)
+
           const parseVoiceUrlFromMarkdown = (text: string) => {
             const regex = /\!\[voice]\((.*?)\)/;
             const matches = text.match(regex);

@@ -27,8 +27,9 @@ interface Block {
 async function containsMarkdownImageSyntax(blockListStr: string): Promise<boolean> {
   try {
     // Check if the input blockList string contains Markdown image syntax
-    const markdownImageRegex = /!\[.*?\]\(.*?\)/g;
+    const markdownImageRegex = /!\[(?!voice).*?\]\(.*?\)/g;
     const containsImage = markdownImageRegex.test(blockListStr);
+    console.log("containsImage", containsImage)
     return containsImage; // Return true if Markdown image syntax is found, otherwise false
   } catch (error) {
     console.error("SaveResponse, Error detecting Markdown image syntax:", error);
@@ -37,6 +38,19 @@ async function containsMarkdownImageSyntax(blockListStr: string): Promise<boolea
   }
 }
 
+async function containsMarkdownVoiceSyntax(blockListStr: string): Promise<boolean> {
+  try {
+    // Check if the input blockList string contains Markdown image syntax
+    const markdownImageRegex = /!\[voice\]\(.*?\)/g;
+    const containsVoice = markdownImageRegex.test(blockListStr);
+    console.log("containsVoice", containsVoice)
+    return containsVoice; // Return true if Markdown image syntax is found, otherwise false
+  } catch (error) {
+    console.error("SaveResponse, Error detecting Markdown image syntax:", error);
+    console.error("SaveResponse, Block list string causing error:", blockListStr);
+    return false; // In case of error, return false
+  }
+}
 
 type RouteContext = {
     params: Promise<{ chatId: string }>;
@@ -76,7 +90,11 @@ export async function POST(
         if (image_url) {
             imageTokens = 500
         }
-        
+
+        const voice_url = await containsMarkdownVoiceSyntax(blockList)
+        if (voice_url) {
+            voiceTokens = 10
+        }
         await prismadb.companion.update({
             where: { id: chatId },
             data: {

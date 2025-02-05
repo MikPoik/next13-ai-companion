@@ -111,6 +111,10 @@ export const ChatHeader = ({
                         </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={() => window.location.href = `/api/chat/${companion.id}/download-history`}>
+                            <Download className="w-4 h-4 mr-2" />
+                            Download HTML Chat History
+                        </DropdownMenuItem>
                         <DropdownMenuItem onClick={() => router.push((preserveQueryParams(`/companion/${companion.id}`)))} className="mb-2">
                             <Edit className="w-4 h-4 mr-2" />
                             Edit

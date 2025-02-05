@@ -1,4 +1,4 @@
-async function seedLemonfoxVoices() {
+async function seedDeepinfraVoices() {
   const { PrismaClient } = require('@prisma/client');
 
   const db = new PrismaClient();
@@ -6,40 +6,40 @@ async function seedLemonfoxVoices() {
     await db.voice.createMany({
       data: [
         {
-          id: 'mia',
-          name: 'Mia',
-          voice_id: 'mia',
-          sample_url: 'https://api.steamship.com/api/v1/block/99727F63-0B88-4358-ABD3-5483949A3DC5/raw'
+          id: 'none',
+          name: 'none',
+          voice_id: 'none',
+          sample_url: 'none'
         },
         {
-          id: 'ava',
-          name: 'Ava',
-          voice_id: 'ava',
-          sample_url: 'https://api.steamship.com/api/v1/block/1125D9B3-06E0-427B-B603-9BB8DD08C5E2/raw'
+          id: 'af_bella',
+          name: 'Bella',
+          voice_id: 'af_bella',
+          sample_url: 'none'
         },
         {
-          id: 'zoe',
-          name: 'Zoe',
-          voice_id: 'zoe',
-          sample_url: 'https://api.steamship.com/api/v1/block/2E0C87AE-AFE3-4FF5-B3DD-4068FC03AF4F/raw'
+          id: 'af_sarah',
+          name: 'Sarah',
+          voice_id: 'af_sarah',
+          sample_url: 'none'
         },
         {
-          id: 'leo',
-          name: 'Leo',
-          voice_id: 'leo',
-          sample_url: 'https://api.steamship.com/api/v1/block/A9846309-9E48-4518-97D7-1CC39F3DDE98/raw'
+          id: 'am_michael',
+          name: 'Michael',
+          voice_id: 'am_michael',
+          sample_url: ''
         },
         {
-          id: 'sam',
-          name: 'Sam',
-          voice_id: 'sam',
-          sample_url: 'https://api.steamship.com/api/v1/block/C9AD86E7-92F6-465A-91EB-D3446746FEE2/raw'
+          id: 'am_adam',
+          name: 'Adam',
+          voice_id: 'am_adam',
+          sample_url: 'none'
         },
         {
-          id: 'ben',
-          name: 'Ben',
-          voice_id: 'ben',
-          sample_url: 'https://api.steamship.com/api/v1/block/0BC76742-6FA9-4FA4-9D24-6EE9ACC32C5D/raw'
+          id: 'am_eric',
+          name: 'Eric',
+          voice_id: 'am_eric',
+          sample_url: 'none'
         }
       ],
     });
@@ -50,4 +50,4 @@ async function seedLemonfoxVoices() {
   }
 }
 
-seedLemonfoxVoices();
+seedDeepinfraVoices();
