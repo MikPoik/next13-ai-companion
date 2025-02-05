@@ -436,7 +436,7 @@ export const ChatClient = ({ isPro, companion,chat_history }: ChatClientProps) =
   const onSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     useStreamStore.getState().setContent("");
-    console.log(chunksRef.current.length)
+    
     if (!input && chunksRef.current.length === 0) {
       toast({
         description: "Input cannot be empty.",
@@ -447,10 +447,9 @@ export const ChatClient = ({ isPro, companion,chat_history }: ChatClientProps) =
       return;
     }
 
-    // Check if messagesRef.current is a valid array
     if (!Array.isArray(messagesRef.current)) {
       console.error('Error: messagesRef.current is not a valid array');
-      messagesRef.current = []; // Initialize it as an empty array if not
+      messagesRef.current = [];
     }
 
     const { status, message } = await checkBalance(companion.id);
@@ -473,13 +472,11 @@ export const ChatClient = ({ isPro, companion,chat_history }: ChatClientProps) =
 
     setIsSubmitting(true);
     retryCountRef.current = 0;
-    setShowInputMsg(input)
-
+    setShowInputMsg(input);
 
     try {
-      handleSubmit(e as any, {});
-    }
-    catch (error) {
+      await handleSubmit(e);
+    } catch (error) {
       console.error('An error occurred:', error);
       setIsSubmitting(false);
       toast({
@@ -487,8 +484,7 @@ export const ChatClient = ({ isPro, companion,chat_history }: ChatClientProps) =
         variant: 'destructive',
         duration: 3000,
       });
-
-  };
+    }
   }
 
   const transformedMessages: ChatMessageProps[] = messages.slice(1).map((message) => (
