@@ -138,6 +138,9 @@ export const ChatClient = ({ isPro, companion,chat_history }: ChatClientProps) =
             const { text } = await response.json();
             if (text && text.trim()) {
               setInput(text);
+              // Trigger form submission after setting input
+              const formEvent = new Event('submit', { cancelable: true });
+              handleSubmit(formEvent as any, {});
             } else {
               throw new Error('No transcription returned');
             }
