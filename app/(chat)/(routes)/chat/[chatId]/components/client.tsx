@@ -140,9 +140,12 @@ export const ChatClient = ({ isPro, companion,chat_history }: ChatClientProps) =
               const trimmedText = text.trim();
               setInput(trimmedText);
               setIsSubmitting(false);
-              // Submit immediately after setting the input
-              const formEvent = new Event('submit', { cancelable: true });
-              handleSubmit(formEvent as any);
+              setTimeout(() => {
+                const form = document.querySelector('form');
+                if (form) {
+                  form.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+                }
+              }, 100);
             } else {
               throw new Error('No transcription returned');
             }
@@ -475,7 +478,7 @@ export const ChatClient = ({ isPro, companion,chat_history }: ChatClientProps) =
     setShowInputMsg(input);
 
     try {
-      await handleSubmit(e);
+      handleSubmit(e);
     } catch (error) {
       console.error('An error occurred:', error);
       setIsSubmitting(false);
