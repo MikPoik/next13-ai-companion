@@ -1,4 +1,3 @@
-
 import { auth } from "@clerk/nextjs/server";
 import { NextRequest, NextResponse } from "next/server";
 import prismadb from "@/lib/prismadb";
@@ -45,7 +44,7 @@ export async function GET(
 
         const response = await call_modal_agent("get_chat_history", agentConfig);
         const allMessages = await response.json();
-        
+
         // Filter messages to include only user and assistant messages, excluding first user message
         const filteredMessages = allMessages
             .filter((msg: any, index: number) => 
@@ -66,6 +65,7 @@ export async function GET(
         .assistant { background: #f5f5f5; margin-right: 20%; }
         .timestamp { font-size: 0.8em; color: #666; }
         img { max-width: 100%; height: auto; border-radius: 4px; margin: 10px 0; }
+        audio { width: 100%; }
     </style>
 </head>
 <body>
@@ -73,9 +73,11 @@ export async function GET(
     <div class="chat-container">
         ${filteredMessages.map((msg: any) => {
             const isImage = msg.content?.includes("![") && msg.content?.includes("](") && !msg.content?.includes("![voice]");
+            const isVoice = msg.content?.includes("![voice]");
             let content = msg.content || "";
             let imageUrl = "";
-            
+            let voiceUrl = "";
+
             if (isImage) {
                 const matches = content.match(/!\[.*?\]\((.*?)\)/);
                 if (matches) {
@@ -83,12 +85,21 @@ export async function GET(
                     content = content.replace(/!\[.*?\]\((.*?)\)/g, "").trim();
                 }
             }
-            
+
+            if (isVoice) {
+                const matches = content.match(/!\[voice\]\((.*?)\)/);
+                if (matches) {
+                    voiceUrl = matches[1];
+                    content = content.replace(/!\[voice\]\((.*?)\)/g, "").trim();
+                }
+            }
+
             return `
         <div class="message ${msg.role}">
             <div class="timestamp">${msg.role === 'user' ? 'You' : companion.name} - ${new Date().toLocaleString()}</div>
             <div>${content}</div>
             ${imageUrl ? `<img src="${imageUrl}" alt="Chat Image">` : ''}
+            ${voiceUrl ? `<audio controls src="${voiceUrl}"></audio>` : ''}
         </div>`;
         }).join("")}
     </div>
