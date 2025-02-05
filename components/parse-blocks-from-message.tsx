@@ -67,7 +67,7 @@
     
     parts.forEach((part, index) => {
       if (part.trim()) {
-        let messageType = MessageTypes.TEXT;
+        let messageType: "TEXT" | "IMAGE" | "VOICE" = MessageTypes.TEXT;
         let text = part;
 
         if (/!\[voice\]\(.*?\)/.test(part)) {

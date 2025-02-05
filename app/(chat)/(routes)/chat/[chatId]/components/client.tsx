@@ -101,9 +101,9 @@ export const ChatClient = ({ isPro, companion,chat_history }: ChatClientProps) =
           }
           throw err;
         });
-
+      console.log("Start recording")
       if (!stream) return;
-
+      
       const mediaRecorder = new MediaRecorder(stream, {
         mimeType: 'audio/webm'
       });
@@ -113,8 +113,10 @@ export const ChatClient = ({ isPro, companion,chat_history }: ChatClientProps) =
       mediaRecorder.ondataavailable = (e) => {
         chunksRef.current.push(e.data);
       };
-
+      console.log(chunksRef.current.length)
       mediaRecorder.onstop = async () => {
+        console.log("Stop recording")
+        console.log(chunksRef.current.length)
         const audioBlob = new Blob(chunksRef.current, { type: 'audio/webm' });
         const formData = new FormData();
         formData.append('audio', audioBlob);
@@ -422,7 +424,8 @@ export const ChatClient = ({ isPro, companion,chat_history }: ChatClientProps) =
   const onSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     useStreamStore.getState().setContent("");
-    if (!input) {
+    console.log(chunksRef.current.length)
+    if (!input && chunksRef.current.length === 0) {
       toast({
         description: "Input cannot be empty.",
         variant: "destructive",

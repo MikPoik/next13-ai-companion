@@ -5,7 +5,7 @@ import { checkSubscription } from "@/lib/subscription";
 const { v4: uuidv4 } = require('uuid');
 import { call_modal_agent } from "@/lib/utils";
 
-async function updateAgent(name: string, description: string, personality: string, appearance: string, background: string, seed: string, workspace_name: string, instance_handle: string, agent_version: string, create_images: boolean, llm_model: string, image_model: string,tags:string, update_version: boolean = false) {
+async function updateAgent(name: string, description: string, personality: string, appearance: string, background: string, seed: string, workspace_name: string, instance_handle: string, agent_version: string, create_images: boolean, llm_model: string, image_model: string,tags:string,voice_preset:string = "none", update_version: boolean = false) {
   let retryCount = 0;
   const maxRetries = 3;
 
@@ -37,6 +37,9 @@ async function updateAgent(name: string, description: string, personality: strin
         llm_config: {
           model: llm_model,
           provider: llm_model.toLowerCase().includes("gpt") ? "openai" : "deepinfra" // final provider determined on backend
+        },
+        voice_config: {
+          voice_preset: voice_preset
         },
         image_config: {
           image_model: image_model,
@@ -129,7 +132,8 @@ export async function POST(req: NextRequest) {
         companion.createImages,
         companion.model,
         companion.imageModel,
-        companion_tags
+        companion_tags,
+        companion.voiceId
       );
 
     } else if (agent_version !== companion.steamshipAgent[0].version || companion.steamshipAgent[0].revision !== companion.revision) {
@@ -154,6 +158,7 @@ export async function POST(req: NextRequest) {
         companion.model,
         companion.imageModel,
         companion_tags,
+        companion.voiceId,
         true
       );
     } else {
