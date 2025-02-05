@@ -738,7 +738,7 @@ export const CompanionForm = ({
                                     */}
                                 </div>
                                 <FormDescription>
-                                    Select a voice for your AI (&quot;none&quot; means voice is disabled)
+                                    Select a voice for your AI if you want voice messages to chat (&quot;none&quot; means voice is disabled)
                                 </FormDescription>
                                 <FormMessage />
                             </FormItem>

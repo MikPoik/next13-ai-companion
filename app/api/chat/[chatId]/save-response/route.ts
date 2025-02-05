@@ -29,7 +29,7 @@ async function containsMarkdownImageSyntax(blockListStr: string): Promise<boolea
     // Check if the input blockList string contains Markdown image syntax
     const markdownImageRegex = /!\[(?!voice).*?\]\(.*?\)/g;
     const containsImage = markdownImageRegex.test(blockListStr);
-    console.log("containsImage", containsImage)
+
     return containsImage; // Return true if Markdown image syntax is found, otherwise false
   } catch (error) {
     console.error("SaveResponse, Error detecting Markdown image syntax:", error);
@@ -43,7 +43,7 @@ async function containsMarkdownVoiceSyntax(blockListStr: string): Promise<boolea
     // Check if the input blockList string contains Markdown image syntax
     const markdownImageRegex = /!\[voice\]\(.*?\)/g;
     const containsVoice = markdownImageRegex.test(blockListStr);
-    console.log("containsVoice", containsVoice)
+
     return containsVoice; // Return true if Markdown image syntax is found, otherwise false
   } catch (error) {
     console.error("SaveResponse, Error detecting Markdown image syntax:", error);

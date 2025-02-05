@@ -111,7 +111,7 @@ export const ChatHeader = ({
                         </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => window.location.href = `/api/chat/${companion.id}/download-history`}>
+                        <DropdownMenuItem onClick={() => window.location.href = `/api/chat/${companion.id}/download-history`} className="mb-2">
                             <Download className="w-4 h-4 mr-2" />
                             Download HTML Chat History
                         </DropdownMenuItem>

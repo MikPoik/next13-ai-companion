@@ -8,7 +8,7 @@ type RouteContext = {
     params: Promise<{ chatId: string }>;  // Make params a Promise
 }
 
-export async function POST(
+export async function GET(
     request: NextRequest,
     { params }: RouteContext
 ) {
@@ -95,7 +95,7 @@ export async function POST(
 </body>
 </html>`;
 
-        const fileName = `chat-history-${companion.name}-${new Date().toISOString().split('T')[0]}.html`;
+        const fileName = `chat-history-${companion.name}.html`;
 
         return new NextResponse(htmlContent, {
             headers: {
