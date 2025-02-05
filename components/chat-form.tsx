@@ -40,7 +40,9 @@ export const ChatForm = ({
 
     const handleFormSubmit = (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        onSubmit(e);
+        if (!isLoading) {
+            onSubmit(e);
+        }
     };
 
     return (

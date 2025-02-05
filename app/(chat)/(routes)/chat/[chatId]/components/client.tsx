@@ -438,6 +438,7 @@ export const ChatClient = ({ isPro, companion,chat_history }: ChatClientProps) =
 
   const onSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (isSubmitting || isLoading) return;
     useStreamStore.getState().setContent("");
     
     if (!input && chunksRef.current.length === 0) {
