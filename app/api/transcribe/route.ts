@@ -11,8 +11,9 @@ export async function POST(req: Request) {
 
     const formData = await req.formData();
     const audioFile = formData.get('audio') as Blob;
+    console.log(audioFile.size)
     
-    const response = await fetch("https://api.deepgram.com/v1/listen", {
+    const response = await fetch("https://api.deepgram.com/v1/listen?model=nova-2&smart_format=true", {
       method: "POST",
       headers: {
         Authorization: `Token ${process.env.DEEPGRAM_API_KEY}`,
@@ -26,6 +27,7 @@ export async function POST(req: Request) {
     }
 
     const data = await response.json();
+    console.log(data)
     return NextResponse.json({ text: data.results.channels[0].alternatives[0].transcript });
 
   } catch (error) {

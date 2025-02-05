@@ -438,6 +438,7 @@ export const ChatClient = ({ isPro, companion,chat_history }: ChatClientProps) =
         variant: "destructive",
         duration: 3000,
       });
+      setIsSubmitting(false);
       return;
     }
 
