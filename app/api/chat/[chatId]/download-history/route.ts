@@ -38,7 +38,14 @@ export async function GET(
         };
 
         const response = await call_modal_agent("get_chat_history", agentConfig);
-        const messages = await response.json();
+        const allMessages = await response.json();
+        
+        // Filter messages to include only user and assistant messages, excluding first user message
+        const filteredMessages = allMessages
+            .filter((msg: any, index: number) => 
+                (msg.role === 'user' || msg.role === 'assistant') && 
+                !(index === 0 && msg.role === 'user')
+            );
 
         // Generate HTML content
         const htmlContent = `
@@ -58,7 +65,7 @@ export async function GET(
 <body>
     <h1>Chat History with ${companion.name}</h1>
     <div class="chat-container">
-        ${messages.map((msg: any) => {
+        ${filteredMessages.map((msg: any) => {
             const isImage = msg.content?.includes("![") && msg.content?.includes("](") && !msg.content?.includes("![voice]");
             let content = msg.content || "";
             let imageUrl = "";
