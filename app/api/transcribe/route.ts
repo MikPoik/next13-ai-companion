@@ -27,7 +27,7 @@ export async function POST(req: Request) {
     }
 
     const data = await response.json();
-    console.log(data)
+    console.log(JSON.stringify(data, null, 2));
     return NextResponse.json({ text: data.results.channels[0].alternatives[0].transcript });
 
   } catch (error) {

@@ -44,7 +44,7 @@ export async function GET(
         const filteredMessages = allMessages
             .filter((msg: any, index: number) => 
                 (msg.role === 'user' || msg.role === 'assistant') && 
-                !(index === 0 && msg.role === 'user')
+                !(index === 1 && msg.role === 'user')
             );
 
         // Generate HTML content
