@@ -96,7 +96,7 @@ export async function GET(
 
             return `
         <div class="message ${msg.role}">
-            <div class="timestamp">${msg.role === 'user' ? 'You' : companion.name} - ${new Date().toLocaleString()}</div>
+            <div class="timestamp">${msg.role === 'user' ? 'You' : companion.name}</div>
             <div>${content}</div>
             ${imageUrl ? `<img src="${imageUrl}" alt="Chat Image">` : ''}
             ${voiceUrl ? `<audio controls src="${voiceUrl}"></audio>` : ''}
