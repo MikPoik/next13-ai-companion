@@ -1,6 +1,6 @@
 "use client";
 import axios from "axios";
-import { ChevronLeft, Edit, MessagesSquare, MoreVertical, Trash, PhoneCall,Download } from "lucide-react";
+import { ChevronLeft, Edit, MessagesSquare, MoreVertical, Trash, PhoneCall,Download, Copy } from "lucide-react"; // Added Copy import
 import { useRouter } from "next/navigation";
 import { Companion, Message } from "@prisma/client";
 import { useUser } from "@clerk/nextjs";
@@ -79,13 +79,13 @@ export const ChatHeader = ({
         //console.log(params.toString());
         return `${path}${params.toString() ? `?${params.toString()}` : ''}`;
     };
-    
+
     return (
         <div className="flex w-full justify-between items-center border-b border-primary/10 pb-1 py-1">
             <MobileSidebar isPro={isPro} />
             <div className="flex gap-x-2 items-center">
 
-               
+
                 <div className="flex flex-col gap-y-1">
                     <div className="flex items-center gap-x-2">
                         <p className="font-bold">{companion.name}</p>
@@ -115,13 +115,31 @@ export const ChatHeader = ({
                             <Download className="w-4 h-4 mr-2" />
                             Download HTML Chat History
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => router.push((preserveQueryParams(`/companion/${companion.id}`)))} className="mb-2">
-                            <Edit className="w-4 h-4 mr-2" />
-                            Edit
+                        <DropdownMenuItem onClick={async () => {
+                            try {
+                                const response = await axios.post(`/api/companion/${companion.id}/fork`);
+                                const forkedCompanion = response.data;
+                                toast({
+                                    description: "Character forked successfully!"
+                                });
+                                router.push(`/companion/${forkedCompanion.id}`);
+                            } catch (error) {
+                                toast({
+                                    variant: "destructive",
+                                    description: "Failed to fork character."
+                                });
+                            }
+                        }} className="mb-2">
+                            <Copy className="w-4 h-4 mr-2" />
+                            Fork Character
                         </DropdownMenuItem>
                         <DropdownMenuItem onClick={onDeleteChatHistory} className="mb-2">
                             <Trash className="w-4 h-4 mr-2" />
                             Delete Chat history
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => router.push((preserveQueryParams(`/companion/${companion.id}`)))} className="mb-2">
+                            <Edit className="w-4 h-4 mr-2" />
+                            Edit
                         </DropdownMenuItem>
                     </DropdownMenuContent>
                 </DropdownMenu>
@@ -138,6 +156,24 @@ export const ChatHeader = ({
                             <Download className="w-4 h-4 mr-2" />
                             Download HTML Chat History
                         </DropdownMenuItem>
+                        <DropdownMenuItem onClick={async () => {
+                            try {
+                                const response = await axios.post(`/api/companion/${companion.id}/fork`);
+                                const forkedCompanion = response.data;
+                                toast({
+                                    description: "Character forked successfully!"
+                                });
+                                router.push(`/companion/${forkedCompanion.id}`);
+                            } catch (error) {
+                                toast({
+                                    variant: "destructive",
+                                    description: "Failed to fork character."
+                                });
+                            }
+                        }} className="mb-2">
+                            <Copy className="w-4 h-4 mr-2" />
+                            Fork Character
+                        </DropdownMenuItem>
                         <DropdownMenuItem onClick={onDeleteChatHistory}>
                             <Trash className="w-4 h-4 mr-2" />
                             Delete Chat history
@@ -149,8 +185,8 @@ export const ChatHeader = ({
             {/* Call Modal */}
             <CallModal isOpen={isCallModalOpen} onClose={() => setIsCallModalOpen(false)} companionId={companion.id} companionName={companion.name} />
 
-            
+
         </div>
-        
+
     );
 };
