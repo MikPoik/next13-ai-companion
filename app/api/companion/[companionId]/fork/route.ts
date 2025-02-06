@@ -1,13 +1,18 @@
-
 import { auth, currentUser } from "@clerk/nextjs/server";
-import { NextResponse } from "next/server";
+import { NextResponse,NextRequest } from "next/server";
 import prismadb from "@/lib/prismadb";
 
+type RouteContext = {
+    params: Promise<{ companionId: string }>;  // Make params a Promise
+}
+
 export async function POST(
-    req: Request,
-    { params }: { params: { companionId: string } }
+    request: NextRequest,
+     { params }: RouteContext
 ) {
     try {
+        const unwrappedParams = await params;
+        const companionId = unwrappedParams.companionId;
         const user = await currentUser();
         if (!user || !user.id) {
             return new NextResponse("Unauthorized", { status: 401 });
@@ -15,7 +20,7 @@ export async function POST(
 
         const companion = await prismadb.companion.findUnique({
             where: {
-                id: params.companionId
+                id: companionId
             },
             include: {
                 tags: true
@@ -28,15 +33,16 @@ export async function POST(
 
         const forkedCompanion = await prismadb.companion.create({
             data: {
+                categoryId: "default",
                 userId: user.id,
                 userName: user.firstName || "user",
                 src: companion.src,
-                name: `${companion.name} (Fork)`,
+                name: `${companion.name}`,
                 description: companion.description,
                 personality: companion.personality,
                 seed: companion.seed,
                 packageName: companion.packageName,
-                isPublic: true,
+                isPublic: false,
                 workspaceName: companion.workspaceName,
                 instanceHandle: companion.instanceHandle,
                 behaviour: companion.behaviour,

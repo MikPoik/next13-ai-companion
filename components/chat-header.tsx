@@ -115,32 +115,15 @@ export const ChatHeader = ({
                             <Download className="w-4 h-4 mr-2" />
                             Download HTML Chat History
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={async () => {
-                            try {
-                                const response = await axios.post(`/api/companion/${companion.id}/fork`);
-                                const forkedCompanion = response.data;
-                                toast({
-                                    description: "Character forked successfully!"
-                                });
-                                router.push(`/companion/${forkedCompanion.id}`);
-                            } catch (error) {
-                                toast({
-                                    variant: "destructive",
-                                    description: "Failed to fork character."
-                                });
-                            }
-                        }} className="mb-2">
-                            <Copy className="w-4 h-4 mr-2" />
-                            Fork Character
+                        <DropdownMenuItem onClick={() => router.push((preserveQueryParams(`/companion/${companion.id}`)))} className="mb-2">
+                            <Edit className="w-4 h-4 mr-2" />
+                            Edit
                         </DropdownMenuItem>
                         <DropdownMenuItem onClick={onDeleteChatHistory} className="mb-2">
                             <Trash className="w-4 h-4 mr-2" />
                             Delete Chat history
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => router.push((preserveQueryParams(`/companion/${companion.id}`)))} className="mb-2">
-                            <Edit className="w-4 h-4 mr-2" />
-                            Edit
-                        </DropdownMenuItem>
+
                     </DropdownMenuContent>
                 </DropdownMenu>
             ) : (
@@ -152,7 +135,7 @@ export const ChatHeader = ({
                     </DropdownMenuTrigger>
 
                     <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => window.location.href = `/api/chat/${companion.id}/download-history`}>
+                        <DropdownMenuItem onClick={() => window.location.href = `/api/chat/${companion.id}/download-history`}  className="mb-2">
                             <Download className="w-4 h-4 mr-2" />
                             Download HTML Chat History
                         </DropdownMenuItem>

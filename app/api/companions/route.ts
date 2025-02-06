@@ -9,7 +9,7 @@ export async function GET(req: Request) {
     const categoryId = searchParams.get("categoryId");
     const name = searchParams.get("name");
     const page = parseInt(searchParams.get('page') || '1');
-    const pageSize = 48;
+    const pageSize = 68;
     const nsfw = searchParams.get('nsfw') === 'true';
     const tagIds = searchParams.get('tag')?.split(',').filter(id => id !== '') || [];
     const user = await currentUser();
