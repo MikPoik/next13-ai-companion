@@ -72,6 +72,7 @@ model Companion {
   backstory      String
   messages       Message[]
   featured       Boolean @default(false)
+  cot_prompt     Boolean @default(true)
 
   tags           Tag[]  @relation("CompanionsTags")
   nsfw           Boolean @default(false)

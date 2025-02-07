@@ -42,7 +42,7 @@ export async function POST(
                 personality: companion.personality,
                 seed: companion.seed,
                 packageName: companion.packageName,
-                isPublic: false,
+                isPublic: companion.isPublic,
                 workspaceName: companion.workspaceName,
                 instanceHandle: companion.instanceHandle,
                 behaviour: companion.behaviour,
@@ -57,7 +57,8 @@ export async function POST(
                 nsfw: companion.nsfw,
                 tags: {
                     connect: companion.tags.map(tag => ({ id: tag.id }))
-                }
+                },
+                cot_prompt:companion.cot_prompt
             }
         });
 

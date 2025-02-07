@@ -63,7 +63,8 @@ const formSchema = z.object({
     regenerateImage: z.boolean().optional(),
     phoneVoiceId: z.string().optional(),
     tags: z.array(z.string()).min(1,{ message: "tags are required" }),
-    nsfw: z.boolean().optional()
+    nsfw: z.boolean().optional(),
+    cot_prompt: z.boolean().optional()
 });
 
 
@@ -205,13 +206,14 @@ export const CompanionForm = ({
             selfiePost: "",
             model: "meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo",
             createImages: false,
-            imageModel: "fal-ai/flux/dev",
+            imageModel: "flux-schnell",
             voiceId: 'none',
             backstory: "",
             regenerateImage: false,
             phoneVoiceId: '101',
             tags: [],
-            nsfw: false
+            nsfw: false,
+            cot_prompt:true
 
 
 
@@ -401,7 +403,17 @@ export const CompanionForm = ({
                                                 </SelectTrigger>
                                             </FormControl>
                                             <SelectContent style={dropdownStyle}>
-                                                <SelectItem key="realistic-vision-v5-1" value="realistic-vision-v5-1">Realistic Vision v5</SelectItem>
+                                                {/*<SelectItem key="https://civitai.com/api/download/models/1308497?type=Model&format=SafeTensor" value="https://civitai.com/api/download/models/1308497?type=Model&format=SafeTensor">Flux Anime Enchancer</SelectItem>*/}
+                                                <SelectItem key="https://civitai.com/api/download/models/1272367?type=Model&format=SafeTensor" value="https://civitai.com/api/download/models/1272367?type=Model&format=SafeTensor">Flux Realistic Anime</SelectItem>
+                                                <SelectItem key="https://civitai.com/api/download/models/729537?type=Model&format=SafeTensor" value="https://civitai.com/api/download/models/729537?type=Model&format=SafeTensor">Flux Anime</SelectItem>
+                                                <SelectItem key="https://civitai.com/api/download/models/1061126?type=Model&format=SafeTensor" value="https://civitai.com/api/download/models/1061126?type=Model&format=SafeTensor">Flux Hentai</SelectItem>
+                                                {/*<SelectItem key="https://civitai.com/api/download/models/756735?type=Model&format=SafeTensor" value="https://civitai.com/api/download/models/756735?type=Model&format=SafeTensor">Flux Hentai 2</SelectItem>
+                                                <SelectItem key="https://civitai.com/api/download/models/723657?type=Model&format=SafeTensor" value="https://civitai.com/api/download/models/723657?type=Model&format=SafeTensor">Flux nsfw 3</SelectItem>*/}
+                                                <SelectItem key="https://civitai.com/api/download/models/904370?type=Model&format=SafeTensor" value="https://civitai.com/api/download/models/904370?type=Model&format=SafeTensor">Flux nsfw</SelectItem>
+                                                {/*<SelectItem key="https://civitai.com/api/download/models/746602?type=Model&format=SafeTensor" value="https://civitai.com/api/download/models/746602?type=Model&format=SafeTensor">Flux nsfw</SelectItem>*/}
+                                                <SelectItem key="https://civitai.com/api/download/models/753053?type=Model&format=SafeTensor" value="https://civitai.com/api/download/models/753053?type=Model&format=SafeTensor">Flux Pony Fantasy</SelectItem>
+                                                <SelectItem key="https://civitai.com/api/download/models/728041?type=Model&format=SafeTensor" value="https://civitai.com/api/download/models/728041?type=Model&format=SafeTensor">Flux Midjorney</SelectItem>
+                                                {/*<SelectItem key="realistic-vision-v5-1" value="realistic-vision-v5-1">Realistic Vision v5</SelectItem>*/}
                                                 <SelectItem key="realistic-vision-v3" value="realistic-vision-v3">Realistic Vision v3</SelectItem>
                                                 <SelectItem key="dark-sushi-mix-v2-25" value="dark-sushi-mix-v2-25">Dark Sushi mix v2.25</SelectItem>
                                                 <SelectItem key="absolute-reality-v1-8-1" value="absolute-reality-v1-8-1">Absolute Reality v1.8.1</SelectItem>
@@ -412,6 +424,7 @@ export const CompanionForm = ({
                                                 <SelectItem key="real-cartoon-xl-v6" value="real-cartoon-xl-v6">Realcartoon v6 (SDXL)</SelectItem>
                                                 <SelectItem key="counterfeit-xl-v2-5" value="counterfeit-xl-v2-5">Counterfeit (SDXL) Anime</SelectItem>
                                                 <SelectItem key="animagine-xl-v-3-1" value="animagine-xl-v-3-1">Animagine XL (SDXL) Anime</SelectItem>
+                                                {/*
                                                 <SelectItem key="https://civitai.com/api/download/models/926965?type=Model&format=SafeTensor&size=pruned&fp=fp16" value="https://civitai.com/api/download/models/926965?type=Model&format=SafeTensor&size=pruned&fp=fp16">Lustify (SDXL) Realistic</SelectItem>
                                                 <SelectItem key="https://civitai.com/api/download/models/233092?type=Model&format=SafeTensor&size=full&fp=fp16" value="https://civitai.com/api/download/models/233092?type=Model&format=SafeTensor&size=full&fp=fp16">Better Than Words (SDXL) Realistic</SelectItem>
                                                 <SelectItem key="https://civitai.com/api/download/models/981979?type=Model&format=SafeTensor&size=pruned&fp=fp16" value="https://civitai.com/api/download/models/981979?type=Model&format=SafeTensor&size=pruned&fp=fp16">Suzannes Mix (SDXL) Realistic</SelectItem>
@@ -422,7 +435,8 @@ export const CompanionForm = ({
                                                 <SelectItem key="https://civitai.com/api/download/models/156375" value="https://civitai.com/api/download/models/156375">Clearhung Anime (SDXL)</SelectItem>
                                                 <SelectItem key="https://civitai.com/api/download/models/303526?type=Model&format=SafeTensor&size=full&fp=fp16" value="https://civitai.com/api/download/models/303526?type=Model&format=SafeTensor&size=full&fp=fp16">Animemix (SDXL)</SelectItem>
                                                 <SelectItem key="https://civitai.com/api/download/models/286821" value="https://civitai.com/api/download/models/286821">Deephentai (SDXL)</SelectItem>
-                                                <SelectItem key="fal-ai/flux/dev" value="fal-ai/flux/dev">FLUX.1 (SFW)</SelectItem>
+                                                */}
+                                                <SelectItem key="flux-schnell" value="flux-schnell">FLUX Schnell (SFW)</SelectItem>
                                                 <SelectItem key="fal-ai/stable-diffusion-v35-medium" value="fal-ai/stable-diffusion-v35-medium">StableDiffusion v3.5 (SFW)</SelectItem>
 
 
@@ -436,7 +450,7 @@ export const CompanionForm = ({
                                             type="button"
                                             className="btn-sm" // Add the appropriate button class
                                             style={isImgLoading ? avatarButtonStyleDimmed : avatarButtonStyle}
-                                            onClick={() => handleImageUpdate("")} // Call playAudio directly without arguments // Call playAudio directly
+                                            onClick={() => handleImageUpdate("")} 
                                             disabled={isImgLoading}
                                         >
                                             Generate avatar
@@ -634,7 +648,34 @@ export const CompanionForm = ({
                                 );
                             }}
                         />
-                    
+                    <FormField
+                        name="cot_prompt"
+                        control={form.control}
+                        render={({ field }) => {
+                            // Remove the value property from the field object
+                            const { value, ...rest } = field;
+
+                            return (
+                                <FormItem>
+
+                                    <FormControl>
+                                        <FormLabel>Use Chain of Thought &nbsp;
+                                            <input
+                                                type="checkbox"
+                                                {...rest} // Spread the rest of the field object into the input element's props
+                                                checked={value} // Use the value property to set the checked property
+                                                style={{ width: '16px', height: '16px', cursor: "pointer" }}
+                                            />
+                                        </FormLabel>
+                                    </FormControl>
+                                    <FormDescription>
+                                        Check to use reasoning pre-prompt. Should improve output but is slightly slower
+                                    </FormDescription>
+                                    <FormMessage />
+                                </FormItem>
+                            );
+                        }}
+                    />
                     <div className="space-y-2 w-full">
                         <div>
                             <h3 className="text-lg font-medium">Configuration</h3>
@@ -799,20 +840,19 @@ export const CompanionForm = ({
                                                     {...rest} // Spread the rest of the field object into the input element's props
                                                     checked={value} // Use the value property to set the checked property
                                                     style={{ 
-                                                        width: '14px', 
-                                                        height: '14px',
+                                                        width: '16px', 
+                                                        height: '16px',
                                                         backgroundColor: '#2d2d2d',
                                                         border: '2px solid #666',
                                                         borderRadius: '3px',
                                                         opacity: '0.8',
-                                                        cursor: 'not-allowed'
-                                                    }}
-                                                    disabled
+                                                        cursor: 'pointer'
+                                                    }}                                                    
                                                 />
                                             </label>
                                         </FormControl>
                                         <FormDescription>
-                                            (New companions are public, other users can also talk to the character)
+                                            Show in public Companions, other users can also talk to the character)
                                         </FormDescription>
                                         <FormMessage />
                                     </FormItem>

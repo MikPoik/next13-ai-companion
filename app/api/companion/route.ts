@@ -18,7 +18,7 @@ export async function POST(req: Request) {
     try {
         const body = await req.json();
         const user = await currentUser();
-        const { src, name, description, personality, seed, categoryId, packageName, isPublic, selfiePost, selfiePre, behaviour, model, createImages, imageModel, voiceId, backstory,phoneVoiceId,tags,nsfw } = body;
+        const { src, name, description, personality, seed, categoryId, packageName, isPublic, selfiePost, selfiePre, behaviour, model, createImages, imageModel, voiceId, backstory,phoneVoiceId,tags,nsfw,cot_prompt } = body;
         //console.log(src);
         if (!user || !user.id) {
             return new NextResponse("Unauthorized", { status: 401 });
@@ -140,7 +140,7 @@ export async function POST(req: Request) {
                 personality: personality_string,
                 seed,
                 packageName: env_packageName,
-                isPublic: true, // all public
+                isPublic:isPublic,
                 workspaceName: workspace_name,
                 instanceHandle: instance_handle,
                 behaviour: behaviour_string,
@@ -160,6 +160,7 @@ export async function POST(req: Request) {
                 },
                 nsfw: nsfw,
                 voiceAgentId: voice_agent_id,
+                cot_prompt: cot_prompt,
             }
         });
         
