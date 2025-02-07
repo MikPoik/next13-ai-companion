@@ -51,11 +51,27 @@ const SelectContent = React.forwardRef<
     >
       <SelectPrimitive.Viewport
         className={cn(
-          "p-1 overflow-y-auto scrollbar-thin",
+          "p-1 overflow-y-auto",
           position === "popper" &&
             "w-full min-w-[var(--radix-select-trigger-width)]"
         )}
-        style={{ maxHeight: "300px" }}
+        style={{ 
+          maxHeight: "300px",
+          overflowY: "auto",
+          scrollbarWidth: "thin",
+          scrollbarColor: "rgba(155, 155, 155, 0.5) transparent",
+          "&::-webkit-scrollbar": {
+            width: "8px",
+          },
+          "&::-webkit-scrollbar-track": {
+            background: "transparent",
+          },
+          "&::-webkit-scrollbar-thumb": {
+            backgroundColor: "rgba(155, 155, 155, 0.5)",
+            borderRadius: "20px",
+            border: "transparent",
+          }
+        }}
       >
         {children}
       </SelectPrimitive.Viewport>
