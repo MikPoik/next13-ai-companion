@@ -592,7 +592,7 @@ export const CompanionForm = ({
                                                 <SelectValue defaultValue={field.value} placeholder="Select a llm model" />
                                             </SelectTrigger>
                                         </FormControl>
-                                        <SelectContent>
+                                        <SelectContent style={{ maxHeight: "200px", overflowY: "auto" }}>
 
                                             <SelectItem key="NousResearch/Hermes-3-Llama-3.1-405B" value="NousResearch/Hermes-3-Llama-3.1-405B">Hermes-3-Llama-3.1-405B</SelectItem>
 
