@@ -42,7 +42,7 @@ export async function POST(
                 personality: companion.personality,
                 seed: companion.seed,
                 packageName: companion.packageName,
-                isPublic: companion.isPublic,
+                isPublic: false,
                 workspaceName: companion.workspaceName,
                 instanceHandle: companion.instanceHandle,
                 behaviour: companion.behaviour,
