@@ -114,16 +114,16 @@ export async function POST(req: Request) {
                 {
                     tokenCount: 0,
                     messageCount: 0,
-                    messageLimit: 1000,
-                    tokenLimit: 100000
+                    messageLimit: 10000000,
+                    tokenLimit: 1000000
 
                 },
                 create: {
                     userId: session?.metadata?.userId,
                     tokenCount: 0,
                     messageCount: 0,
-                    messageLimit: 1000,
-                    tokenLimit: 100000
+                    messageLimit: 10000000,
+                    tokenLimit: 1000000
                 },
             });
         }
@@ -143,7 +143,7 @@ export async function POST(req: Request) {
                         userId: userId,
                         tokenCount: 0,
                         messageCount: 0,
-                        messageLimit: 1000,
+                        messageLimit: 10000000,
                         [type]: increment,
                     },
                 });
@@ -156,17 +156,17 @@ export async function POST(req: Request) {
                 return new NextResponse("Metadata with user id is required for top-up", { status: 400 });
             }
             if (session?.metadata?.tokens === 'tokens-topup-50000') {
-                await handleTopUp(userId, 'proTokens', 50000);
+                await handleTopUp(userId, 'proTokens', 1000000);
             } else if (session?.metadata?.calltime) {
                 switch (session.metadata.calltime) {
-                    case 'calltime-topup-5':
-                        await handleTopUp(userId, 'callTime', 5 * 60); // 5 minutes in seconds
-                        break;
-                    case 'calltime-topup-10':
-                        await handleTopUp(userId, 'callTime', 10 * 60); // 10 minutes in seconds
-                        break;
                     case 'calltime-topup-30':
-                        await handleTopUp(userId, 'callTime', 30 * 60); // 10 minutes in seconds
+                        await handleTopUp(userId, 'callTime', 30 * 60); // 30 minutes in seconds
+                        break;
+                    case 'calltime-topup-60':
+                        await handleTopUp(userId, 'callTime', 60 * 60); // 60 minutes in seconds
+                        break;
+                    case 'calltime-topup-120':
+                        await handleTopUp(userId, 'callTime', 120 * 60); // 10 minutes in seconds
                         break;
                     // Add additional cases for different call time top-ups if needed
                     default:
@@ -219,16 +219,16 @@ export async function POST(req: Request) {
                 {
                     tokenCount: 0,
                     messageCount: 0,
-                    messageLimit: 7500,
-                    tokenLimit: 100000
+                    messageLimit: 75000000,
+                    tokenLimit: 1000000
 
                 },
                 create: {
                     userId: sub.userId,
                     tokenCount: 0,
                     messageCount: 0,
-                    messageLimit: 7500,
-                    tokenLimit: 100000
+                    messageLimit: 75000000,
+                    tokenLimit: 1000000
                 },
             });
         } else {

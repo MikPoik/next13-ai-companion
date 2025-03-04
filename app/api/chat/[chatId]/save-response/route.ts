@@ -88,12 +88,12 @@ export async function POST(
         const image_url = await containsMarkdownImageSyntax(blockList)
         let finalContent = prompt
         if (image_url) {
-            imageTokens = 500
+            imageTokens = 1000
         }
 
         const voice_url = await containsMarkdownVoiceSyntax(blockList)
         if (voice_url) {
-            voiceTokens = 10
+            voiceTokens = 100
         }
         await prismadb.companion.update({
             where: { id: chatId },
@@ -127,8 +127,8 @@ export async function POST(
                             userId: user.id,
                             tokenCount: tokenCost,
                             messageCount: 1,
-                            messageLimit: 1000,
-                            tokenLimit: 10000,
+                            messageLimit: 10000000,
+                            tokenLimit: 1000000,
                             firstMessage: currentDateTime,
                             // Assuming initial setting for proTokens and callTime needs to be handled here as well
                             proTokens: 0,

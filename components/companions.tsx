@@ -142,7 +142,7 @@ export const Companions = ({ initialCompanions }: CompanionsProps) => {
   }
 
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6 pb-10">
+    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-[repeat(auto-fit,minmax(256px,1fr))] gap-3 pb-10">
       {ageVerificationState === 'true' && companions.map((item, index) => (
           <div 
             className="card-container" 
@@ -157,8 +157,8 @@ export const Companions = ({ initialCompanions }: CompanionsProps) => {
               style={{
                 aspectRatio: '2 / 3',
                 position: 'relative',
-                maxWidth: '512px',
-                maxHeight: '768px',
+                maxWidth: '256px',
+                maxHeight: '512px',
                 overflow: 'hidden'
               }}>
               <div className="absolute inset-0 z-0">

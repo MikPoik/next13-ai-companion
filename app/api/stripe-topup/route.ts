@@ -51,12 +51,12 @@ export async function GET(request: NextRequest) {
             }
         }
         if (calltime) {
-            if (calltime === 'calltime-topup-5') {
+            if (calltime === 'calltime-topup-30') {
                 price_id = process.env.CALLTIME_TOPUP_5_PRICE_ID || "";
-            } else if (calltime === 'calltime-topup-10') {
+            } else if (calltime === 'calltime-topup-60') {
                 price_id = process.env.CALLTIME_TOPUP_10_PRICE_ID || "";
             }
-            else if (calltime === 'calltime-topup-30') {
+            else if (calltime === 'calltime-topup-120') {
                 price_id = process.env.CALLTIME_TOPUP_30_PRICE_ID || "";
             }
         }

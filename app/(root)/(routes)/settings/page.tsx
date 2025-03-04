@@ -12,7 +12,7 @@ const SettingsPage = async () => {
 
    if (!userId) return redirectToSignIn()
     var tokens = 0;
-    var token_limit = 10000;
+    var token_limit = 1000000;
     var proTokens = 0;
     var callTime = 0;
     if (userId) {
@@ -34,8 +34,8 @@ const SettingsPage = async () => {
                     userId: userId,
                     tokenCount: 0,
                     messageCount: 1,
-                    messageLimit: 1000,
-                    tokenLimit: 10000,
+                    messageLimit: 10000000,
+                    tokenLimit: 100000,
                     firstMessage: currentDateTime,
                     proTokens: 0,
                     callTime: 0,
@@ -90,17 +90,17 @@ const SettingsPage = async () => {
             {!isSubscribed && (
                 <div>
                     <div className="py-2">
-                        <span className="text-sky-500 mx-1 font-medium" >Pro plan</span> - <span className="text-sky-500 mx-1 font-medium">9.99$</span> / month.
+                        <span className="text-sky-500 mx-1 font-medium" >Pro plan</span> - <span className="text-sky-500 mx-1 font-medium">4.99$</span> / month.
                         
                         <div className="text-muted-foreground text-sm py-2 pb-2 pl-1">
-                            * 100,000 tokens / month<br />
+                            * 1000,000 tokens / month<br />
                         </div>
                         <SubscriptionButton isPro={false} tier="pro" />
                     </div>
 
                     <div className="mt-4 py-2">
                        
-                        <span className="text-purple-500 mx-1 font-medium">Unlimited plan</span> - <span className="text-purple-500 mx-1 font-medium">24.99$</span> / month.
+                        <span className="text-purple-500 mx-1 font-medium">Unlimited plan</span> - <span className="text-purple-500 mx-1 font-medium">9.99$</span> / month.
                         <div className="text-muted-foreground text-sm py-2 pb-2 pl-1">
                             * Unlimited tokens for chat and images<br />
                         </div>
@@ -120,7 +120,7 @@ const SettingsPage = async () => {
                         Want to upgrade to Unlimited?<br />
                         
                     </div>   
-                    <span className="text-purple-500 mx-1 font-medium">Unlimited plan</span> - <span className="text-purple-500 mx-1 font-medium">24.99$</span> / month.
+                    <span className="text-purple-500 mx-1 font-medium">Unlimited plan</span> - <span className="text-purple-500 mx-1 font-medium">9.99$</span> / month.
                     <div className="text-muted-foreground text-sm py-2 pb-2 pl-1">
                         * Unlimited tokens for chat and images<br /> 
                         
@@ -134,7 +134,7 @@ const SettingsPage = async () => {
                     <div className="text-muted-foreground text-sm py-2 pb-2 pl-1">
                         Want to upgrade to Unlimited?
                     </div>   
-                    <span className="text-purple-500 mx-1 font-medium">Unlimited plan</span> - <span className="text-purple-500 mx-1 font-medium">24.99$</span> / month.
+                    <span className="text-purple-500 mx-1 font-medium">Unlimited plan</span> - <span className="text-purple-500 mx-1 font-medium">9.99$</span> / month.
                     <div className="text-muted-foreground text-sm py-2 pb-2 pl-1">
                         * Unlimited tokens for chat and images<br /> 
                     </div>           
@@ -158,8 +158,8 @@ const SettingsPage = async () => {
                 Buy call time for companion:
             </div>
 
-            <CallTopUpButton amount={5} price="4.99$" isPro={isSubscribed} /><span className="mr-2"></span>
-            <CallTopUpButton amount={10} price="8.99$" isPro={isSubscribed} /><span className="mr-2"></span><CallTopUpButton amount={30} price="24.99$" isPro={isSubscribed} />
+            <CallTopUpButton amount={30} price="4.99$" isPro={isSubscribed} /><span className="mr-2"></span>
+            <CallTopUpButton amount={60} price="8.99$" isPro={isSubscribed} /><span className="mr-2"></span>
             <br />
             <br />
             <h3 className="text-lg font-medium">Usage</h3>

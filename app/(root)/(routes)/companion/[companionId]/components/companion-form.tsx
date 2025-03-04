@@ -5,7 +5,7 @@ import axios, { AxiosResponse } from "axios";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
-import { Wand2, Trash2 } from "lucide-react";
+import { Wand2, Trash2, Group } from "lucide-react";
 import { Category, Companion, Voice, PhoneVoice,Tag } from "@prisma/client";
 //import { BotAvatarForm } from "@/components/bot-avatar-form";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
@@ -213,7 +213,7 @@ export const CompanionForm = ({
             phoneVoiceId: '101',
             tags: [],
             nsfw: false,
-            cot_prompt:true
+            cot_prompt:false
 
 
 
@@ -380,8 +380,8 @@ export const CompanionForm = ({
                         render={({ field }) => (
                             <FormItem>
                                 <FormLabel>Character appearance</FormLabel>
-                                <FormControl>
-                                    <Input disabled={isLoading} className="bg-background resize-none" placeholder={PREAMBLE_SELFIE_PRE} {...field} />
+                                <FormControl>                                    
+                                    <Textarea disabled={isLoading} rows={4} className="bg-background resize-none" placeholder={PREAMBLE_SELFIE_PRE} {...field} />
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>
@@ -403,17 +403,19 @@ export const CompanionForm = ({
                                                 </SelectTrigger>
                                             </FormControl>
                                             <SelectContent style={dropdownStyle}>
-                                                {/*<SelectItem key="https://civitai.com/api/download/models/1308497?type=Model&format=SafeTensor" value="https://civitai.com/api/download/models/1308497?type=Model&format=SafeTensor">Flux Anime Enchancer</SelectItem>*/}
-                                                <SelectItem key="https://civitai.com/api/download/models/1272367?type=Model&format=SafeTensor" value="https://civitai.com/api/download/models/1272367?type=Model&format=SafeTensor">Flux Realistic Anime</SelectItem>
+                                                <Group name="Essential Models" className="space-y-2">
+                                                    <SelectItem key="essential/photorealistic" value="essential/photorealistic">Essential V2 Photorealistic</SelectItem>
+                                                    <SelectItem key="essential/anime" value="essential/anime">Essential V2 Anime</SelectItem>
+                                                    <SelectItem key="essential/art" value="essential/art">Essential V2 Art</SelectItem>
+                                                </Group>
+                                                <Group name="Flux Models" className="space-y-2">
+                                                    <SelectItem key="https://civitai.com/api/download/models/1272367?type=Model&format=SafeTensor" value="https://civitai.com/api/download/models/1272367?type=Model&format=SafeTensor">Flux Realistic Anime</SelectItem>
+                                                </Group>
                                                 <SelectItem key="https://civitai.com/api/download/models/729537?type=Model&format=SafeTensor" value="https://civitai.com/api/download/models/729537?type=Model&format=SafeTensor">Flux Anime</SelectItem>
                                                 <SelectItem key="https://civitai.com/api/download/models/1061126?type=Model&format=SafeTensor" value="https://civitai.com/api/download/models/1061126?type=Model&format=SafeTensor">Flux Hentai</SelectItem>
-                                                <SelectItem key="https://civitai.com/api/download/models/952214?type=Model&format=SafeTensor" value="https://civitai.com/api/download/models/952214?type=Model&format=SafeTensor">Flux Hentai 2</SelectItem>
-                                                <SelectItem key="https://civitai.com/api/download/models/723657?type=Model&format=SafeTensor" value="https://civitai.com/api/download/models/723657?type=Model&format=SafeTensor">Flux nsfw 2</SelectItem>
                                                 <SelectItem key="https://civitai.com/api/download/models/904370?type=Model&format=SafeTensor" value="https://civitai.com/api/download/models/904370?type=Model&format=SafeTensor">Flux nsfw</SelectItem>
-                                                {/*<SelectItem key="https://civitai.com/api/download/models/746602?type=Model&format=SafeTensor" value="https://civitai.com/api/download/models/746602?type=Model&format=SafeTensor">Flux nsfw</SelectItem>*/}
                                                 <SelectItem key="https://civitai.com/api/download/models/753053?type=Model&format=SafeTensor" value="https://civitai.com/api/download/models/753053?type=Model&format=SafeTensor">Flux Pony Fantasy</SelectItem>
                                                 <SelectItem key="https://civitai.com/api/download/models/728041?type=Model&format=SafeTensor" value="https://civitai.com/api/download/models/728041?type=Model&format=SafeTensor">Flux Midjorney</SelectItem>
-                                                {/*<SelectItem key="realistic-vision-v5-1" value="realistic-vision-v5-1">Realistic Vision v5</SelectItem>*/}
                                                 <SelectItem key="realistic-vision-v3" value="realistic-vision-v3">Realistic Vision v3</SelectItem>
                                                 <SelectItem key="dark-sushi-mix-v2-25" value="dark-sushi-mix-v2-25">Dark Sushi mix v2.25</SelectItem>
                                                 <SelectItem key="absolute-reality-v1-8-1" value="absolute-reality-v1-8-1">Absolute Reality v1.8.1</SelectItem>
@@ -596,15 +598,15 @@ export const CompanionForm = ({
 
                                             <SelectItem key="NousResearch/Hermes-3-Llama-3.1-405B" value="NousResearch/Hermes-3-Llama-3.1-405B">Hermes-3-Llama-3.1-405B</SelectItem>
 
-                                            <SelectItem key="Sao10K/L3-70B-Euryale-v2.1" value="Sao10K/L3-70B-Euryale-v2.1">Euryale L3 70B</SelectItem>
+                                            <SelectItem key="Sao10K/L3.3-70B-Euryale-v2.3" value="Sao10K/L3.3-70B-Euryale-v2.3">Euryale L3.3 70B</SelectItem>
                                             <SelectItem key="Sao10K/L3.1-70B-Euryale-v2.2" value="Sao10K/L3.1-70B-Euryale-v2.2">Euryale L3.1 70B</SelectItem>
 
                                             <SelectItem key="NousResearch/Nous-Hermes-2-Mixtral-8x7B-DPO" value="NousResearch/Nous-Hermes-2-Mixtral-8x7B-DPO">Mixtral 8x7B DPO</SelectItem>
-                                            <SelectItem key="mistralai/Mixtral-8x22B-Instruct-v0.1" value="mistralai/Mixtral-8x22B-Instruct-v0.1">Mixtral 8x22B</SelectItem>
-                                            <SelectItem key="mistralai/Mistral-Nemo-Instruct-2407" value="mistralai/Mistral-Nemo-Instruct-2407">Mistral Nemo 12B</SelectItem>      
+                                            <SelectItem key="mistralai/Mistral-Small-24B-Instruct-2501" value="mistralai/Mistral-Small-24B-Instruct-2501">Mistral 24B</SelectItem>      
 
                                             <SelectItem key="nvidia/Llama-3.1-Nemotron-70B-Instruct" value="nvidia/Llama-3.1-Nemotron-70B-Instruct">Nvidia Nemotron 70B</SelectItem>      
                                             <SelectItem key="Gryphe/MythoMax-L2-13b" value="Gryphe/MythoMax-L2-13b">Mythomax 13B</SelectItem>      
+                                            <SelectItem key="meta-llama/Llama-3.3-70B-Instruct-Turbo" value="meta-llama/Llama-3.3-70B-Instruct-Turbo">Meta-Llama-3.3-70B (SFW)</SelectItem>
                                             <SelectItem key="meta-llama/Meta-Llama-3.1-405B-Instruct" value="meta-llama/Meta-Llama-3.1-405B-Instruct">Meta-Llama-3.1-405B (SFW)</SelectItem>
                                             <SelectItem key="meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo" value="meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo">Meta Llama 3.1 70B Turbo (SFW)</SelectItem>
 

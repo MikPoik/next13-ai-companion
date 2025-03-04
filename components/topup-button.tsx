@@ -34,7 +34,7 @@ export const TopUpButton = ({
 
   return (
     <Button size="sm" variant="premium" disabled={loading} onClick={onClick} >
-        50 000 Pro tokens / 5.99$
+        1000 000 Pro tokens / 5.99$
       <Box className="w-4 h-4 ml-2" />
     </Button>
   )
