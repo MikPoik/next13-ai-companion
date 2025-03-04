@@ -15,7 +15,7 @@ import { Button } from "@/components/ui/button";
 import { ImageUpload } from "@/components/image-upload";
 import { useToast } from "@/components/ui/use-toast";
 import { Separator } from "@/components/ui/separator";
-import { Select, SelectContent, SelectItem, SelectValue, SelectTrigger } from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectValue, SelectTrigger,SelectGroup,SelectSeparator,SelectLabel } from "@/components/ui/select";
 import dotenv from "dotenv";
 dotenv.config({ path: `.env` });
 import Image from 'next/image'
@@ -25,8 +25,8 @@ const STEAMSHIP_IMG_BOT_URL = "https://mpoikkilehto.steamship.run/avatar-gen-dev
 
 const PREAMBLE = `Your personality can be described as ...`;
 const PREAMBLE_BEHAVIOUR = `You behave like ...`;
-const PREAMBLE_BACKSTORY = `Story info, events, relevant details and facts about the character ...`;
-const PREAMBLE_SELFIE_PRE = `Keywords to describe your character appearance in detail: `;
+const PREAMBLE_BACKSTORY = `Story info, events, relevant details and facts about the character ... Location, all other info`;
+const PREAMBLE_SELFIE_PRE = `Keywords to describe your character appearance in detail, subject, clothes, body description, style, ... `;
 const PREAMBLE_SELFIE_POST = `describe image details and effects ...`;
 const SEED_CHAT = `First message for the character ...`;
 
@@ -403,29 +403,43 @@ export const CompanionForm = ({
                                                 </SelectTrigger>
                                             </FormControl>
                                             <SelectContent style={dropdownStyle}>
-                                                <Group name="Essential Models" className="space-y-2">
-                                                    <SelectItem key="essential/photorealistic" value="essential/photorealistic">Essential V2 Photorealistic</SelectItem>
-                                                    <SelectItem key="essential/anime" value="essential/anime">Essential V2 Anime</SelectItem>
-                                                    <SelectItem key="essential/art" value="essential/art">Essential V2 Art</SelectItem>
-                                                </Group>
-                                                <Group name="Flux Models" className="space-y-2">
+                                                    <SelectGroup>
+                                                      <SelectLabel>--- Recommended Essential Models ---</SelectLabel>
+                                                      <SelectItem value="essential/photorealism">Essential V2 Photorealism</SelectItem>
+                                                      <SelectItem value="essential/anime">Essential V2 Anime</SelectItem>
+                                                      <SelectItem value="essential/art">Essential V2 Art</SelectItem>
+                                                    </SelectGroup>
+                                                    <SelectSeparator />
+                                                    <SelectGroup>
+                                                      <SelectLabel>--- Flux Lora Models ---</SelectLabel>
                                                     <SelectItem key="https://civitai.com/api/download/models/1272367?type=Model&format=SafeTensor" value="https://civitai.com/api/download/models/1272367?type=Model&format=SafeTensor">Flux Realistic Anime</SelectItem>
-                                                </Group>
+  
                                                 <SelectItem key="https://civitai.com/api/download/models/729537?type=Model&format=SafeTensor" value="https://civitai.com/api/download/models/729537?type=Model&format=SafeTensor">Flux Anime</SelectItem>
                                                 <SelectItem key="https://civitai.com/api/download/models/1061126?type=Model&format=SafeTensor" value="https://civitai.com/api/download/models/1061126?type=Model&format=SafeTensor">Flux Hentai</SelectItem>
                                                 <SelectItem key="https://civitai.com/api/download/models/904370?type=Model&format=SafeTensor" value="https://civitai.com/api/download/models/904370?type=Model&format=SafeTensor">Flux nsfw</SelectItem>
                                                 <SelectItem key="https://civitai.com/api/download/models/753053?type=Model&format=SafeTensor" value="https://civitai.com/api/download/models/753053?type=Model&format=SafeTensor">Flux Pony Fantasy</SelectItem>
                                                 <SelectItem key="https://civitai.com/api/download/models/728041?type=Model&format=SafeTensor" value="https://civitai.com/api/download/models/728041?type=Model&format=SafeTensor">Flux Midjorney</SelectItem>
+                                                    </SelectGroup>
+                                                     <SelectSeparator />
+                                                    <SelectGroup>
+                                                <SelectLabel>--- Stable diffusion 1.5 Models ---</SelectLabel>
                                                 <SelectItem key="realistic-vision-v3" value="realistic-vision-v3">Realistic Vision v3</SelectItem>
                                                 <SelectItem key="dark-sushi-mix-v2-25" value="dark-sushi-mix-v2-25">Dark Sushi mix v2.25</SelectItem>
                                                 <SelectItem key="absolute-reality-v1-8-1" value="absolute-reality-v1-8-1">Absolute Reality v1.8.1</SelectItem>
                                                 <SelectItem key="dream-shaper-v8" value="dream-shaper-v8">Dream Shaper v8</SelectItem>
+                                                        <SelectSeparator />
+                                                    </SelectGroup>
+                                                
+                                                <SelectGroup>
+                                                    <SelectLabel>--- Stable diffusion XL Models ---</SelectLabel>
                                                 <SelectItem key="juggernaut-xl-v10" value="juggernaut-xl-v10">Juggernaut XL (SDXL)</SelectItem>
                                                 <SelectItem key="realvis-xl-v4" value="realvis-xl-v4">Realistic Vision v4 (SDXL)</SelectItem>
                                                 <SelectItem key="reproduction-v3-31" value="reproduction-v3-31">Reproduction v3 (SDXL) Anime</SelectItem>
                                                 <SelectItem key="real-cartoon-xl-v6" value="real-cartoon-xl-v6">Realcartoon v6 (SDXL)</SelectItem>
                                                 <SelectItem key="counterfeit-xl-v2-5" value="counterfeit-xl-v2-5">Counterfeit (SDXL) Anime</SelectItem>
                                                 <SelectItem key="animagine-xl-v-3-1" value="animagine-xl-v-3-1">Animagine XL (SDXL) Anime</SelectItem>
+                                                    <SelectSeparator />
+                                                </SelectGroup>
                                                 {/*
                                                 <SelectItem key="https://civitai.com/api/download/models/926965?type=Model&format=SafeTensor&size=pruned&fp=fp16" value="https://civitai.com/api/download/models/926965?type=Model&format=SafeTensor&size=pruned&fp=fp16">Lustify (SDXL) Realistic</SelectItem>
                                                 <SelectItem key="https://civitai.com/api/download/models/233092?type=Model&format=SafeTensor&size=full&fp=fp16" value="https://civitai.com/api/download/models/233092?type=Model&format=SafeTensor&size=full&fp=fp16">Better Than Words (SDXL) Realistic</SelectItem>
@@ -438,8 +452,12 @@ export const CompanionForm = ({
                                                 <SelectItem key="https://civitai.com/api/download/models/303526?type=Model&format=SafeTensor&size=full&fp=fp16" value="https://civitai.com/api/download/models/303526?type=Model&format=SafeTensor&size=full&fp=fp16">Animemix (SDXL)</SelectItem>
                                                 <SelectItem key="https://civitai.com/api/download/models/286821" value="https://civitai.com/api/download/models/286821">Deephentai (SDXL)</SelectItem>
                                                 */}
+                                                
+                                                <SelectGroup>
+                                                    <SelectLabel>--- Safe for work models ---</SelectLabel>
                                                 <SelectItem key="flux-schnell" value="flux-schnell">FLUX Schnell (SFW)</SelectItem>
                                                 <SelectItem key="fal-ai/stable-diffusion-v35-medium" value="fal-ai/stable-diffusion-v35-medium">StableDiffusion v3.5 (SFW)</SelectItem>
+                                                </SelectGroup>    
 
 
 
@@ -671,7 +689,7 @@ export const CompanionForm = ({
                                         </FormLabel>
                                     </FormControl>
                                     <FormDescription>
-                                        Check to use reasoning pre-prompt. Should improve output but is slightly slower
+                                        Check to use reasoning pre-prompt. May improve output but is slightly slower
                                     </FormDescription>
                                     <FormMessage />
                                 </FormItem>

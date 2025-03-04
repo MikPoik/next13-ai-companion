@@ -24,20 +24,25 @@ interface Block {
   workspaceId?: string;
 }
 
-async function containsMarkdownImageSyntax(blockListStr: string): Promise<boolean> {
+async function containsMarkdownImageSyntax(blockListStr: string): Promise<{containsImage: boolean, imageCost: number}> {
   try {
     // Check if the input blockList string contains Markdown image syntax
     const markdownImageRegex = /!\[(?!voice).*?\]\(.*?\)/g;
-    const containsImage = markdownImageRegex.test(blockListStr);
-
-    return containsImage; // Return true if Markdown image syntax is found, otherwise false
+    const matches = blockListStr.match(markdownImageRegex);
+    const containsImage = matches !== null;
+    let imageCost = 500;
+    if (matches && matches.length > 1 && matches[0].includes("_tier_3") )
+    {
+        imageCost = 1000;
+    };
+    
+    return { containsImage, imageCost }; // Return object with bool and cost
   } catch (error) {
     console.error("SaveResponse, Error detecting Markdown image syntax:", error);
     console.error("SaveResponse, Block list string causing error:", blockListStr);
-    return false; // In case of error, return false
+    return { containsImage: false, imageCost: 0 }; // In case of error, return default object
   }
 }
-
 async function containsMarkdownVoiceSyntax(blockListStr: string): Promise<boolean> {
   try {
     // Check if the input blockList string contains Markdown image syntax
@@ -86,9 +91,10 @@ export async function POST(
         responseText = prompt;
         
         const image_url = await containsMarkdownImageSyntax(blockList)
-        let finalContent = prompt
-        if (image_url) {
-            imageTokens = 1000
+
+        if (image_url.containsImage) {
+            console.log("Image cost:", image_url.imageCost);
+            imageTokens = image_url.imageCost
         }
 
         const voice_url = await containsMarkdownVoiceSyntax(blockList)
