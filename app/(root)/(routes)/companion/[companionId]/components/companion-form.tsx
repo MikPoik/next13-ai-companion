@@ -284,7 +284,7 @@ export const CompanionForm = ({
             if ((error as any).response.status === 406) {
             toast({
                 variant: "destructive",
-                description: "Illegal content detected in character",
+                description: ((error as any).response.status).detail,
                 duration: 3000,
             });
             }
@@ -416,7 +416,7 @@ export const CompanionForm = ({
   
                                                 <SelectItem key="https://civitai.com/api/download/models/729537?type=Model&format=SafeTensor" value="https://civitai.com/api/download/models/729537?type=Model&format=SafeTensor">Flux Anime</SelectItem>
                                                 <SelectItem key="https://civitai.com/api/download/models/1061126?type=Model&format=SafeTensor" value="https://civitai.com/api/download/models/1061126?type=Model&format=SafeTensor">Flux Hentai</SelectItem>
-                                                <SelectItem key="https://civitai.com/api/download/models/904370?type=Model&format=SafeTensor" value="https://civitai.com/api/download/models/904370?type=Model&format=SafeTensor">Flux nsfw</SelectItem>
+                                                <SelectItem key="https://civitai.com/api/download/models/904370?type=Model&format=SafeTensor" value="https://civitai.com/api/download/models/904370?type=Model&format=SafeTensor">Flux Explicit</SelectItem>
                                                 <SelectItem key="https://civitai.com/api/download/models/753053?type=Model&format=SafeTensor" value="https://civitai.com/api/download/models/753053?type=Model&format=SafeTensor">Flux Pony Fantasy</SelectItem>
                                                 <SelectItem key="https://civitai.com/api/download/models/728041?type=Model&format=SafeTensor" value="https://civitai.com/api/download/models/728041?type=Model&format=SafeTensor">Flux Midjorney</SelectItem>
                                                     </SelectGroup>
@@ -613,24 +613,34 @@ export const CompanionForm = ({
                                             </SelectTrigger>
                                         </FormControl>
                                         <SelectContent style={{ maxHeight: "200px", overflowY: "auto" }}>
-
+                                            <SelectGroup>
+                                                <SelectLabel>--- Recommended Uncensored models (NSFW) ---</SelectLabel>
                                             <SelectItem key="NousResearch/Hermes-3-Llama-3.1-405B" value="NousResearch/Hermes-3-Llama-3.1-405B">Hermes-3-Llama-3.1-405B</SelectItem>
 
                                             <SelectItem key="Sao10K/L3.3-70B-Euryale-v2.3" value="Sao10K/L3.3-70B-Euryale-v2.3">Euryale L3.3 70B</SelectItem>
                                             <SelectItem key="Sao10K/L3.1-70B-Euryale-v2.2" value="Sao10K/L3.1-70B-Euryale-v2.2">Euryale L3.1 70B</SelectItem>
-
+                                                <SelectSeparator />
+                                            </SelectGroup>
+                                            <SelectGroup>
+                                                <SelectLabel>--- Other Uncensored models (NSFW) ---</SelectLabel>
                                             <SelectItem key="NousResearch/Nous-Hermes-2-Mixtral-8x7B-DPO" value="NousResearch/Nous-Hermes-2-Mixtral-8x7B-DPO">Mixtral 8x7B DPO</SelectItem>
                                             <SelectItem key="mistralai/Mistral-Small-24B-Instruct-2501" value="mistralai/Mistral-Small-24B-Instruct-2501">Mistral 24B</SelectItem>      
-
+                                                <SelectItem key="Gryphe/MythoMax-L2-13b" value="Gryphe/MythoMax-L2-13b">Mythomax 13B</SelectItem>   
+                                                <SelectSeparator />
+                                            </SelectGroup>
+                                            <SelectGroup>
+                                                <SelectLabel>--- Censored models (SFW) ---</SelectLabel>
+                                                <SelectItem key="meta-llama/Meta-Llama-3.1-405B-Instruct" value="meta-llama/Meta-Llama-3.1-405B-Instruct">Meta-Llama-3.1-405B</SelectItem>
                                             <SelectItem key="nvidia/Llama-3.1-Nemotron-70B-Instruct" value="nvidia/Llama-3.1-Nemotron-70B-Instruct">Nvidia Nemotron 70B</SelectItem>      
-                                            <SelectItem key="Gryphe/MythoMax-L2-13b" value="Gryphe/MythoMax-L2-13b">Mythomax 13B</SelectItem>      
-                                            <SelectItem key="meta-llama/Llama-3.3-70B-Instruct-Turbo" value="meta-llama/Llama-3.3-70B-Instruct-Turbo">Meta-Llama-3.3-70B (SFW)</SelectItem>
-                                            <SelectItem key="meta-llama/Meta-Llama-3.1-405B-Instruct" value="meta-llama/Meta-Llama-3.1-405B-Instruct">Meta-Llama-3.1-405B (SFW)</SelectItem>
-                                            <SelectItem key="meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo" value="meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo">Meta Llama 3.1 70B Turbo (SFW)</SelectItem>
+   
+                                            <SelectItem key="meta-llama/Llama-3.3-70B-Instruct-Turbo" value="meta-llama/Llama-3.3-70B-Instruct-Turbo">Meta-Llama-3.3-70B</SelectItem>
 
-                                            <SelectItem key="gpt-4o" value="gpt-4o">GPT-4o (SFW)</SelectItem>
+                                            <SelectItem key="meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo" value="meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo">Meta Llama 3.1 70B Turbo</SelectItem>
 
-                                            <SelectItem key="gpt-4o-mini" value="gpt-4o-mini">GPT-4o-mini (SFW)</SelectItem>
+                                            <SelectItem key="gpt-4o" value="gpt-4o">GPT-4o</SelectItem>
+
+                                            <SelectItem key="gpt-4o-mini" value="gpt-4o-mini">GPT-4o-mini </SelectItem>
+                                            </SelectGroup>
                                         </SelectContent>
                                     </Select>
                                     <FormDescription>

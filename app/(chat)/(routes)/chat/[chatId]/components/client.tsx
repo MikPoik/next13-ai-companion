@@ -304,7 +304,7 @@ export const ChatClient = ({ isPro, companion,chat_history }: ChatClientProps) =
     const autoSubmit = async () => {
       try {
         initializingRef.current = true;
-        let introMessage = `Write ${companion.name}'s next response`;
+        let introMessage = `Now let's role-play.`;
         // Check if seed phrase contains narration marks: *text*. "text", (text) <text>
         const checkNarrativeMarks = (text: string): boolean => {
             const narrativeMarksPattern = /["*<\(\[].*?[">\)\]*]/;
