@@ -190,11 +190,12 @@ export async function PATCH(
         
         if (!updateCompanion.voiceAgentId) {
             bolna_json = getBolnaAgentJson(companion.name)
-            const response = await fetch('https://api.bolna.dev/agent', {
+            const response = await fetch('https://api.bolna.dev/v2/agent', {
                 method: 'POST',
                 headers: headers,
                 body: JSON.stringify(bolna_json),
             });
+            console.log(JSON.stringify(await response.json(), null, 2));
             const result = await response.json();
             const voice_agent_id = result.agent_id;            
             const updateCompanion = await prismadb.companion.update({
@@ -207,12 +208,14 @@ export async function PATCH(
                 });
             voiceAgentId = voice_agent_id;
         }
-        const response = await fetch(`https://api.bolna.dev/agent/${updateCompanion.voiceAgentId}`, {
+        const response = await fetch(`https://api.bolna.dev/v2/agent/${updateCompanion.voiceAgentId}`, {
             method: 'PUT',
             headers: headers,
             body: JSON.stringify(bolna_json),
         });
+        
         const result = await response.json();
+        console.log(console.log(JSON.stringify(result, null, 2)));
         const voice_agent_id = result.agent_id;
         const status = result.status;
         

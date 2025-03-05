@@ -406,9 +406,9 @@ export const CompanionForm = ({
                                             <SelectContent style={dropdownStyle}>
                                                     <SelectGroup>
                                                       <SelectLabel>--- Recommended Essential Models ---</SelectLabel>
-                                                      <SelectItem value="essential/photorealism">Essential V2 Photorealism</SelectItem>
-                                                      <SelectItem value="essential/anime">Essential V2 Anime</SelectItem>
-                                                      <SelectItem value="essential/art">Essential V2 Art</SelectItem>
+                                                      <SelectItem value="essential/photorealism">Essential Photorealism</SelectItem>
+                                                      <SelectItem value="essential/anime">Essential Anime</SelectItem>
+                                                      <SelectItem value="essential/art">Essential Art</SelectItem>
                                                     </SelectGroup>
                                                     <SelectSeparator />
                                                     <SelectGroup>

@@ -40,25 +40,25 @@ function getBolnaAgentJson(name: string, voiceName: string = "Rachel", provider:
                         "buffer_size": 100
                     },
                     "llm_agent": {
+                        "base_url":"https://api.deepinfra.com/v1/openai",
                         "max_tokens": 150,
-                        "presence_penalty": 0.01,
-                        "repetition_penalty": 1.00,
+                        "presence_penalty": 0.0,
+                        "repetition_penalty": 1.05,
                         "extraction_details": null,
-                        "top_p": 1,
+                        "top_p": 0.1,
                         "model": llm_model,
                         "agent_flow_type": "streaming",
                         "request_json": false,
-                        "min_p": 0.05,
+                        "min_p": 0.9,
                         "frequency_penalty": 0.01,
                         "stop": null,
-                        "temperature": 0.7,
+                        "temperature": 2,
                         "backend": "bolna",
-                        "provider": llm_provider,
+                        "provider": "custom",
                         "family": "mixtral",
                         "extra_config": null,
                         "routes": null,
-                        "summarization_details": null,
-                        "base_url": null
+                        "summarization_details": null                        
                     },
                     "transcriber": {
                         "sampling_rate": 16000,
