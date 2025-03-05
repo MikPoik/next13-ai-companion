@@ -15,10 +15,16 @@ export async function GET(req: Request) {
     const user = await currentUser();
     let user_id = user?.id || "public";
 
-    // Base where clause with name search
-    let whereClause: any = {
-      name: { contains: name || undefined, mode: 'insensitive' }
-    };
+    // Base where clause with name and description search
+    let whereClause: any = {};
+    
+    // If there's a search term, search in both name and description
+    if (name) {
+      whereClause.OR = [
+        { name: { contains: name, mode: 'insensitive' } },
+        { description: { contains: name, mode: 'insensitive' } }
+      ];
+    }
 
     // First determine the category context
     if (categoryId === "my-companions") {
