@@ -46,8 +46,10 @@ interface ChatClientDisplayMessage {
 }
 
 const scrollContainerStyle: React.CSSProperties = {
-  msOverflowStyle: "none", 
-  scrollbarWidth: "none" 
+    overflowY: "auto",
+    scrollbarWidth: "thin", // For Firefox
+    scrollbarColor: "rgba(155, 155, 155, 0.2) transparent" // For Firefox
+  
 };
 
 const transformChatMessageToPrismaMessage = (
@@ -304,7 +306,7 @@ export const ChatClient = ({ isPro, companion,chat_history }: ChatClientProps) =
     const autoSubmit = async () => {
       try {
         initializingRef.current = true;
-        let introMessage = `Now let's role-play.`;
+        let introMessage = `Write ${companion.name}'s next response`;
         // Check if seed phrase contains narration marks: *text*. "text", (text) <text>
         const checkNarrativeMarks = (text: string): boolean => {
             const narrativeMarksPattern = /["*<\(\[].*?[">\)\]*]/;
