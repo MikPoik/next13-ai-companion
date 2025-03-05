@@ -18,7 +18,7 @@ export const TopUpButton = ({
   const onClick = async () => {
     try {
       setLoading(true);
-      const tokensAmount = "tokens-topup-50000";
+      const tokensAmount = "tokens-topup-200000";
       const response = await axios.get(`/api/stripe-topup?tokens=${encodeURIComponent(tokensAmount)}`);
 
       window.location.href = response.data.url;
@@ -34,7 +34,7 @@ export const TopUpButton = ({
 
   return (
     <Button size="sm" variant="premium" disabled={loading} onClick={onClick} >
-        1000 000 Pro tokens / 5.99$
+        200 000 Pro tokens / 5.99$
       <Box className="w-4 h-4 ml-2" />
     </Button>
   )

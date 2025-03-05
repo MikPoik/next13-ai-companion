@@ -122,7 +122,7 @@ export async function POST(req: Request) {
         };
         const data = getBolnaAgentJson(name)
 
-        const response = await fetch('https://api.bolna.dev/agent', {
+        const response = await fetch('https://api.bolna.dev/v2/agent', {
             method: 'POST',
             headers: headers,
             body: JSON.stringify(data),

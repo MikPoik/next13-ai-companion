@@ -12,7 +12,7 @@ const SettingsPage = async () => {
 
    if (!userId) return redirectToSignIn()
     var tokens = 0;
-    var token_limit = 1000000;
+    var token_limit = 200000;
     var proTokens = 0;
     var callTime = 0;
     if (userId) {
@@ -93,7 +93,7 @@ const SettingsPage = async () => {
                         <span className="text-sky-500 mx-1 font-medium" >Pro plan</span> - <span className="text-sky-500 mx-1 font-medium">4.99$</span> / month.
                         
                         <div className="text-muted-foreground text-sm py-2 pb-2 pl-1">
-                            * 1000,000 tokens / month<br />
+                            * 200,000 tokens / month<br />
                         </div>
                         <SubscriptionButton isPro={false} tier="pro" />
                     </div>
@@ -158,8 +158,8 @@ const SettingsPage = async () => {
                 Buy call time for companion:
             </div>
 
-            <CallTopUpButton amount={30} price="4.99$" isPro={isSubscribed} /><span className="mr-2"></span>
-            <CallTopUpButton amount={60} price="8.99$" isPro={isSubscribed} /><span className="mr-2"></span>
+            <CallTopUpButton amount={10} price="4.99$" isPro={isSubscribed} /><span className="mr-2"></span>
+            <CallTopUpButton amount={20} price="8.99$" isPro={isSubscribed} /><span className="mr-2"></span>
             <br />
             <br />
             <h3 className="text-lg font-medium">Usage</h3>

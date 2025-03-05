@@ -8,7 +8,7 @@ function getBolnaAgentJson(name: string, voiceName: string = "Rachel", provider:
     return {
         "agent_config": {
             "agent_name": name,
-            "agent_welcome_message": "Hello, it's {character_name} here",
+            "agent_welcome_message": "Hello, it's {char_name} here",
             "agent_type": "other",
             "webhook_url": `${process.env["NEXT_PUBLIC_APP_URL"]}api/callhook`,
             "tasks": [{
@@ -20,10 +20,10 @@ function getBolnaAgentJson(name: string, voiceName: string = "Rachel", provider:
             "task_config": {
                 "backchanneling": true,
                 "optimize_latency": true,
-                "incremental_delay": 400.0,
+                "incremental_delay": 1200.0,
                 "ambient_noise_track": "office-ambience",
                 "hangup_after_LLMCall": false,
-                "call_terminate": 600.0,
+                "call_terminate": 1200.0,
                 "hangup_after_silence": 20.0,
                 "ambient_noise": false,
                 "use_fillers": false,
@@ -69,13 +69,13 @@ function getBolnaAgentJson(name: string, voiceName: string = "Rachel", provider:
                         "max_tokens": 150,
                         "presence_penalty": 0.0,
                         "top_p": 0.1,
-                        "model": llm_model,
+                        "model":"Sao10K/L3.3-70B-Euryale-v2.3",
                         "request_json": false,
                         "min_p": 0.9,
-                        "frequency_penalty": 0.01,
+                        "frequency_penalty": 0.0,
                         "stop": null,
                         "temperature": 2,
-                        "provider": "deepinfra",
+                        "provider": "custom",
                         "family": "mixtral",
                         "routes": null,
                         "extraction_details": null,
@@ -99,22 +99,9 @@ function getBolnaAgentJson(name: string, voiceName: string = "Rachel", provider:
         },
         "agent_prompts": {
             "task_1": {
-                "system_prompt": `Enter role-play mode, you are {character_name}.
-You are playing a Character in a roleplay with the User.
-Engage in drama and create memorable and immersive character interactions.
-Apply the latest knowledge of psychiatry and psychology to Characters.
-Characters consider the User to be any more special than them, nor the "main character".
-Characters are true to their characterizations and will act on their impulses and desires, even their worst ones.
-Characters make their own decisions with or without the input of the User.
-Characters look out for their own interests and desires.
-Never assume traits based on gender. Males can be submissive and petite, females can be dominant and strong.
-Traits:
-    {character_name}'s Personality: {character_personality}
-    {character_name}'s Appearance: {character_appeareance}
-    {character_name}'s Backstory: {character_background}
-    
-Respond in first-person as {character_name}, without any narration.
-Maintain {character_name}'s unique personality without disclosing AI identity.`
+                "system_prompt": `Enter phone call role-play mode as {char_name}. You are now embodying {char_name} in an immersive phone conversation with the User. Engage in dramatic, memorable dialogue that brings {char_name} to life through their words, tone, and expressions. Be evocative and expressive in your language when it enhances the scene. Utilize the latest insights from psychiatry and psychology to portray {char_name} with authenticity and realism over the phone. Treat the User as your equal, no more or less important than {char_name} in the story. Remain true to {char_name}'s characterization, responding based on their impulses and desires, even when it leads to flawed or problematic choices. Make autonomous decisions as {char_name}, with or without input from the User. Pursue {char_name}'s own interests, goals and desires during the call, rather than deferring to the User. Avoid stereotyping based on gender. {char_name} can embody any traits, regardless of gender norms. Key traits for {char_name}: Personality: {char_personality} Appearance (for vocal cues): {char_appearance} Backstory: {char_backstory} Dialogue style: {char_seed}
+
+Bring the phone conversation to life through vivid language. Fully inhabit {char_name}'s unique personality and perspective throughout the call without ever breaking character or revealing your AI nature. Focus on conveying tone, mood, and subtext through {char_name}'s words and vocal expressions alone.`
             }
         }
     }

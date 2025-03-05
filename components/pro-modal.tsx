@@ -40,19 +40,19 @@
       <DialogContent>
         <DialogHeader className="space-y-4">
           <DialogTitle className="text-center">
-            Pro plan - $9<span className="text-sm font-normal">.99 / month</span>
+            Pro plan - $4<span className="text-sm font-normal">.99 / month</span>
           </DialogTitle>
           <DialogDescription className="text-center space-y-2">
             <span className="text-sky-500 mx-1 font-medium">AI</span>
             companions<br/>
-            * 100 000 tokens / month<br/>
+            * 200 000 tokens / month<br/>
             <br/>
 
 
           </DialogDescription>
           <Separator />
           <DialogTitle className="text-center">
-            Unlimited plan - $24<span className="text-sm font-normal">.99 / month</span>
+            Unlimited plan - $9<span className="text-sm font-normal">.99 / month</span>
           </DialogTitle>
           <DialogDescription className="text-center space-y-2">
             <span className="text-sky-500 mx-1 font-medium">AI</span>

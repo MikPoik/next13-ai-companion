@@ -134,7 +134,7 @@ export async function POST(
                             tokenCount: tokenCost,
                             messageCount: 1,
                             messageLimit: 10000000,
-                            tokenLimit: 1000000,
+                            tokenLimit: 100000,
                             firstMessage: currentDateTime,
                             // Assuming initial setting for proTokens and callTime needs to be handled here as well
                             proTokens: 0,

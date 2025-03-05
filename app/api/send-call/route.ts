@@ -52,7 +52,7 @@ export async function GET(request: Request) {
                     tokenCount: 0,
                     messageCount: 1,
                     messageLimit: 1000,
-                    tokenLimit: 10000,
+                    tokenLimit: 100000,
                     firstMessage: currentDateTime,
                     proTokens: 0,
                     callTime: 300,
@@ -215,7 +215,7 @@ export async function POST(req: Request) {
         if (!companion.voiceAgentId || companion.voiceAgentId === "") {
             console.log("companion voice agent id not set")
 
-            const response = await fetch('https://api.bolna.dev/agent', {
+            const response = await fetch('https://api.bolna.dev/v2/agent', {
                 method: 'POST',
                 headers: headers,
                 body: JSON.stringify(create_bolna_agent_json),
@@ -233,7 +233,7 @@ export async function POST(req: Request) {
             });
             await new Promise(resolve => setTimeout(resolve, 3000));
         }
-        const update_voice_agent = await fetch(`https://api.bolna.dev/agent/${voice_agent_id}`, {
+        const update_voice_agent = await fetch(`https://api.bolna.dev/v2/agent/${voice_agent_id}`, {
             method: 'PUT',
             headers: headers,
             body: JSON.stringify(create_bolna_agent_json),
@@ -247,14 +247,12 @@ export async function POST(req: Request) {
             "agent_id": voice_agent_id, 
             "recipient_phone_number": phoneNumber,
             "user_data": {
-                "character_name": companion.name,
-                "character_type": companion.description,
-                "character_personality": companion.personality,
-                "character_appearance": companion.selfiePre,
+                "char_name": companion.name,
+                "char_personality": companion.personality,
+                "char_appearance": companion.selfiePre,
                 "previous_messages": formattedMessages,
-                "character_seed": cleanNarration(companion.seed),
-                "character_background": companion.backstory.length > 2000 ? companion.backstory.slice(0, 2000) : companion.backstory,
-                "tags": tags,
+                "char_seed": cleanNarration(companion.seed),
+                "char_background": companion.backstory.length > 10000 ? companion.backstory.slice(0, 10000) : companion.backstory
             }
 
         }
