@@ -91,10 +91,13 @@ export async function POST(req: Request) {
 
         const moderation = await call_modal_agent("moderate_character",agentConfig);
         const moderation_result = await moderation.json()
-        
-        if (moderation_result.result === true) {
+        console.log(moderation_result)
+        if (moderation_result.moderation_result === true) {
             console.log("Moderation failed");
-            return new NextResponse("Moderation failed", { status: 406, error: moderation_result.reasoning });
+            return new NextResponse(
+                JSON.stringify({ message: "Moderation failed", reason: moderation_result.reasoning }), 
+                { status: 406, headers: { 'Content-Type': 'application/json' }}
+            );
         }
 
         // Create new tags

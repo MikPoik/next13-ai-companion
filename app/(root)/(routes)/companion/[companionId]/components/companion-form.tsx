@@ -282,11 +282,10 @@ export const CompanionForm = ({
         } catch (error) {
             console.log(error);
             if ((error as any).response.status === 406) {
-            toast({
-                variant: "destructive",
-                description: ((error as any).response.status).detail,
-                duration: 3000,
-            });
+                return new NextResponse(
+                    JSON.stringify({ message: "Moderation failed", reason: (error as any).response.data.reasoning }),
+                    { status: 406, headers: { 'Content-Type': 'application/json' }}
+                );
             }
             else {
                 toast({

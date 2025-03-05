@@ -69,9 +69,14 @@ export async function PATCH(
         const moderation = await call_modal_agent("moderate_character",agentConfig);
         const moderation_result = await moderation.json()
 
-        if (moderation_result === true) {
+        console.log(moderation_result)
+        if (moderation_result.moderation_result === true) {
             console.log("Moderation failed");
-            return new NextResponse("Moderation failed", { status: 406});
+            const reason = moderation_result.data ? moderation_result.data.reason : "unknown reason";
+            return new NextResponse(
+                JSON.stringify({ message: "Moderation failed", reason }), 
+                { status: 406, headers: { 'Content-Type': 'application/json' }}
+            );
         }
 
         //find companion from db
