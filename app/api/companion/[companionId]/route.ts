@@ -220,7 +220,20 @@ export async function PATCH(
                 const errorResponse = await response.json();
                 console.error("Bolna API Error:", JSON.stringify(errorResponse, null, 2));
 
+interface ErrorDetail {
+    loc?: string[];
+    msg?: string;
+    type?: string;
+}
+
                 if (errorResponse.detail && Array.isArray(errorResponse.detail)) {
+                    errorResponse.detail.forEach((err: ErrorDetail, idx) => {
+
+
+                if (errorResponse.detail && Array.isArray(errorResponse.detail)) {
+
+                    errorResponse.detail.forEach((err: any, idx) => {
+
                     errorResponse.detail.forEach((err, idx) => {
                         if (err.loc) {
                             console.error(`Field ${idx+1} error:`, err.loc.join(' -> '), ':', err.msg);
