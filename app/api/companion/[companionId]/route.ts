@@ -69,12 +69,10 @@ export async function PATCH(
         const moderation = await call_modal_agent("moderate_character",agentConfig);
         const moderation_result = await moderation.json()
 
-        console.log(moderation_result)
         if (moderation_result.moderation_result === true) {
-            console.log("Moderation failed");
-            const reason = moderation_result.data ? moderation_result.data.reason : "unknown reason";
+            const reason = moderation_result.reasoning ? moderation_result.reasoning : "unknown reason";
             return new NextResponse(
-                JSON.stringify({ message: "Moderation failed", reason }), 
+                JSON.stringify({ message: reason }), 
                 { status: 406, headers: { 'Content-Type': 'application/json' }}
             );
         }

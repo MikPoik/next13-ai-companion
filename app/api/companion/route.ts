@@ -91,11 +91,11 @@ export async function POST(req: Request) {
 
         const moderation = await call_modal_agent("moderate_character",agentConfig);
         const moderation_result = await moderation.json()
-        console.log(moderation_result)
+        
         if (moderation_result.moderation_result === true) {
-            console.log("Moderation failed");
+            const reason = moderation_result.reasoning ? moderation_result.reasoning : "unknown reason";
             return new NextResponse(
-                JSON.stringify({ message: "Moderation failed", reason: moderation_result.reasoning }), 
+                JSON.stringify({ message: reason }), 
                 { status: 406, headers: { 'Content-Type': 'application/json' }}
             );
         }
