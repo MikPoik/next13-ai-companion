@@ -6,11 +6,12 @@ function getBolnaAgentJson(name: string, voiceName: string = "Rachel", provider:
     
     
     return {
-        "agent_name": name,
-        "agent_welcome_message": "Hello, it's {character_name} here",
-        "agent_type": "other",
-        "webhook_url": `${process.env["NEXT_PUBLIC_APP_URL"]}api/callhook`,
-        "tasks": [{
+        "agent_config": {
+            "agent_name": name,
+            "agent_welcome_message": "Hello, it's {character_name} here",
+            "agent_type": "other",
+            "webhook_url": `${process.env["NEXT_PUBLIC_APP_URL"]}api/callhook`,
+            "tasks": [{
             "task_type": "conversation",
             "toolchain": {
                 "execution": "parallel",
@@ -94,7 +95,8 @@ function getBolnaAgentJson(name: string, voiceName: string = "Rachel", provider:
                 },
                 "api_tools": null
             }
-        }],
+        }]
+        },
         "agent_prompts": {
             "task_1": {
                 "system_prompt": `Enter role-play mode, you are {character_name}.
