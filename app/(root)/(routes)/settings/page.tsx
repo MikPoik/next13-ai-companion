@@ -114,7 +114,7 @@ const SettingsPage = async () => {
                     <SubscriptionButton isPro={true} tier={tier} />
                 </div>
             )}
-            {subcriptionButtonState && tier == 'pro' && (
+            {subcriptionButtonState && proTokens ===0 && tier === 'pro' && (
                 <div className="mt-4 py-2">
                     <div className="text-muted-foreground text-sm py-2 pb-2 pl-1">
                         Want to upgrade to Unlimited?<br />

@@ -46,17 +46,17 @@ export async function GET(request: NextRequest) {
         //console.log(metadata_json);
         let price_id = "";
         if (tokens) {
-            if (tokens === 'tokens-topup-50000') {
+            if (tokens === 'tokens-topup-200000') {
                 price_id = process.env.TOKENS_TOPUP_PRICE_ID || "";
             }
         }
         if (calltime) {
-            if (calltime === 'calltime-topup-30') {
+            if (calltime === 'calltime-topup-10') {
                 price_id = process.env.CALLTIME_TOPUP_5_PRICE_ID || "";
-            } else if (calltime === 'calltime-topup-60') {
+            } else if (calltime === 'calltime-topup-20') {
                 price_id = process.env.CALLTIME_TOPUP_10_PRICE_ID || "";
             }
-            else if (calltime === 'calltime-topup-120') {
+            else if (calltime === 'calltime-topup-30') {
                 price_id = process.env.CALLTIME_TOPUP_30_PRICE_ID || "";
             }
         }
