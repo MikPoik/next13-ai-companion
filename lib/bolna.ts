@@ -6,97 +6,95 @@ function getBolnaAgentJson(name: string, voiceName: string = "Rachel", provider:
     
     
     return {
-        "agent_config": {
-            "agent_name": name,
-            "agent_welcome_message": "Hello, it's {character_name} here",
-            "agent_type": "other",
-            "webhook_url": `${process.env["NEXT_PUBLIC_APP_URL"]}api/callhook`,
-            "tasks": [{
+        "agent_name": name,
+        "agent_welcome_message": "Hello, it's {character_name} here",
+        "agent_type": "other",
+        "webhook_url": `${process.env["NEXT_PUBLIC_APP_URL"]}api/callhook`,
+        "tasks": [{
+            "task_type": "conversation",
+            "toolchain": {
+                "execution": "parallel",
+                "pipelines": [["transcriber", "llm", "synthesizer"]]
+            },
+            "task_config": {
+                "backchanneling": true,
                 "optimize_latency": true,
-                "tools_config": {
-                    "output": {
-                        "format": "wav",
-                        "provider": "twilio"
+                "incremental_delay": 400.0,
+                "ambient_noise_track": "office-ambience",
+                "hangup_after_LLMCall": false,
+                "call_terminate": 600.0,
+                "hangup_after_silence": 20.0,
+                "ambient_noise": false,
+                "use_fillers": false,
+                "interruption_backoff_period": 0.0,
+                "backchanneling_start_delay": 5.0,
+                "call_cancellation_prompt": null,
+                "number_of_words_for_interruption": 3.0,
+                "backchanneling_message_gap": 5.0,
+                "trigger_user_online_message_after": 10.0,
+                "check_if_user_online": true,
+                "check_user_online_message": "Hey, are you still there"
+            },
+            "tools_config": {
+                "output": {
+                    "format": "wav",
+                    "provider": "twilio"
+                },
+                "input": {
+                    "format": "wav",
+                    "provider": "twilio"
+                },
+                "synthesizer": {
+                    "audio_format": "wav",
+                    "provider": provider,
+                    "stream": true,
+                    "caching": true,
+                    "provider_config": {
+                        "voice": voiceName,
+                        ...(provider === "elevenlabs" && { "voice_id": voiceId }),
+                        ...(provider === "polly" && { "engine": pollyEngine }),
+                        ...(provider === "polly" && { "language": pollyLanguage }),
+                        ...(provider === "elevenlabs" && { model: modelName }),
+                        "sampling_rate": "8000",
+                        ...(provider === "elevenlabs" && { "use_turbo": elevenlabs_turbo })
                     },
-                    "input": {
-                        "format": "wav",
-                        "provider": "twilio"
-                    },
-                    "synthesizer": {
-                        "audio_format": "wav",
-                        "provider": provider,
-                        "stream": true,
-                        "caching": true,
-                        "provider_config": {
-                            "voice": voiceName,
-                            ...(provider === "elevenlabs" && { "voice_id": voiceId }),
-                            ...(provider === "polly" && { "engine": pollyEngine }),
-                            ...(provider === "polly" && { "language": pollyLanguage }),
-                            ...(provider === "elevenlabs" && { model: modelName }),
-                            "sampling_rate": "8000",
-                            ...(provider === "elevenlabs" && { "use_turbo": elevenlabs_turbo })
-
-                        },
-                        "buffer_size": 100
-                    },
-                    "llm_agent": {
-                        "base_url":"https://api.deepinfra.com/v1/openai",
+                    "buffer_size": 100
+                },
+                "llm_agent": {
+                    "agent_type": "simple_llm_agent",
+                    "agent_flow_type": "streaming",
+                    "llm_config": {
+                        "base_url": "https://api.deepinfra.com/v1/openai",
                         "max_tokens": 150,
                         "presence_penalty": 0.0,
-                        "repetition_penalty": 1.05,
-                        "extraction_details": null,
                         "top_p": 0.1,
                         "model": llm_model,
-                        "agent_flow_type": "streaming",
                         "request_json": false,
                         "min_p": 0.9,
                         "frequency_penalty": 0.01,
                         "stop": null,
                         "temperature": 2,
-                        "backend": "bolna",
-                        "provider": "custom",
+                        "provider": "deepinfra",
                         "family": "mixtral",
-                        "extra_config": null,
                         "routes": null,
-                        "summarization_details": null                        
-                    },
-                    "transcriber": {
-                        "sampling_rate": 16000,
-                        "endpointing": 100,
-                        "keywords": "",
-                        "stream": true,
-                        "model": "nova-2",
-                        "task": "transcribe",
-                        "provider": "deepgram",
-                        "language": "en",
-                        "encoding": "linear16"
-                    },
-                    "api_tools": null
+                        "extraction_details": null,
+                        "summarization_details": null
+                    }
                 },
-                "task_config": {
-                    "backchanneling": true,
-                    "optimize_latency": true,
-                    "incremental_delay": 400.0,
-                    "ambient_noise_track": "office-ambience",
-                    "hangup_after_LLMCall": false,
-                    "call_terminate": 600.0,
-                    "hangup_after_silence": 20.0,
-                    "ambient_noise": false,
-                    "use_fillers": false,
-                    "interruption_backoff_period": 0.0,
-                    "backchanneling_start_delay": 5.0,
-                    "call_cancellation_prompt": null,
-                    "number_of_words_for_interruption": 3.0,
-                    "backchanneling_message_gap": 5.0,
-                    "trigger_user_online_message_after": 10.0,
+                "transcriber": {
+                    "sampling_rate": 16000,
+                    "endpointing": 100,
+                    "keywords": "",
+                    "stream": true,
+                    "model": "nova-2",
+                    "task": "transcribe",
+                    "provider": "deepgram",
+                    "language": "en",
+                    "encoding": "linear16"
                 },
-                "task_type": "conversation",
-                "toolchain": {
-                    "execution": "parallel",
-                    "pipelines": [["transcriber", "llm", "synthesizer"]]
-                }
-            }],
-        },
+                "api_tools": null
+            }
+        }],
         "agent_prompts": {
             "task_1": {
                 "system_prompt": `Enter role-play mode, you are {character_name}.

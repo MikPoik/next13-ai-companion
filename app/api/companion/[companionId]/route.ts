@@ -187,7 +187,7 @@ export async function PATCH(
 
         let voiceAgentId = companion.voiceAgentId;
         let bolna_json = getBolnaAgentJson(name);
-        
+
         if (!updateCompanion.voiceAgentId) {
             bolna_json = getBolnaAgentJson(companion.name)
             const response = await fetch('https://api.bolna.dev/v2/agent', {
@@ -208,18 +208,39 @@ export async function PATCH(
                 });
             voiceAgentId = voice_agent_id;
         }
-        const response = await fetch(`https://api.bolna.dev/v2/agent/${updateCompanion.voiceAgentId}`, {
-            method: 'PUT',
-            headers: headers,
-            body: JSON.stringify(bolna_json),
-        });
-        
-        const result = await response.json();
-        console.log(console.log(JSON.stringify(result, null, 2)));
-        const voice_agent_id = result.agent_id;
-        const status = result.status;
-        
-        return NextResponse.json(companion);
+
+        try {
+            const response = await fetch(`https://api.bolna.dev/v2/agent/${updateCompanion.voiceAgentId}`, {
+                method: 'PUT',
+                headers: headers,
+                body: JSON.stringify(bolna_json),
+            });
+
+            if (!response.ok) {
+                const errorResponse = await response.json();
+                console.error("Bolna API Error:", JSON.stringify(errorResponse, null, 2));
+
+                if (errorResponse.detail && Array.isArray(errorResponse.detail)) {
+                    errorResponse.detail.forEach((err, idx) => {
+                        if (err.loc) {
+                            console.error(`Field ${idx+1} error:`, err.loc.join(' -> '), ':', err.msg);
+                        }
+                    });
+                }
+                throw new Error(`Bolna API request failed with status ${response.status}`);
+            } else {
+                console.log("Successfully updated Bolna agent");
+            }
+            const result = await response.json();
+            console.log(console.log(JSON.stringify(result, null, 2)));
+            const voice_agent_id = result.agent_id;
+            const status = result.status;
+
+            return NextResponse.json(companion);
+        } catch (error) {
+            console.error("Error updating Bolna agent:", error);
+            return new NextResponse("Internal Error", { status: 500 });
+        }
     } catch (error) {
         console.log("[COMPANION_PATCH]", error);
         return new NextResponse("Internal Error", { status: 500 });
@@ -255,4 +276,3 @@ export async function DELETE(
         return new NextResponse("Internal Error", { status: 500 });
     }
 };
-
