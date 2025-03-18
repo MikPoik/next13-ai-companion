@@ -166,7 +166,12 @@ export const CompanionForm = ({
             setImageUrl(imgSrc);
             setIsImgLoading(false);
         }).catch((error) => {
-            console.log('Error', error);
+            toast({
+                variant: "destructive",
+                description: (error as any).response.data.message,
+                duration: 3000,
+            });
+            //console.log('Error', error);
             setIsImgLoading(false);
             // handle error
         });
