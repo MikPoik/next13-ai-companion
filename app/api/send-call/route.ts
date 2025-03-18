@@ -1,10 +1,11 @@
-
 import { headers } from "next/headers"
 import { NextResponse } from "next/server"
 import { auth, currentUser } from "@clerk/nextjs/server";
 import prismadb from "@/lib/prismadb"
+import { UserButton } from "@clerk/nextjs"
 import { checkSubscription } from "@/lib/subscription";
-import twilio from 'twilio';
+import { format } from "path";
+import {getBolnaAgentJson} from "@/lib/bolna";
 import { call_modal_agent } from "@/lib/utils";
 
 export const maxDuration = 60;
@@ -101,7 +102,7 @@ export async function POST(req: Request) {
             include: {                
                 tags: true,
                 steamshipAgent: {
-                    take: 1, 
+                    take: 1, // Limit the number of records to 1
                     orderBy: { createdAt: "desc" },
                     where: { userId: user.id }
                 },
@@ -119,25 +120,28 @@ export async function POST(req: Request) {
         if (!phoneVoice) {
             return new NextResponse("No phone voice found", { status: 404 });
         }
-
         const agent_config = {
             "workspace_id": companion.steamshipAgent[0].workspaceHandle,
             "context_id": companion.steamshipAgent[0].instanceHandle+user.id,
             "agent_id": companion.steamshipAgent[0].instanceHandle,
         };
-        const chat_history = await call_modal_agent("get_chat_history", agent_config);
-        const chat_history_json = await chat_history.json();
+        const chat_history = await call_modal_agent("get_chat_history",agent_config);
+        const chat_history_json = await chat_history.json()
+
 
         interface ChatHistoryEntry {
           role: string;
           content: string;
           tag: string;
         }
+        
 
-        let formattedMessages = '';
+        let formattedMessages = ''
+
         const EMOJI_PATTERN = /[\uD800-\uDBFF][\uDC00-\uDFFF]|[\u2702-\u27B0]/g;
 
-        chat_history_json.forEach((entry: ChatHistoryEntry) => {
+
+            chat_history_json.forEach((entry: ChatHistoryEntry) => {
           try {
             // Get the role, defaulting to user if not assistant/system
             const roleText = entry.role === 'assistant' ? 'assistant' : 'user';
@@ -145,125 +149,162 @@ export async function POST(req: Request) {
             // Process the content
             let text = '';
             if (typeof entry.content === 'string') {
+                
               text = entry.content;
             } else {
               text = String(entry.content);
-            }
-            
-            // Clean the text
-            text = text
-              .replace(EMOJI_PATTERN, '')
-              .replace(/\[.*?\]/g, '')
-              .replace(/\*.*?\*/g, '')
-              .replace(/\n/g, '. ')
-              .trim();
-              
-            // Add to formatted messages
-            if (
-              entry.role !== 'system' && 
-              !(entry.role === 'assistant' && entry.tag === 'image') &&
-              !(entry.role === 'user' && text.includes("Narrate"))
-            ) {
-              formattedMessages += `${roleText}: ${text}\n`;
-            }
-          } catch (error) {
-            console.error('Error processing message:', error);
-          }
-        });
 
+            }
+              // Clean the text
+              text = text
+                .replace(EMOJI_PATTERN, '')
+                .replace(/\[.*?\]/g, '')
+                .replace(/\*.*?\*/g, '')
+                .replace(/\n/g, '. ')
+                .trim();
+              // Add to formatted messages
+              if (
+                entry.role !== 'system' && 
+                !(entry.role === 'assistant' && entry.tag === 'image') &&
+                !(entry.role === 'user' && text.includes("Narrate"))
+              ) {
+                formattedMessages += `${roleText}: ${text}\n`;
+              }
+              } catch (error) {
+                  console.error('Error processing message:', error);
+                }
+              });
         // Add seed message if no assistant messages exist
         if (!formattedMessages.includes('assistant:')) {
           formattedMessages = `assistant: ${companion.seed.replace(EMOJI_PATTERN, '')}\n${formattedMessages}`;
         }
+        //console.log(formattedMessages)
+        // Create dynamic environment variables
+        const now = new Date();
+        const day = now.toLocaleString("en-US", { weekday: "long" });
+        const time = now.toLocaleTimeString("en-US", { hour12: true });
+        const date = now.toLocaleDateString("en-US");
 
-        // UltraVox API setup
-        const ULTRAVOX_API_KEY = process.env.ULTRAVOX_API_KEY;
-        if (!ULTRAVOX_API_KEY) {
-            return new NextResponse("ULTRAVOX_API_KEY is not defined", { status: 500 });
+        const apiKey = process.env["BOLNA_API_KEY"];
+        if (!apiKey) {
+            return new NextResponse("BOLNA_API_KEY is not defined", { status: 500 });
         }
-
-        // Twilio configuration
-        const TWILIO_ACCOUNT_SID = process.env.TWILIO_ACCOUNT_SID;
-        const TWILIO_AUTH_TOKEN = process.env.TWILIO_AUTH_TOKEN;
-        const TWILIO_PHONE_NUMBER = process.env.TWILIO_PHONE_NUMBER;
-
-        if (!TWILIO_ACCOUNT_SID || !TWILIO_AUTH_TOKEN || !TWILIO_PHONE_NUMBER) {
-            return new NextResponse("Twilio configuration is incomplete", { status: 500 });
-        }
-
-        // Create system prompt based on companion data
-        const systemPrompt = `You are ${companion.name}. ${cleanNarration(companion.seed)}
-Personality: ${companion.personality}
-Background: ${companion.backstory.length > 5000 ? companion.backstory.slice(0, 5000) : companion.backstory}
-Previous conversation context: ${formattedMessages}`;
-
-        // Define UltraVox call configuration
-        const ultravoxCallConfig = {
-            systemPrompt: systemPrompt,
-            model: 'fixie-ai/ultravox',
-            voice: phoneVoice.name || 'Mark', // Use the companion's voice or default to Mark
-            temperature: 0.7,
-            firstSpeaker: 'FIRST_SPEAKER_USER',
-            medium: { "twilio": {} }
+        const headers = {
+            'Authorization': `Bearer ${apiKey}`,
+            'Content-Type': 'application/json'
         };
-
-        // Create UltraVox call
-        const response = await fetch('https://api.ultravox.ai/api/calls', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-API-Key': ULTRAVOX_API_KEY
-            },
-            body: JSON.stringify(ultravoxCallConfig)
-        });
-
-        if (!response.ok) {
-            const errorData = await response.json();
-            console.error('UltraVox API error:', errorData);
-            return new NextResponse(JSON.stringify({ message: 'Error creating UltraVox call', details: errorData }), 
-                { status: response.status, headers: { 'Content-Type': 'application/json' } });
-        }
-
-        const ultravoxData = await response.json();
-        const joinUrl = ultravoxData.joinUrl;
-
-        if (!joinUrl) {
-            return new NextResponse(JSON.stringify({ message: 'No join URL provided by UltraVox' }), 
-                { status: 500, headers: { 'Content-Type': 'application/json' } });
-        }
-
-        // Initiate Twilio call
-        const client = twilio(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN);
-        const twilioCall = await client.calls.create({
-            twiml: `<Response><Connect><Stream url="${joinUrl}"/></Connect></Response>`,
-            to: phoneNumber,
-            from: TWILIO_PHONE_NUMBER
-        });
-
-        // Create call log
-        const callLog = await prismadb.callLog.create({
-            data: {
-                id: twilioCall.sid,
-                userId: user.id,
-                companionId: companion.id,
-                status: 'call-requested',
+        let maxDuration = 0;
+        if (balance) {
+            maxDuration = balance.callTime / 60;
+            if (maxDuration < 1 && balance.callTime > 0) {
+                maxDuration = 1;
             }
+            if (maxDuration > 12) {
+                maxDuration = 2;
+            }
+        }
+        let voice_preset = phoneVoice.voice_preset;
+
+
+
+        let voice_agent_id = companion.voiceAgentId;
+
+
+        const create_bolna_agent_json = getBolnaAgentJson(companion.name,phoneVoice.bolnaVoice,phoneVoice.bolnaProvider,phoneVoice.bolnaVoiceId,phoneVoice.bolnaModel,phoneVoice.bolnaElevenlabTurbo,phoneVoice.bolnaPollyEngine,phoneVoice.bolnaPollyLanguage)
+
+        if (!companion.voiceAgentId || companion.voiceAgentId === "") {
+            console.log("companion voice agent id not set")
+
+            const response = await fetch('https://api.bolna.dev/v2/agent', {
+                method: 'POST',
+                headers: headers,
+                body: JSON.stringify(create_bolna_agent_json),
+            });
+            const result = await response.json();
+
+            voice_agent_id = result.agent_id;  
+            const updateCompanion = await prismadb.companion.update({
+                where: {
+                    id: companionId,
+                },
+                data: {
+                    voiceAgentId: voice_agent_id,
+                }
+            });
+            await new Promise(resolve => setTimeout(resolve, 3000));
+        }
+        const update_voice_agent = await fetch(`https://api.bolna.dev/v2/agent/${voice_agent_id}`, {
+            method: 'PUT',
+            headers: headers,
+            body: JSON.stringify(create_bolna_agent_json),
+        });
+        //console.log("Update agent: ", await update_voice_agent.json())
+        await new Promise(resolve => setTimeout(resolve, 3000));
+
+        let tags = companion.tags.map(tag => tag.name).join(", ");
+
+        const data = {
+            "agent_id": voice_agent_id, 
+            "recipient_phone_number": phoneNumber,
+            "user_data": {
+                "char_name": companion.name,
+                "char_personality": companion.personality,
+                "char_appearance": companion.selfiePre,
+                "previous_messages": formattedMessages,
+                "char_seed": cleanNarration(companion.seed),
+                "char_background": companion.backstory.length > 10000 ? companion.backstory.slice(0, 10000) : companion.backstory
+            }
+
+        }
+
+        const response = await fetch('https://api.bolna.dev/call', {
+            method: 'POST',
+            headers: headers,
+            body: JSON.stringify(data),
         });
 
-        return new NextResponse(JSON.stringify({ 
-            message: 'ok', 
-            callId: twilioCall.sid, 
-            status: 'initiated' 
-        }), {
-            status: 200,
-            headers: { 'Content-Type': 'application/json' }
-        });
 
+        const responseJson = await response.json();
+        //console.log("response", responseJson);
+
+        const callId = responseJson.execution_id;
+        const status = responseJson.status;
+        //console.log(callId, status);
+
+
+        if (status === 'queued') {
+            const callLog = await prismadb.callLog.create({
+                data: {
+                    id: callId,
+                    userId: user.id,
+                    companionId: companion.id,
+                    status: 'call-requested',
+                }
+            });
+
+            return new NextResponse(JSON.stringify({ message: 'ok', callId, status }), {
+              status: 200,
+              headers: { 'Content-Type': 'application/json' }
+            });
+        } else {
+            console.log(responseJson, callId, status)
+            return new NextResponse(JSON.stringify({ message: 'Something went wrong, please try again', callId, status }), {
+              status: 400,
+              headers: { 'Content-Type': 'application/json' }
+            });
+
+        }
     } catch (error: any) {
         console.error('Error while processing send-call:', error);
         return new NextResponse(JSON.stringify({ error: error.message }), {
-            status: 500,
-            headers: { 'Content-Type': 'application/json' }
+          status: 500,
+          headers: { 'Content-Type': 'application/json' }
         });
     }
+
+    // Fallback response in case none of the above conditions are met
+    return new NextResponse(JSON.stringify({ message: 'Unexpected end of function reached' }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' }
+    });
 }
