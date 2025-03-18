@@ -35,7 +35,7 @@ const SettingsPage = async () => {
                     tokenCount: 0,
                     messageCount: 1,
                     messageLimit: 10000000,
-                    tokenLimit: 100000,
+                    tokenLimit: 20000,
                     firstMessage: currentDateTime,
                     proTokens: 0,
                     callTime: 0,
