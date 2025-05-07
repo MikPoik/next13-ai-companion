@@ -1,6 +1,6 @@
-# Build a SaaS AI Companion with Next.js 13, React, Tailwind, Prisma, Stripe | Full Tutorial 2023
+# Build a SaaS AI Companion with Next.js 15, React, Tailwind, Prisma, Stripe
 
-Modified for Steamship
+Modified for Modal
 
 
 This is a repository for Build a SaaS AI Platform with Next.js 13, React, Tailwind, Prisma, Stripe | Full Tutorial 2023.
@@ -20,11 +20,11 @@ Features:
 - How to fetch data in server react components by directly accessing database (WITHOUT API! like Magic!)
 - How to handle relations between Server and Child components!
 - How to reuse layouts
-- Folder structure in Next 13 App Router
+- Folder structure in Next 15 App Router
 
 ### Prerequisites
 
-**Node version 18.x.x**
+**Node version 20.x.x**
 
 
 
@@ -69,10 +69,6 @@ npx prisma db push
 
 ```
 
-Seed categories:
-```shell
-node scripts/seed.ts
-```
 
 
 ### Start the app
