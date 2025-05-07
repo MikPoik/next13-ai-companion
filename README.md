@@ -1,7 +1,7 @@
 
 # TruLuv - AI Companion Platform
 
-A modern SaaS AI Companion platform built with Next.js 15, React, Tailwind CSS, Prisma, and Stripe integration.
+A modern SaaS AI Companion platform built with Next.js 20, React, Tailwind CSS, Prisma, and Stripe integration.
 
 ## Features
 
@@ -19,7 +19,7 @@ A modern SaaS AI Companion platform built with Next.js 15, React, Tailwind CSS, 
 
 ## Tech Stack
 
-- **Frontend**: Next.js 15, React 18, Tailwind CSS
+- **Frontend**: Next.js 20, React 18, Tailwind CSS
 - **Backend**: Next.js API Routes
 - **Database**: Prisma ORM with PostgreSQL
 - **Authentication**: Clerk
@@ -51,9 +51,6 @@ NEXT_PUBLIC_CLERK_SIGN_UP_URL=/sign-up
 NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL=/dashboard
 NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL=/dashboard
 
-# Cloudinary
-NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME=
-NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET=
 
 # Database
 DATABASE_URL=
