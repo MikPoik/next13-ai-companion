@@ -38,7 +38,7 @@ export async function POST(
                     tokenCount: 0,
                     messageCount: 1,
                     messageLimit: 10000000,
-                    tokenLimit: 20000,
+                    tokenLimit: 10000,
                     firstMessage: currentDateTime,
                     proTokens: 0,
                     callTime: 300,
